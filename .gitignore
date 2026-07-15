@@ -1,0 +1,16 @@
+.DS_Store
+.build/
+DerivedData/
+.adk/
+.pnpm-store/
+.swiftpm/
+xcuserdata/
+*.xcresult
+functions/lib/
+functions/node_modules/
+functions/generated-schemas/
+GoogleService-Info.plist
+*.xcconfig.local
+.env
+.env.*
+!.env.example

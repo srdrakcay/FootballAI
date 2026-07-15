@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    { "collectionGroup": "fixtures", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "competitionId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "kickoffAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "fixtures", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "kickoffAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "analysisRequests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "state", "order": "ASCENDING" }, { "fieldPath": "leaseExpiresAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "analysisRequests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "uid", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "usageLedger", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "uid", "order": "ASCENDING" }, { "fieldPath": "periodUTC", "order": "ASCENDING" }] },
+    { "collectionGroup": "quotaReservations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "state", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "analyses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "state", "order": "ASCENDING" }, { "fieldPath": "validUntil", "order": "ASCENDING" }] }
+    ,{ "collectionGroup": "analyses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "fixtureKey", "order": "ASCENDING" }, { "fieldPath": "state", "order": "ASCENDING" }] }
+  ],
+  "fieldOverrides": []
+}

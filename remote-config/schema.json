@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["feature_analysis_generation_enabled", "feature_cached_analysis_read_enabled", "feature_premium_enabled", "supported_leagues_v1", "free_monthly_unique_views", "free_history_days", "premium_history_days", "analysis_credit_cost", "revenuecat_public_sdk_key_ios", "analysis_ttl_policy_v1", "analysis_schema_version", "analysis_prompt_version", "analysis_model_alias", "analysis_max_retries", "analysis_lock_lease_seconds", "copy_paywall_variant", "copy_disclaimer_variant", "minimum_supported_app_version"],
+  "properties": {
+    "feature_analysis_generation_enabled": { "type": "boolean" }, "feature_cached_analysis_read_enabled": { "type": "boolean" }, "feature_premium_enabled": { "type": "boolean" },
+    "feature_extended_leagues_enabled": { "type": "boolean" }, "feature_notifications_enabled": { "type": "boolean" },
+    "supported_leagues_v1": { "type": "array", "uniqueItems": true, "items": { "enum": ["PL", "PD", "SA", "BL1", "FL1", "UCL"] } },
+    "free_monthly_unique_views": { "type": "integer", "minimum": 0, "maximum": 20 }, "free_history_days": { "type": "integer", "minimum": 1, "maximum": 90 }, "premium_history_days": { "type": "integer", "minimum": 30, "maximum": 730 },
+    "analysis_credit_cost": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "revenuecat_public_sdk_key_ios": { "type": "string", "pattern": "^(|test_[A-Za-z0-9]+|appl_[A-Za-z0-9]+)$" },
+    "analysis_ttl_policy_v1": { "type": "object", "additionalProperties": false, "required": ["over_48h_seconds", "between_6h_48h_seconds", "under_6h_seconds"], "properties": { "over_48h_seconds": { "type": "integer", "minimum": 3600, "maximum": 86400 }, "between_6h_48h_seconds": { "type": "integer", "minimum": 1800, "maximum": 21600 }, "under_6h_seconds": { "type": "integer", "minimum": 300, "maximum": 3600 } } },
+    "analysis_schema_version": { "enum": ["2.0"] }, "analysis_prompt_version": { "enum": ["football-v2.1.0"] }, "analysis_model_alias": { "enum": ["gemini-flash-default"] },
+    "analysis_max_retries": { "type": "integer", "minimum": 0, "maximum": 3 }, "analysis_lock_lease_seconds": { "type": "integer", "minimum": 30, "maximum": 180 },
+    "copy_paywall_variant": { "enum": ["control", "benefit_history_v1"] }, "copy_disclaimer_variant": { "enum": ["legal_v1"] },
+    "minimum_supported_app_version": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" }
+  }
+}

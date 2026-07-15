@@ -1,0 +1,27 @@
+{
+  "name": "footballai-functions",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22"
+  },
+  "main": "lib/src/index.js",
+  "scripts": {
+    "prebuild": "node scripts/sync-schemas.mjs",
+    "build": "tsc -p tsconfig.json",
+    "test": "pnpm run build && node --test lib/test/**/*.test.js",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^5.0.5",
+    "@google-cloud/secret-manager": "^6.2.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  }
+}

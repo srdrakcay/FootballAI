@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://footballai.example/schemas/analysis-input-snapshot.schema.json",
+  "title": "AnalysisInputSnapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshotId", "snapshotVersion", "contentHash", "fixture", "dataSnapshotAt", "sections", "provenance"],
+  "properties": {
+    "snapshotId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "snapshotVersion": { "type": "integer", "minimum": 1 },
+    "contentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fixture": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fixtureKey", "fixtureVersion", "kickoffAt", "status", "competitionId", "homeTeamId", "awayTeamId"],
+      "properties": {
+        "fixtureKey": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "fixtureVersion": { "type": "integer", "minimum": 1 },
+        "kickoffAt": { "type": "string", "format": "date-time" },
+        "status": { "enum": ["scheduled", "timed", "postponed"] },
+        "competitionId": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "homeTeamId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "awayTeamId": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "dataSnapshotAt": { "type": "string", "format": "date-time" },
+    "sections": {
+      "type": "object", "additionalProperties": false,
+      "required": ["recentForm", "headToHead", "standings", "squadAvailability", "lineups", "weather"],
+      "properties": {
+        "recentForm": { "$ref": "#/$defs/section" }, "headToHead": { "$ref": "#/$defs/section" },
+        "standings": { "$ref": "#/$defs/section" }, "squadAvailability": { "$ref": "#/$defs/section" },
+        "lineups": { "$ref": "#/$defs/section" }, "weather": { "$ref": "#/$defs/section" }
+      }
+    },
+    "provenance": { "type": "array", "minItems": 1, "maxItems": 16, "items": { "type": "object", "additionalProperties": false, "required": ["sourceId", "retrievedAt"], "properties": { "sourceId": { "type": "string", "minLength": 1, "maxLength": 64 }, "retrievedAt": { "type": "string", "format": "date-time" } } } }
+  },
+  "$defs": {
+    "section": {
+      "type": "object", "additionalProperties": false, "required": ["status", "observedAt", "data"],
+      "properties": { "status": { "enum": ["available", "unavailable", "stale"] }, "observedAt": { "type": ["string", "null"], "format": "date-time" }, "data": { "type": ["object", "array", "null"] } },
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "available" } } }, "then": { "properties": { "observedAt": { "type": "string" }, "data": { "type": ["object", "array"] } } } },
+        { "if": { "properties": { "status": { "const": "unavailable" } } }, "then": { "properties": { "data": { "type": "null" } } } }
+      ]
+    }
+  }
+}

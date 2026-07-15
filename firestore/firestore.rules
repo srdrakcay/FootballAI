@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(uid) { return signedIn() && request.auth.uid == uid; }
+    function onlyAllowed(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+
+    match /fixtures/{fixtureKey} {
+      allow read: if signedIn();
+      allow write: if false;
+      match /snapshots/{snapshotId} { allow read, write: if false; }
+    }
+
+    match /analyses/{analysisId} {
+      allow read: if signedIn() && resource.data.state == 'ready' && resource.data.validUntil > request.time;
+      allow write: if false;
+      match /locales/{locale} {
+        allow read: if signedIn() && get(/databases/$(database)/documents/analyses/$(analysisId)).data.state == 'ready';
+        allow write: if false;
+      }
+    }
+
+    match /users/{uid} {
+      allow read: if owns(uid);
+      allow create: if owns(uid) && request.resource.data.keys().hasOnly(['locale']) && request.resource.data.locale in ['tr', 'en', 'es', 'fr'];
+      allow update: if owns(uid) && onlyAllowed(['locale']) && request.resource.data.locale in ['tr', 'en', 'es', 'fr'];
+      allow delete: if false;
+      match /private/{document} { allow read: if owns(uid); allow write: if false; }
+      match /history/{versionId} { allow read: if owns(uid); allow write: if false; }
+      match /favorites/{fixtureKey} {
+        allow read: if owns(uid);
+        allow create, update: if owns(uid)
+          && request.resource.data.fixtureKey == fixtureKey
+          && request.resource.data.keys().hasOnly(['fixtureKey', 'competitionId', 'competitionName', 'homeTeam', 'awayTeam', 'kickoffAt', 'status', 'fixtureVersion', 'createdAt'])
+          && request.resource.data.createdAt == request.time;
+        allow delete: if owns(uid);
+      }
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'analysisVersionId', 'rating', 'reasonCode', 'createdAt'])
+        && request.resource.data.rating in ['helpful', 'not_helpful', 'report']
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if false;
+    }
+
+    match /analysisRequests/{id} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+    match /analysisCache/{id} { allow read, write: if false; }
+    match /analysisByFixture/{id} { allow read, write: if false; }
+    match /fixtureSyncWindows/{id} { allow read, write: if false; }
+    match /usageLedger/{id} { allow read, write: if false; }
+    match /quotaReservations/{id} { allow read, write: if false; }
+    match /subscriptions/{id} { allow read, write: if false; }
+    match /adminAudit/{id} { allow read, write: if false; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

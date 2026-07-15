@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://footballai.example/schemas/analysis-result.schema.json",
+  "title": "AnalysisResultV2",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "analysisId", "status", "fixtureKey", "fixtureVersion", "snapshotId", "snapshotVersion", "generatedAt", "validUntil", "promptVersion", "modelVersion", "language", "markets", "confidence", "rationale", "dataAvailability", "limitations", "moderationStatus"],
+  "properties": {
+    "schemaVersion": { "const": "2.0" }, "analysisId": { "type": "string", "minLength": 1, "maxLength": 128 }, "status": { "const": "ready" },
+    "fixtureKey": { "type": "string", "minLength": 1, "maxLength": 160 }, "fixtureVersion": { "type": "integer", "minimum": 1 },
+    "snapshotId": { "type": "string", "minLength": 1, "maxLength": 128 }, "snapshotVersion": { "type": "integer", "minimum": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" }, "validUntil": { "type": "string", "format": "date-time" },
+    "promptVersion": { "type": "string", "minLength": 1, "maxLength": 64 }, "modelVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "language": { "enum": ["tr", "en", "es", "fr"] },
+    "markets": {
+      "type": "object", "additionalProperties": false, "required": ["matchResult", "goals25", "bothTeamsScore", "likelyScores", "likelyScoresTotalPct", "otherScoresPct"],
+      "properties": {
+        "matchResult": { "$ref": "#/$defs/matchResult" }, "goals25": { "$ref": "#/$defs/overUnder" }, "bothTeamsScore": { "$ref": "#/$defs/yesNo" },
+        "likelyScores": { "type": "array", "minItems": 1, "maxItems": 10, "items": { "type": "object", "additionalProperties": false, "required": ["home", "away", "pct"], "properties": { "home": { "type": "integer", "minimum": 0, "maximum": 20 }, "away": { "type": "integer", "minimum": 0, "maximum": 20 }, "pct": { "$ref": "#/$defs/pct" } } } },
+        "likelyScoresTotalPct": { "$ref": "#/$defs/pct" }, "otherScoresPct": { "$ref": "#/$defs/pct" }
+      }
+    },
+    "confidence": { "type": "object", "additionalProperties": false, "required": ["level", "scorePct"], "properties": { "level": { "enum": ["low", "medium", "high"] }, "scorePct": { "$ref": "#/$defs/pct" } } },
+    "rationale": { "type": "array", "maxItems": 12, "items": { "type": "object", "additionalProperties": false, "required": ["code", "text", "evidenceRefs"], "properties": { "code": { "type": "string", "pattern": "^[A-Z0-9_]{1,64}$" }, "text": { "type": "string", "minLength": 1, "maxLength": 800 }, "evidenceRefs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^sections\\.(recentForm|headToHead|standings|squadAvailability|lineups|weather)$" } } } } },
+    "dataAvailability": { "type": "object", "additionalProperties": { "enum": ["available", "unavailable", "stale"] } },
+    "limitations": { "type": "array", "uniqueItems": true, "maxItems": 16, "items": { "type": "string", "pattern": "^[A-Z0-9_]{1,64}$" } },
+    "moderationStatus": { "const": "passed" }
+  },
+  "$defs": {
+    "pct": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "matchResult": { "type": "object", "additionalProperties": false, "required": ["homePct", "drawPct", "awayPct"], "properties": { "homePct": { "$ref": "#/$defs/pct" }, "drawPct": { "$ref": "#/$defs/pct" }, "awayPct": { "$ref": "#/$defs/pct" } } },
+    "overUnder": { "type": "object", "additionalProperties": false, "required": ["overPct", "underPct"], "properties": { "overPct": { "$ref": "#/$defs/pct" }, "underPct": { "$ref": "#/$defs/pct" } } },
+    "yesNo": { "type": "object", "additionalProperties": false, "required": ["yesPct", "noPct"], "properties": { "yesPct": { "$ref": "#/$defs/pct" }, "noPct": { "$ref": "#/$defs/pct" } } }
+  },
+  "$comment": "Cross-field totals, evidence availability, temporal constraints, duplicate scorelines and prohibited claims are enforced by the deterministic application validator after schema validation."
+}

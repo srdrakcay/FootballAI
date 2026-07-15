@@ -1,0 +1,22 @@
+{
+  "feature_analysis_generation_enabled": false,
+  "feature_cached_analysis_read_enabled": true,
+  "feature_premium_enabled": false,
+  "feature_extended_leagues_enabled": false,
+  "feature_notifications_enabled": false,
+  "supported_leagues_v1": ["PL", "PD", "SA", "BL1", "FL1", "UCL"],
+  "free_monthly_unique_views": 1,
+  "free_history_days": 30,
+  "premium_history_days": 365,
+  "analysis_credit_cost": 1,
+  "revenuecat_public_sdk_key_ios": "",
+  "analysis_ttl_policy_v1": { "over_48h_seconds": 86400, "between_6h_48h_seconds": 21600, "under_6h_seconds": 3600 },
+  "analysis_schema_version": "2.0",
+  "analysis_prompt_version": "football-v2.1.0",
+  "analysis_model_alias": "gemini-flash-default",
+  "analysis_max_retries": 2,
+  "analysis_lock_lease_seconds": 90,
+  "copy_paywall_variant": "control",
+  "copy_disclaimer_variant": "legal_v1",
+  "minimum_supported_app_version": "1.0.0"
+}
