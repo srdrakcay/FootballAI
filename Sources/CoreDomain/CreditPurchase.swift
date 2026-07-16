@@ -25,9 +25,10 @@ public protocol CreditPurchaseService: Sendable {
 }
 
 public actor InMemoryCreditPurchaseService: CreditPurchaseService {
-    public init() {}
+    private let values: [CreditPackage]
+    public init(packages: [CreditPackage] = []) { values = packages }
     public func configure(publicAPIKey: String, appUserID: String) {}
-    public func packages() -> [CreditPackage] { [] }
+    public func packages() -> [CreditPackage] { values }
     public func purchase(packageID: String) throws -> CreditPurchaseResult { .cancelled }
     public func resetUser() {}
 }

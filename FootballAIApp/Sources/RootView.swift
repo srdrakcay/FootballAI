@@ -10,7 +10,9 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if completedOnboarding {
+            if showsStoreScreenshot {
+                CreditStoreView(compositionRoot: compositionRoot, wallet: .defaultValue)
+            } else if completedOnboarding {
                 MainTabShell(compositionRoot: compositionRoot)
                     .transition(.opacity.combined(with: .scale(scale: 1.02)))
             } else {
@@ -18,11 +20,19 @@ struct RootView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .environment(\.locale, .autoupdatingCurrent)
+        .environment(\.locale, currentAppLocale)
         .task(id: completedOnboarding) {
             guard completedOnboarding else { return }
             _ = try? await compositionRoot.startSession()
         }
+    }
+
+    private var showsStoreScreenshot: Bool {
+#if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-store")
+#else
+        false
+#endif
     }
 }
 
@@ -90,7 +100,20 @@ private extension Color {
 }
 
 private func appText(_ turkish: String, _ english: String) -> String {
-    Locale.autoupdatingCurrent.language.languageCode?.identifier == "tr" ? turkish : english
+    currentAppLocale.language.languageCode?.identifier == "tr" ? turkish : english
+}
+
+private var currentAppLocale: Locale {
+#if DEBUG
+    if ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-tr") {
+        return Locale(identifier: "tr_TR")
+    }
+#endif
+    return .autoupdatingCurrent
+}
+
+private func creditText(_ count: Int) -> String {
+    appText("\(count) kredi", "\(count) credit\(count == 1 ? "" : "s")")
 }
 
 // MARK: - Onboarding
@@ -232,8 +255,22 @@ private enum MainTab: CaseIterable {
 
 private struct MainTabShell: View {
     let compositionRoot: AppCompositionRoot
-    @State private var selectedTab: MainTab = .matches
+    @State private var selectedTab: MainTab
     @State private var showsTabBar = true
+
+    init(compositionRoot: AppCompositionRoot) {
+        self.compositionRoot = compositionRoot
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        switch true {
+        case arguments.contains("-footballai-screenshot-history"): _selectedTab = State(initialValue: .history)
+        case arguments.contains("-footballai-screenshot-profile"): _selectedTab = State(initialValue: .profile)
+        default: _selectedTab = State(initialValue: .matches)
+        }
+#else
+        _selectedTab = State(initialValue: .matches)
+#endif
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -370,7 +407,7 @@ private struct MatchDashboardView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(appText("MAÇ TAKVİMİ", "MATCH CALENDAR")).font(.caption2.bold()).tracking(1.4).foregroundStyle(NeonTheme.cyan)
-                    Text(selectedDate.formatted(Date.FormatStyle().day().month(.wide).year().locale(.autoupdatingCurrent))).font(.headline)
+                    Text(selectedDate.formatted(Date.FormatStyle().day().month(.wide).year().locale(currentAppLocale))).font(.headline)
                 }
                 Spacer()
                 Button { showsCalendar = true } label: {
@@ -384,7 +421,7 @@ private struct MatchDashboardView: View {
                         let selected = Calendar.current.isDate(date, inSameDayAs: selectedDate)
                         Button { selectedDate = date; selectedFilter = .all } label: {
                             VStack(spacing: 5) {
-                                Text(date.formatted(Date.FormatStyle().weekday(.abbreviated).locale(.autoupdatingCurrent))).font(.caption2.weight(.semibold))
+                                Text(date.formatted(Date.FormatStyle().weekday(.abbreviated).locale(currentAppLocale))).font(.caption2.weight(.semibold))
                                 Text(date.formatted(.dateTime.day())).font(.headline)
                             }
                             .foregroundStyle(selected ? .white : NeonTheme.secondaryText)
@@ -424,14 +461,19 @@ private struct MatchDashboardView: View {
                 Circle().stroke(.white.opacity(0.10), lineWidth: 7)
                 Circle().trim(from: 0, to: 1).stroke(NeonTheme.gradient, style: StrokeStyle(lineWidth: 7, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                VStack(spacing: -2) { Text("\(wallet.balance)").font(.title2.bold()); Text(appText("kredi", "credits")).font(.caption2).foregroundStyle(NeonTheme.secondaryText) }
+                VStack(spacing: -2) {
+                    Text("\(wallet.balance)").font(.title2.bold())
+                    Text(appText("kredi", wallet.balance == 1 ? "credit" : "credits"))
+                        .font(.caption2)
+                        .foregroundStyle(NeonTheme.secondaryText)
+                }
             }
             .frame(width: 74, height: 74)
             VStack(alignment: .leading, spacing: 7) {
-                Label(appText("\(wallet.balance) kredin var", "You have \(wallet.balance) credits"), systemImage: "sparkles")
+                Label(appText("\(wallet.balance) kredin var", "You have \(creditText(wallet.balance))"), systemImage: "sparkles")
                     .font(.headline)
                     .foregroundStyle(.white)
-                Text(appText("Bir maç analizi şu anda \(wallet.analysisCreditCost) kredi. Tutar uzaktan güvenli biçimde güncellenebilir.", "A match analysis currently costs \(wallet.analysisCreditCost) credits. The price can be updated remotely."))
+                Text(appText("Bir maç analizi şu anda \(wallet.analysisCreditCost) kredi. Tutar uzaktan güvenli biçimde güncellenebilir.", "A match analysis currently costs \(creditText(wallet.analysisCreditCost)). The price can be updated remotely."))
                     .font(.caption)
                     .foregroundStyle(NeonTheme.secondaryText)
                     .lineSpacing(2)
@@ -553,7 +595,7 @@ private struct FixtureCard: View {
                     .font(.caption2.bold()).tracking(1.1).foregroundStyle(NeonTheme.cyan)
                 Spacer().frame(minWidth: 44)
             }
-            Label(fixture.kickoffAt.formatted(Date.FormatStyle().day().month(.abbreviated).hour().minute().locale(.autoupdatingCurrent)), systemImage: "clock")
+            Label(fixture.kickoffAt.formatted(Date.FormatStyle().day().month(.abbreviated).hour().minute().locale(currentAppLocale)), systemImage: "clock")
                 .font(.caption).foregroundStyle(NeonTheme.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 13) {
@@ -685,7 +727,7 @@ private struct NeonFixtureDetailView: View {
                 Image(systemName: "brain.head.profile.fill").font(.title2).foregroundStyle(NeonTheme.purple)
             }
             Divider().overlay(.white.opacity(0.10))
-            AnalysisStateView(viewModel: compositionRoot.makeAnalysisViewModel(fixtureKey: fixture.key, locale: SupportedLocale.resolve(identifier: Locale.autoupdatingCurrent.identifier)))
+            AnalysisStateView(viewModel: compositionRoot.makeAnalysisViewModel(fixtureKey: fixture.key, locale: SupportedLocale.resolve(identifier: currentAppLocale.identifier)))
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
                 .tint(NeonTheme.purple)
@@ -876,11 +918,18 @@ private struct ProfileView: View {
     private var planCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) { Text(appText("KREDİ CÜZDANI", "CREDIT WALLET")).font(.caption.bold()).tracking(1.4).foregroundStyle(NeonTheme.cyan); Text(appText("\(wallet.balance) kredi", "\(wallet.balance) credits")).font(.headline) }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(appText("KREDİ CÜZDANI", "CREDIT WALLET")).font(.caption.bold()).tracking(1.4).foregroundStyle(NeonTheme.cyan)
+                    Text(creditText(wallet.balance)).font(.headline)
+                }
                 Spacer()
                 Image(systemName: "bolt.circle.fill").font(.system(size: 34)).foregroundStyle(NeonTheme.purple)
             }
-            HStack { Text(appText("Maç analizi maliyeti", "Match analysis cost")).font(.caption).foregroundStyle(NeonTheme.secondaryText); Spacer(); Text(appText("\(wallet.analysisCreditCost) kredi", "\(wallet.analysisCreditCost) credits")).font(.caption.bold()) }
+            HStack {
+                Text(appText("Maç analizi maliyeti", "Match analysis cost")).font(.caption).foregroundStyle(NeonTheme.secondaryText)
+                Spacer()
+                Text(creditText(wallet.analysisCreditCost)).font(.caption.bold())
+            }
             Button { showsCreditStore = true } label: {
                 Label(appText("Kredi satın al", "Get credits"), systemImage: "plus.circle.fill")
                     .font(.subheadline.bold()).foregroundStyle(.white).frame(maxWidth: .infinity).frame(height: 48).background(NeonTheme.gradient, in: Capsule())
@@ -1084,7 +1133,7 @@ private struct CreditStoreView: View {
                                 .font(.system(size: 54)).foregroundStyle(NeonTheme.gradient)
                             Text(appText("Sıradaki Maç Analizini Aç", "Unlock Your Next Match Analysis"))
                                 .font(.title2.bold()).multilineTextAlignment(.center)
-                            Text(appText("Mevcut bakiye: \(wallet.balance) kredi", "Current balance: \(wallet.balance) credits"))
+                            Text(appText("Mevcut bakiye: \(wallet.balance) kredi", "Current balance: \(creditText(wallet.balance))"))
                                 .font(.subheadline).foregroundStyle(NeonTheme.cyan)
                             Text(appText("Abonelik yok • Tek seferlik satın alma", "No subscription • One-time purchase"))
                                 .font(.caption).foregroundStyle(NeonTheme.secondaryText)
@@ -1104,7 +1153,9 @@ private struct CreditStoreView: View {
                                                 .font(.title2).foregroundStyle(selectedPackageID == package.id ? NeonTheme.lime : NeonTheme.secondaryText)
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(package.title).font(.headline).foregroundStyle(.white)
-                                                Text(package.id).font(.caption2).foregroundStyle(NeonTheme.secondaryText)
+                                                Text(appText("Tek seferlik kredi paketi", "One-time credit pack"))
+                                                    .font(.caption2)
+                                                    .foregroundStyle(NeonTheme.secondaryText)
                                             }
                                             Spacer()
                                             Text(package.localizedPrice).font(.headline).foregroundStyle(NeonTheme.cyan)
@@ -1118,7 +1169,7 @@ private struct CreditStoreView: View {
                             }
                         }
 
-                        Text(appText("Bir maç analizi şu anda \(wallet.analysisCreditCost) kredi.", "A match analysis currently costs \(wallet.analysisCreditCost) credits."))
+                        Text(appText("Bir maç analizi şu anda \(wallet.analysisCreditCost) kredi.", "A match analysis currently costs \(creditText(wallet.analysisCreditCost))."))
                             .font(.footnote).foregroundStyle(NeonTheme.secondaryText).frame(maxWidth: .infinity).padding(14).glassCard(radius: 16)
 
                         if let message { Text(message).font(.footnote).foregroundStyle(NeonTheme.cyan).multilineTextAlignment(.center) }
@@ -1128,7 +1179,11 @@ private struct CreditStoreView: View {
                                 if isPurchasing { ProgressView().tint(.white) }
                                 else { Text(appText("Seçili kredi paketini satın al", "Purchase selected credit pack")) }
                             }
-                            .font(.headline).frame(maxWidth: .infinity).frame(height: 52).background(NeonTheme.gradient, in: Capsule())
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(NeonTheme.gradient, in: Capsule())
                         }
                         .disabled(selectedPackageID == nil || isPurchasing)
                         .opacity(selectedPackageID == nil ? 0.45 : 1)

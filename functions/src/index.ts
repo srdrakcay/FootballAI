@@ -1,13 +1,14 @@
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue, getFirestore, Timestamp } from "firebase-admin/firestore";
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { authorize, parsePayload } from "./security/requestGuard.js";
 import { FootballDataClient } from "./fixtures/footballDataClient.js";
-import { footballDataApiToken, rotatingSecret } from "./security/secrets.js";
+import { footballDataApiToken, requiredSecret, revenueCatWebhookAuthorization, rotatingSecret } from "./security/secrets.js";
 import { analysisCreditCost } from "./config/runtimeConfig.js";
+import { applyCreditAdjustment, parseRevenueCatCreditEvent } from "./revenuecat/creditEvent.js";
 
 initializeApp();
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
@@ -119,13 +120,96 @@ export const requestAnalysis = onCall({ enforceAppCheck: true, timeoutSeconds: 1
   throw new HttpsError("failed-precondition", "CONFIG_UNAVAILABLE");
 });
 
+export const revenueCatWebhook = onRequest({
+  timeoutSeconds: 15,
+  invoker: "public",
+  secrets: [revenueCatWebhookAuthorization],
+  cors: false,
+}, async (request, response) => {
+  if (request.method !== "POST") {
+    response.set("Allow", "POST").status(405).send("METHOD_NOT_ALLOWED");
+    return;
+  }
+  if (!secureStringEqual(request.get("authorization") ?? "", requiredSecret(revenueCatWebhookAuthorization))) {
+    response.status(401).send("UNAUTHORIZED");
+    return;
+  }
+
+  let event;
+  try {
+    event = parseRevenueCatCreditEvent(request.body);
+  } catch (error) {
+    console.warn("revenuecat_webhook_invalid", { reason: error instanceof Error ? error.message : "UNKNOWN" });
+    response.status(400).send("INVALID_EVENT");
+    return;
+  }
+  if (!event) {
+    response.status(200).json({ accepted: true, ignored: true });
+    return;
+  }
+  if (event.creditDelta === 0) {
+    response.status(200).json({ accepted: true, ignored: true, reason: "NO_CRD_ADJUSTMENT" });
+    return;
+  }
+
+  try {
+    await getAuth().getUser(event.uid);
+  } catch {
+    response.status(409).send("APP_USER_NOT_READY");
+    return;
+  }
+
+  const db = getFirestore();
+  const eventReference = db.collection("revenueCatEvents").doc(event.eventId);
+  const walletReference = db.collection("users").doc(event.uid).collection("private").doc("wallet");
+  const processed = await db.runTransaction(async (transaction) => {
+    const [existingEvent, wallet] = await Promise.all([
+      transaction.get(eventReference),
+      transaction.get(walletReference),
+    ]);
+    if (existingEvent.exists) return false;
+
+    const current = wallet.data() ?? {};
+    const next = applyCreditAdjustment({
+      balance: Number(current.balance ?? 0),
+      refundDebt: Number(current.refundDebt ?? 0),
+      lifetimePurchased: Number(current.lifetimePurchased ?? 0),
+      lifetimeRefunded: Number(current.lifetimeRefunded ?? 0),
+    }, event.creditDelta);
+
+    transaction.set(walletReference, {
+      schemaVersion: 1,
+      currency: "credits",
+      ...next,
+      lifetimeGranted: Math.max(0, Number(current.lifetimeGranted ?? 0)),
+      lifetimeSpent: Math.max(0, Number(current.lifetimeSpent ?? 0)),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+    transaction.create(eventReference, {
+      schemaVersion: 1,
+      uid: event.uid,
+      type: "VIRTUAL_CURRENCY_TRANSACTION",
+      currencyCode: "CRD",
+      creditDelta: event.creditDelta,
+      productId: event.productId,
+      transactionId: event.transactionId,
+      environment: event.environment,
+      occurredAt: Timestamp.fromMillis(event.occurredAtMs),
+      processedAt: FieldValue.serverTimestamp(),
+    });
+    return true;
+  });
+
+  response.status(200).json({ accepted: true, duplicate: !processed });
+});
+
 export const deleteAccount = onCall({ enforceAppCheck: true, timeoutSeconds: 60, invoker: "public" }, async (request) => {
   const context = authorize(request);
   if (request.data?.confirmation !== "DELETE" || Object.keys(request.data ?? {}).some((key) => key !== "confirmation")) {
     throw new HttpsError("invalid-argument", "DELETE_CONFIRMATION_REQUIRED");
   }
   const db = getFirestore();
-  const ownedCollections = ["analysisRequests", "usageLedger", "quotaReservations", "feedback", "subscriptions"];
+  const ownedCollections = ["analysisRequests", "usageLedger", "quotaReservations", "feedback", "subscriptions", "revenueCatEvents"];
   for (const collection of ownedCollections) {
     const snapshot = await db.collection(collection).where("uid", "==", context.uid).get();
     for (let offset = 0; offset < snapshot.docs.length; offset += 400) {
@@ -140,6 +224,12 @@ export const deleteAccount = onCall({ enforceAppCheck: true, timeoutSeconds: 60,
   console.info("account_deleted", { correlationId: context.correlationId });
   return { deleted: true };
 });
+
+function secureStringEqual(received: string, expected: string): boolean {
+  const receivedBytes = Buffer.from(received);
+  const expectedBytes = Buffer.from(expected);
+  return receivedBytes.length === expectedBytes.length && timingSafeEqual(receivedBytes, expectedBytes);
+}
 
 function parseFixtureWindow(value: unknown): { dateFrom: string; dateTo: string } {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new HttpsError("invalid-argument", "INVALID_FIXTURE_WINDOW");

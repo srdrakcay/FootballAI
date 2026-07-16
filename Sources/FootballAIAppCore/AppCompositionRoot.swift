@@ -30,12 +30,20 @@ public final class AppCompositionRoot {
 
     public static func mock(now: Date = .now) -> AppCompositionRoot {
         let fixtures = SampleData.fixtures(now: now)
+        let isTurkish = ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-tr")
+            || Locale.autoupdatingCurrent.language.languageCode?.identifier == "tr"
         return AppCompositionRoot(
             fixtureRepository: InMemoryFixtureRepository(fixtures: fixtures),
             analysisRepository: InMemoryAnalysisRepository(analyses: SampleData.analyses(fixtures: fixtures, now: now)),
-            userLibraryRepository: InMemoryUserLibraryRepository(),
+            userLibraryRepository: InMemoryUserLibraryRepository(
+                favorites: Array(fixtures.prefix(1)),
+                history: SampleData.history(fixtures: fixtures, now: now)
+            ),
             creditWalletRepository: InMemoryCreditWalletRepository(),
-            creditPurchaseService: InMemoryCreditPurchaseService(),
+            creditPurchaseService: InMemoryCreditPurchaseService(packages: [
+                CreditPackage(id: "footballai_credits_5", title: isTurkish ? "5 Kredi" : "5 Credits", localizedPrice: isTurkish ? "₺99,99" : "$2.99"),
+                CreditPackage(id: "footballai_credits_10", title: isTurkish ? "10 Kredi" : "10 Credits", localizedPrice: isTurkish ? "₺169,99" : "$4.99"),
+            ]),
             localeProvider: InMemoryLocaleProvider(),
             configurationService: InMemoryRemoteConfigurationService()
         )
@@ -171,5 +179,23 @@ enum SampleData {
             dataAvailability: ["recentForm": .available, "lineups": .unavailable],
             limitations: ["LINEUPS_UNAVAILABLE"], moderationStatus: .passed
         )]
+    }
+
+    static func history(fixtures: [Fixture], now: Date) -> [AnalysisHistoryItem] {
+        fixtures.prefix(2).enumerated().map { index, fixture in
+            AnalysisHistoryItem(
+                id: "history_mock_\(index + 1)",
+                fixtureKey: fixture.key,
+                analysisID: .init(rawValue: "ana_mock_\(index + 1)"),
+                competitionName: fixture.competition.name,
+                homeTeamName: fixture.homeTeam.name,
+                awayTeamName: fixture.awayTeam.name,
+                kickoffAt: fixture.kickoffAt,
+                viewedAt: now.addingTimeInterval(TimeInterval(-index * 86_400)),
+                generatedAt: now.addingTimeInterval(TimeInterval(-index * 86_400)),
+                validUntil: index == 0 ? now.addingTimeInterval(10_800) : now.addingTimeInterval(-3_600),
+                homeWinProbability: index == 0 ? 46 : 58
+            )
+        }
     }
 }

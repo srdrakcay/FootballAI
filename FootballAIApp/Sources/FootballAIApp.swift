@@ -8,7 +8,15 @@ struct FootballAIApp: App {
 
     init() {
         AppCompositionRoot.bootstrapFirebase()
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-mode") {
+            compositionRoot = AppCompositionRoot.mock()
+        } else {
+            compositionRoot = AppCompositionRoot.live()
+        }
+#else
         compositionRoot = AppCompositionRoot.live()
+#endif
     }
 
     var body: some Scene { WindowGroup { RootView(compositionRoot: compositionRoot) } }
