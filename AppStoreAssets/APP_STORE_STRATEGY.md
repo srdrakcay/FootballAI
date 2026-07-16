@@ -59,7 +59,11 @@ The credit store/paywall must not be included in the App Store screenshot set.
 
 ## Store configuration
 
-- Apple Developer team: Serdar Akçay personal account only (`T7R69DYKA8`)
+- App Store Connect app ID: `6791553742`
+- App Store Connect account/team: `Serkan AKCAY` (`127833330`)
+- Bundle ID: `com.footballai.predictions.com`
+- SKU: `ninety-lens-ios-001`
+- Apple Developer signing team: confirm the correct Team ID in Certificates, Identifiers & Profiles before archive upload
 - Never use: `Sans Girisim Ortak Girisimi`
 - Primary category: Sports
 - Secondary category: Utilities
