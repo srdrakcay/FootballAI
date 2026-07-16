@@ -12,14 +12,12 @@ COPY = {
         ("onboarding", "See every match\ndifferently", "Fixtures, form and team context in one intelligent hub."),
         ("matches", "Plan matchday\nby date", "Browse supported fixtures with a fast daily calendar."),
         ("history", "Keep every\ninsight close", "Favorites and analysis history stay connected to your account."),
-        ("credits", "Credits, not\nsubscriptions", "Choose 5 or 10 credits whenever you need more analyses."),
         ("profile", "Your football hub,\nyour control", "Manage credits, privacy, account data and legal documents."),
     ],
     "tr": [
         ("onboarding", "Maçlara farklı\nbir gözle bak", "Fikstür, form ve takım bağlamı tek bir akıllı merkezde."),
         ("matches", "Maç gününü\ntakvimle planla", "Desteklenen fikstürleri hızlı günlük takvimle keşfet."),
         ("history", "Her analiz\nelinin altında", "Favorilerin ve analiz geçmişin hesabınla birlikte saklanır."),
-        ("credits", "Abonelik değil,\nihtiyacın kadar kredi", "Daha fazla analiz gerektiğinde 5 veya 10 kredi seç."),
         ("profile", "Futbol merkezin,\nkontrol sende", "Kredileri, gizliliği, hesap verilerini ve belgeleri yönet."),
     ],
 }

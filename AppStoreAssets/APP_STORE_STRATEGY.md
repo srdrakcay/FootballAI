@@ -52,12 +52,15 @@ Product principles for store messaging:
 
 1. See every match differently / Maçlara farklı bir gözle bak
 2. Plan matchday by date / Maç gününü takvimle planla
-3. Unlock AI match analysis / Yapay zekâ maç analizini aç
-4. Keep every insight close / Analizlerini ve favorilerini sakla
-5. Credits, not subscriptions / Abonelik değil, ihtiyacın kadar kredi
+3. Keep every insight close / Analizlerini ve favorilerini sakla
+4. Your football hub, your control / Futbol merkezin, kontrol sende
+
+The credit store/paywall must not be included in the App Store screenshot set.
 
 ## Store configuration
 
+- Apple Developer team: Serdar Akçay personal account only (`T7R69DYKA8`)
+- Never use: `Sans Girisim Ortak Girisimi`
 - Primary category: Sports
 - Secondary category: Utilities
 - Pricing: Free
@@ -74,4 +77,3 @@ Product principles for store messaging:
 ## Review-safe disclaimer
 
 FootballAI provides informational, AI-assisted probability analysis based on available match data. It does not guarantee outcomes and does not provide betting advice. Data can be delayed, incomplete, or unavailable.
-
