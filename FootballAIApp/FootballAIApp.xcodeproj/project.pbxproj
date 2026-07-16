@@ -1,8 +1,9 @@
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
-	classes = {};
-	objectVersion = 77;
+	classes = {
+	};
+	objectVersion = 71;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,7 +13,7 @@
 		A10000000000000000000004 /* FeatureFixtures in Frameworks */ = {isa = PBXBuildFile; productRef = A90000000000000000000002 /* FeatureFixtures */; };
 		A10000000000000000000005 /* FeatureAnalysis in Frameworks */ = {isa = PBXBuildFile; productRef = A90000000000000000000003 /* FeatureAnalysis */; };
 		A10000000000000000000006 /* CoreDomain in Frameworks */ = {isa = PBXBuildFile; productRef = A90000000000000000000004 /* CoreDomain */; };
-		A10000000000000000000007 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* GoogleService-Info.plist */; };
+		A10000000000000000000007 /* ../GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* ../GoogleService-Info.plist */; };
 		A10000000000000000000008 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* AppDelegate.swift */; };
 		A10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -21,33 +22,86 @@
 		A20000000000000000000001 /* FootballAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FootballAIApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* FootballAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FootballAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A20000000000000000000004 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "../GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
+		A20000000000000000000004 /* ../GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "../GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		A20000000000000000000005 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A20000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A30000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000003, A10000000000000000000004, A10000000000000000000005, A10000000000000000000006); runOnlyForDeploymentPostprocessing = 0; };
+		A30000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000003 /* FootballAIAppCore in Frameworks */,
+				A10000000000000000000004 /* FeatureFixtures in Frameworks */,
+				A10000000000000000000005 /* FeatureAnalysis in Frameworks */,
+				A10000000000000000000006 /* CoreDomain in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A40000000000000000000001 = {isa = PBXGroup; children = (A40000000000000000000002 /* Sources */, A40000000000000000000004 /* Resources */, A20000000000000000000004 /* GoogleService-Info.plist */, A40000000000000000000003 /* Products */); sourceTree = "<group>"; };
-		A40000000000000000000002 /* Sources */ = {isa = PBXGroup; children = (A20000000000000000000005, A20000000000000000000001, A20000000000000000000002); path = Sources; sourceTree = "<group>"; };
-		A40000000000000000000003 /* Products */ = {isa = PBXGroup; children = (A20000000000000000000003); name = Products; sourceTree = "<group>"; };
-		A40000000000000000000004 /* Resources */ = {isa = PBXGroup; children = (A20000000000000000000006 /* Assets.xcassets */); path = Resources; sourceTree = "<group>"; };
+		A40000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A40000000000000000000002 /* Sources */,
+				A40000000000000000000004 /* Resources */,
+				A20000000000000000000004 /* ../GoogleService-Info.plist */,
+				A40000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A40000000000000000000002 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000005 /* AppDelegate.swift */,
+				A20000000000000000000001 /* FootballAIApp.swift */,
+				A20000000000000000000002 /* RootView.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A40000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000003 /* FootballAI.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A40000000000000000000004 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000006 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		A50000000000000000000001 /* FootballAI */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A70000000000000000000002;
-			buildPhases = (A60000000000000000000001 /* Sources */, A30000000000000000000001 /* Frameworks */, A60000000000000000000002 /* Resources */);
-			buildRules = ();
-			dependencies = ();
+			buildConfigurationList = A70000000000000000000002 /* Build configuration list for PBXNativeTarget "FootballAI" */;
+			buildPhases = (
+				A60000000000000000000001 /* Sources */,
+				A30000000000000000000001 /* Frameworks */,
+				A60000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
 			name = FootballAI;
-			packageProductDependencies = (A90000000000000000000001, A90000000000000000000002, A90000000000000000000003, A90000000000000000000004);
+			packageProductDependencies = (
+				A90000000000000000000001 /* FootballAIAppCore */,
+				A90000000000000000000002 /* FeatureFixtures */,
+				A90000000000000000000003 /* FeatureAnalysis */,
+				A90000000000000000000004 /* CoreDomain */,
+			);
 			productName = FootballAI;
-			productReference = A20000000000000000000003;
+			productReference = A20000000000000000000003 /* FootballAI.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -55,50 +109,185 @@
 /* Begin PBXProject section */
 		A80000000000000000000001 /* Project object */ = {
 			isa = PBXProject;
-			attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2630; LastUpgradeCheck = 2630; TargetAttributes = {A50000000000000000000001 = {CreatedOnToolsVersion = 26.3; SystemCapabilities = {com.apple.InAppPurchase = {enabled = 1; }; }; }; }; };
-			buildConfigurationList = A70000000000000000000001;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					A50000000000000000000001 = {
+						CreatedOnToolsVersion = 26.3;
+						SystemCapabilities = {
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = A70000000000000000000001 /* Build configuration list for PBXProject "FootballAIApp" */;
 			compatibilityVersion = "Xcode 16.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
-			knownRegions = (en, tr, es, fr, Base);
+			knownRegions = (
+				en,
+				tr,
+				es,
+				fr,
+				Base,
+			);
 			mainGroup = A40000000000000000000001;
-			packageReferences = (A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */);
-			productRefGroup = A40000000000000000000003;
+			packageReferences = (
+				A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */,
+			);
+			productRefGroup = A40000000000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (A50000000000000000000001);
+			targets = (
+				A50000000000000000000001 /* FootballAI */,
+			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A60000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000007 /* GoogleService-Info.plist in Resources */, A10000000000000000000009 /* Assets.xcassets in Resources */); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000007 /* ../GoogleService-Info.plist in Resources */,
+				A10000000000000000000009 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000008, A10000000000000000000001, A10000000000000000000002); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000008 /* AppDelegate.swift in Sources */,
+				A10000000000000000000001 /* FootballAIApp.swift in Sources */,
+				A10000000000000000000002 /* RootView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		B10000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; }; name = Debug; };
-		B10000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; }; name = Release; };
-		B10000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = T7R69DYKA8; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Resources/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 17.0; MARKETING_VERSION = 1.0.0; PRODUCT_BUNDLE_IDENTIFIER = com.footballai.predictions.com; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
-		B10000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = T7R69DYKA8; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Resources/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 17.0; MARKETING_VERSION = 1.0.0; PRODUCT_BUNDLE_IDENTIFIER = com.footballai.predictions.com; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+		B10000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		B10000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		B10000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.footballai.predictions.com;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B10000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.footballai.predictions.com;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A70000000000000000000001 = {isa = XCConfigurationList; buildConfigurations = (B10000000000000000000001, B10000000000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		A70000000000000000000002 = {isa = XCConfigurationList; buildConfigurations = (B10000000000000000000003, B10000000000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A70000000000000000000001 /* Build configuration list for PBXProject "FootballAIApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10000000000000000000001 /* Debug */,
+				B10000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A70000000000000000000002 /* Build configuration list for PBXNativeTarget "FootballAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10000000000000000000003 /* Debug */,
+				B10000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */ = {isa = XCLocalSwiftPackageReference; relativePath = ..; };
+		A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A90000000000000000000001 /* FootballAIAppCore */ = {isa = XCSwiftPackageProductDependency; package = A90000000000000000000005; productName = FootballAIAppCore; };
-		A90000000000000000000002 /* FeatureFixtures */ = {isa = XCSwiftPackageProductDependency; package = A90000000000000000000005; productName = FeatureFixtures; };
-		A90000000000000000000003 /* FeatureAnalysis */ = {isa = XCSwiftPackageProductDependency; package = A90000000000000000000005; productName = FeatureAnalysis; };
-		A90000000000000000000004 /* CoreDomain */ = {isa = XCSwiftPackageProductDependency; package = A90000000000000000000005; productName = CoreDomain; };
+		A90000000000000000000001 /* FootballAIAppCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */;
+			productName = FootballAIAppCore;
+		};
+		A90000000000000000000002 /* FeatureFixtures */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */;
+			productName = FeatureFixtures;
+		};
+		A90000000000000000000003 /* FeatureAnalysis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */;
+			productName = FeatureAnalysis;
+		};
+		A90000000000000000000004 /* CoreDomain */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */;
+			productName = CoreDomain;
+		};
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A80000000000000000000001 /* Project object */;

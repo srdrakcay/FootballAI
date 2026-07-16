@@ -24,8 +24,8 @@ There is no recurring subscription. Choose a one-time 5-credit or 10-credit pack
 
 BUILT WITH PRIVACY IN MIND
 
-FootballAI uses a Firebase-generated anonymous account. You can sign out or permanently delete the account and its linked profile data from inside the app. Read the in-app Privacy Policy and Terms of Use at any time.
+NinetyLens uses a Firebase-generated anonymous account. You can sign out or permanently delete the account and its linked profile data from inside the app. Read the in-app Privacy Policy and Terms of Use at any time.
 
 IMPORTANT
 
-AI-assisted analyses are informational and express probabilities, not certain outcomes or betting advice. Match data may be delayed, incomplete, or unavailable. FootballAI is independent and is not affiliated with or endorsed by any club, league, federation, or data provider.
+AI-assisted analyses are informational and express probabilities, not certain outcomes or betting advice. Match data may be delayed, incomplete, or unavailable. NinetyLens is independent and is not affiliated with or endorsed by any club, league, federation, or data provider.

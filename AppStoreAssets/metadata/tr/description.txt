@@ -24,8 +24,8 @@ Yinelenen abonelik yoktur. Daha fazla analiz gerektiğinde tek seferlik 5 veya 1
 
 GİZLİLİK ODAKLI
 
-FootballAI, Firebase tarafından oluşturulan anonim bir hesap kullanır. Uygulama içinden çıkış yapabilir veya hesabı ve bağlantılı profil verilerini kalıcı olarak silebilirsin. Gizlilik Politikası ve Kullanım Koşulları uygulama içinde her zaman erişilebilir.
+NinetyLens, Firebase tarafından oluşturulan anonim bir hesap kullanır. Uygulama içinden çıkış yapabilir veya hesabı ve bağlantılı profil verilerini kalıcı olarak silebilirsin. Gizlilik Politikası ve Kullanım Koşulları uygulama içinde her zaman erişilebilir.
 
 ÖNEMLİ
 
-Yapay zekâ destekli analizler bilgilendirme amaçlıdır; kesin sonuç veya bahis tavsiyesi sunmaz. Maç verileri gecikebilir, eksik olabilir ya da kullanılamayabilir. FootballAI bağımsız bir uygulamadır; herhangi bir kulüp, lig, federasyon veya veri sağlayıcısı tarafından desteklenmez.
+Yapay zekâ destekli analizler bilgilendirme amaçlıdır; kesin sonuç veya bahis tavsiyesi sunmaz. Maç verileri gecikebilir, eksik olabilir ya da kullanılamayabilir. NinetyLens bağımsız bir uygulamadır; herhangi bir kulüp, lig, federasyon veya veri sağlayıcısı tarafından desteklenmez.

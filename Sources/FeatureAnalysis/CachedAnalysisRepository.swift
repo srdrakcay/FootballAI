@@ -28,4 +28,11 @@ public actor CachedAnalysisRepository: AnalysisRepository {
         try await cache.store(value)
         return value
     }
+
+    public func existing(fixtureKey: FixtureKey, locale: SupportedLocale) async throws -> Analysis? {
+        guard await connectivity.current() == .online else { return nil }
+        guard let value = try await remote.existing(fixtureKey: fixtureKey, locale: locale) else { return nil }
+        try await cache.store(value)
+        return value
+    }
 }

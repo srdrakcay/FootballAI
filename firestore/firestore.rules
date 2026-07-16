@@ -12,7 +12,9 @@ service cloud.firestore {
     }
 
     match /analyses/{analysisId} {
-      allow read: if signedIn() && resource.data.state == 'ready' && resource.data.validUntil > request.time;
+      // Ready analyses contain shared match statistics, not user identifiers.
+      // Expired results remain readable so a user can reopen their own history without paying again.
+      allow read: if signedIn() && resource.data.state == 'ready';
       allow write: if false;
       match /locales/{locale} {
         allow read: if signedIn() && get(/databases/$(database)/documents/analyses/$(analysisId)).data.state == 'ready';

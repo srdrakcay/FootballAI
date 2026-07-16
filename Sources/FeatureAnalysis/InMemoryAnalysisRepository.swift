@@ -19,4 +19,7 @@ public actor InMemoryAnalysisRepository: AnalysisRepository {
         guard let analysis = analyses[id] else { throw DomainError.generationFailedPermanent(referenceID: "mock-not-found") }
         return analysis
     }
+    public func existing(fixtureKey: FixtureKey, locale: SupportedLocale) async throws -> Analysis? {
+        analyses.values.first(where: { $0.fixtureKey == fixtureKey })
+    }
 }

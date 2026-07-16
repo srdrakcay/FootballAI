@@ -1,7 +1,9 @@
 import { getRemoteConfig } from "firebase-admin/remote-config";
+import { validateRuntimeConfiguration, type RuntimeConfiguration } from "./validator.js";
 
 const cacheDurationMs = 60_000;
 let cachedAnalysisCreditCost: { value: number; expiresAt: number } | undefined;
+let cachedRuntimeConfiguration: { value: RuntimeConfiguration; expiresAt: number } | undefined;
 
 export async function analysisCreditCost(): Promise<number> {
   const now = Date.now();
@@ -19,5 +21,21 @@ export async function analysisCreditCost(): Promise<number> {
   }
 
   cachedAnalysisCreditCost = { value, expiresAt: now + cacheDurationMs };
+  return value;
+}
+
+export async function analysisRuntimeConfiguration(): Promise<RuntimeConfiguration> {
+  const now = Date.now();
+  if (cachedRuntimeConfiguration && cachedRuntimeConfiguration.expiresAt > now) return cachedRuntimeConfiguration.value;
+  const template = await getRemoteConfig().getTemplate();
+  const raw = Object.fromEntries(Object.entries(template.parameters).map(([key, parameter]) => {
+    const value = parameter.defaultValue;
+    if (!value || !("value" in value)) return [key, undefined];
+    if (value.value === "true") return [key, true];
+    if (value.value === "false") return [key, false];
+    return [key, value.value];
+  }));
+  const value = validateRuntimeConfiguration(raw);
+  cachedRuntimeConfiguration = { value, expiresAt: now + cacheDurationMs };
   return value;
 }

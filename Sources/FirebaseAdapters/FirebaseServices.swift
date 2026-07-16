@@ -77,11 +77,41 @@ public actor FirebaseCallableTransport: CallableTransport {
     public init(region: String = FirebaseEnvironment.functionsRegion) { self.region = region }
 
     public func call<Request: Encodable & Sendable, Response: Decodable & Sendable>(_ name: String, request: Request) async throws -> Response {
-        let encoded = try JSONEncoder().encode(request)
-        let payload = try JSONSerialization.jsonObject(with: encoded)
-        let result = try await Functions.functions(region: region).httpsCallable(name).call(payload)
-        guard JSONSerialization.isValidJSONObject(result.data) else { throw URLError(.cannotParseResponse) }
-        let responseData = try JSONSerialization.data(withJSONObject: result.data)
-        return try JSONDecoder().decode(Response.self, from: responseData)
+        do {
+            let encoded = try JSONEncoder().encode(request)
+            let payload = try JSONSerialization.jsonObject(with: encoded)
+            let result = try await Functions.functions(region: region).httpsCallable(name).call(payload)
+            guard JSONSerialization.isValidJSONObject(result.data) else { throw URLError(.cannotParseResponse) }
+            let responseData = try JSONSerialization.data(withJSONObject: result.data)
+            return try JSONDecoder().decode(Response.self, from: responseData)
+        } catch {
+            throw Self.domainError(from: error)
+        }
+    }
+
+    private static func domainError(from error: any Error) -> any Error {
+        let value = error as NSError
+        guard value.domain == FunctionsErrorDomain else { return error }
+        let details = value.userInfo[FunctionsErrorDetailsKey] as? [String: Any]
+        let reason = details?["reason"] as? String
+
+        if value.code == FunctionsErrorCode.resourceExhausted.rawValue, reason == "INSUFFICIENT_CREDITS" {
+            return DomainError.insufficientCredits(
+                balance: max(0, numericInteger(details?["balance"]) ?? 0),
+                required: max(1, numericInteger(details?["requiredCredits"]) ?? 1)
+            )
+        }
+        if value.code == FunctionsErrorCode.failedPrecondition.rawValue,
+           value.localizedDescription == "CONFIG_UNAVAILABLE" {
+            return DomainError.configUnavailable
+        }
+        if value.code == FunctionsErrorCode.unauthenticated.rawValue { return DomainError.authRequired }
+        if value.code == FunctionsErrorCode.notFound.rawValue { return DomainError.fixtureNotFound }
+        if value.code == FunctionsErrorCode.unavailable.rawValue { return DomainError.networkOffline }
+        return error
+    }
+
+    private static func numericInteger(_ value: Any?) -> Int? {
+        (value as? NSNumber)?.intValue ?? value as? Int
     }
 }

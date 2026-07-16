@@ -1,4 +1,4 @@
-# FootballAI App Store Strategy
+# NinetyLens App Store Strategy
 
 ## Recommended name
 
@@ -80,4 +80,4 @@ The credit store/paywall must not be included in the App Store screenshot set.
 
 ## Review-safe disclaimer
 
-FootballAI provides informational, AI-assisted probability analysis based on available match data. It does not guarantee outcomes and does not provide betting advice. Data can be delayed, incomplete, or unavailable.
+NinetyLens provides informational, AI-assisted probability analysis based on available match data. It does not guarantee outcomes and does not provide betting advice. Data can be delayed, incomplete, or unavailable.

@@ -72,6 +72,11 @@ public actor FirebaseFixtureRepository: FixtureRepository {
         return try Self.fixture(document)
     }
 
+    public func insights(id: FixtureKey) async throws -> FixtureInsights {
+        _ = try await authentication.ensureAnonymousUser()
+        return try await callable.call("getFixtureInsights", request: FixtureInsightsRequestDTO(fixtureKey: id.rawValue))
+    }
+
     private nonisolated static func fixture(_ document: DocumentSnapshot) throws -> Fixture {
         guard let data = document.data(),
               let competitionID = data["competitionId"] as? String,
@@ -261,6 +266,17 @@ public actor FirebaseAnalysisRepository: AnalysisRepository {
         return try Self.analysis(id: id, locale: locale, parent: parent.data(), localized: localized.data())
     }
 
+    public func existing(fixtureKey: FixtureKey, locale: SupportedLocale) async throws -> Analysis? {
+        let uid = try await authentication.ensureAnonymousUser()
+        let history = try await Firestore.firestore()
+            .collection("users").document(uid).collection("history")
+            .whereField("fixtureKey", isEqualTo: fixtureKey.rawValue)
+            .limit(to: 1)
+            .getDocuments()
+        guard let analysisID = history.documents.first?.data()["analysisId"] as? String else { return nil }
+        return try await analysis(id: AnalysisID(rawValue: analysisID), locale: locale)
+    }
+
     private nonisolated static func analysis(id: AnalysisID, locale: SupportedLocale, parent: [String: Any]?, localized: [String: Any]?) throws -> Analysis {
         guard let parent,
               let fixtureKey = parent["fixtureKey"] as? String,
@@ -321,6 +337,7 @@ private struct RequestResponseDTO: Decodable, Sendable {
 }
 private struct FixtureSyncRequestDTO: Encodable, Sendable { let dateFrom: String; let dateTo: String }
 private struct FixtureSyncResponseDTO: Decodable, Sendable { let count: Int; let cached: Bool }
+private struct FixtureInsightsRequestDTO: Encodable, Sendable { let fixtureKey: String }
 
 private func date(_ value: Any?) -> Date? {
     if let timestamp = value as? Timestamp { return timestamp.dateValue() }

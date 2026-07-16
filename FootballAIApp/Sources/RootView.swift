@@ -273,7 +273,7 @@ private struct MainTabShell: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             NeonBackground()
             Group {
                 switch selectedTab {
@@ -285,13 +285,13 @@ private struct MainTabShell: View {
                     NavigationStack { ProfileView(compositionRoot: compositionRoot) }
                 }
             }
-            .safeAreaPadding(.bottom, showsTabBar ? 124 : 0)
-
-            if showsTabBar {
-                NeonTabBar(selection: $selectedTab)
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 8)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if showsTabBar {
+                    NeonTabBar(selection: $selectedTab)
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 8)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
         .animation(.easeInOut(duration: 0.22), value: selectedTab)
@@ -636,6 +636,12 @@ private struct NeonFixtureDetailView: View {
     let compositionRoot: AppCompositionRoot
     @Binding var showsTabBar: Bool
     @State private var isFavorite = false
+    @State private var wallet = CreditWallet.defaultValue
+    @State private var showsCreditStore = false
+    @State private var analysisRetryTrigger = 0
+    @State private var insights: FixtureInsights?
+    @State private var insightsError = false
+    @State private var isLoadingInsights = true
 
     var body: some View {
         ZStack {
@@ -645,6 +651,7 @@ private struct NeonFixtureDetailView: View {
                     matchHero
                     dataStrip
                     analysisCard
+                    footballDataCard
                     disclaimer
                 }
                 .padding(20)
@@ -667,6 +674,23 @@ private struct NeonFixtureDetailView: View {
         .task {
             let favoriteIDs = try? await compositionRoot.favoriteFixtureKeys()
             isFavorite = favoriteIDs?.contains(fixture.key) ?? false
+            wallet = (try? await compositionRoot.creditWallet()) ?? wallet
+            await loadInsights()
+        }
+        .sheet(isPresented: $showsCreditStore) {
+            CreditStoreView(
+                compositionRoot: compositionRoot,
+                wallet: wallet,
+                onWalletUpdated: { wallet = $0 },
+                onPurchaseCompleted: { updatedWallet in
+                    wallet = updatedWallet
+                    guard updatedWallet.balance >= updatedWallet.analysisCreditCost else { return }
+                    showsCreditStore = false
+                    analysisRetryTrigger += 1
+                }
+            )
+            .presentationDetents([.large])
+            .preferredColorScheme(.dark)
         }
     }
 
@@ -719,20 +743,213 @@ private struct NeonFixtureDetailView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Label(appText("FootballAI Analizi", "FootballAI Analysis"), systemImage: "sparkles")
+                    Label(appText("NinetyLens Analizi", "NinetyLens Analysis"), systemImage: "sparkles")
                         .font(.headline).foregroundStyle(.white)
-                    Text(appText("1 ücretsiz hakkın kullanılacak", "Your 1 free analysis will be used")).font(.caption).foregroundStyle(NeonTheme.secondaryText)
+                    Text(appText(
+                        "Bu analiz \(wallet.analysisCreditCost) kredi kullanır • Bakiye: \(wallet.balance)",
+                        "This analysis uses \(creditText(wallet.analysisCreditCost)) • Balance: \(creditText(wallet.balance))"
+                    ))
+                    .font(.caption)
+                    .foregroundStyle(wallet.balance >= wallet.analysisCreditCost ? NeonTheme.secondaryText : NeonTheme.pink)
                 }
                 Spacer()
                 Image(systemName: "brain.head.profile.fill").font(.title2).foregroundStyle(NeonTheme.purple)
             }
             Divider().overlay(.white.opacity(0.10))
-            AnalysisStateView(viewModel: compositionRoot.makeAnalysisViewModel(fixtureKey: fixture.key, locale: SupportedLocale.resolve(identifier: currentAppLocale.identifier)))
+            AnalysisStateView(
+                viewModel: compositionRoot.makeAnalysisViewModel(
+                    fixtureKey: fixture.key,
+                    locale: SupportedLocale.resolve(identifier: currentAppLocale.identifier)
+                ),
+                canAffordAnalysis: wallet.balance >= wallet.analysisCreditCost,
+                retryTrigger: analysisRetryTrigger,
+                onInsufficientCredits: { showsCreditStore = true },
+                onAnalysisReady: {
+                    Task {
+                        wallet = (try? await compositionRoot.creditWallet()) ?? wallet
+                        await loadInsights()
+                    }
+                }
+            )
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
                 .tint(NeonTheme.purple)
         }
         .padding(20).glassCard(radius: 24)
+    }
+
+    @ViewBuilder
+    private var footballDataCard: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(appText("Detaylı maç verileri", "Detailed match data"), systemImage: "chart.xyaxis.line")
+                        .font(.headline)
+                    Text(appText("football-data.org kaynaklı güncel istatistikler", "Current statistics powered by football-data.org"))
+                        .font(.caption)
+                        .foregroundStyle(NeonTheme.secondaryText)
+                }
+                Spacer()
+                if isLoadingInsights { ProgressView().tint(NeonTheme.cyan) }
+            }
+
+            if let insights {
+                if let form = insights.recentForm {
+                    insightSectionTitle(appText("SON 5 MAÇ FORMU", "LAST 5 MATCH FORM"))
+                    HStack(alignment: .top, spacing: 12) {
+                        teamFormCard(name: fixture.homeTeam.name, form: form.home, accent: NeonTheme.purple)
+                        teamFormCard(name: fixture.awayTeam.name, form: form.away, accent: NeonTheme.cyan)
+                    }
+                }
+
+                if let standings = insights.standings {
+                    Divider().overlay(.white.opacity(0.08))
+                    insightSectionTitle(appText("PUAN DURUMU", "STANDINGS"))
+                    standingRow(team: fixture.homeTeam.name, standing: standings.home, color: NeonTheme.purple)
+                    standingRow(team: fixture.awayTeam.name, standing: standings.away, color: NeonTheme.cyan)
+                }
+
+                if !insights.headToHead.isEmpty {
+                    Divider().overlay(.white.opacity(0.08))
+                    insightSectionTitle(appText("İKİLİ KARŞILAŞMALAR", "HEAD TO HEAD"))
+                    ForEach(Array(insights.headToHead.suffix(3).reversed())) { match in
+                        insightMatchRow(match)
+                    }
+                }
+
+                if insights.recentForm == nil, insights.standings == nil, insights.headToHead.isEmpty {
+                    unavailableInsights
+                }
+
+                Text(appText("Veriler 30 dakika önbellekte tutulur.", "Data is cached for 30 minutes."))
+                    .font(.caption2)
+                    .foregroundStyle(NeonTheme.secondaryText)
+            } else if insightsError {
+                unavailableInsights
+            } else {
+                VStack(spacing: 10) {
+                    RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.06)).frame(height: 58)
+                    RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.05)).frame(height: 42)
+                }
+                .redacted(reason: .placeholder)
+            }
+        }
+        .padding(20)
+        .glassCard(radius: 24)
+    }
+
+    private func insightSectionTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.caption2.bold())
+            .tracking(1.2)
+            .foregroundStyle(NeonTheme.secondaryText)
+    }
+
+    private func teamFormCard(name: String, form: TeamRecentForm, accent: Color) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(name).font(.caption.bold()).lineLimit(1)
+            HStack(spacing: 5) {
+                ForEach(Array(form.form.suffix(5).enumerated()), id: \.offset) { _, result in
+                    Text(localizedForm(result))
+                        .font(.caption2.bold())
+                        .frame(width: 22, height: 22)
+                        .background(formColor(result).opacity(0.18), in: Circle())
+                        .foregroundStyle(formColor(result))
+                }
+            }
+            Text(appText(
+                "\(form.wins)G \(form.draws)B \(form.losses)M • \(form.goalsFor)-\(form.goalsAgainst) gol",
+                "\(form.wins)W \(form.draws)D \(form.losses)L • \(form.goalsFor)-\(form.goalsAgainst) goals"
+            ))
+            .font(.caption2)
+            .foregroundStyle(NeonTheme.secondaryText)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(accent.opacity(0.22)))
+    }
+
+    private func standingRow(team: String, standing: TeamStanding, color: Color) -> some View {
+        HStack(spacing: 12) {
+            Text(standing.position.map { "\($0)." } ?? "—")
+                .font(.headline.bold())
+                .foregroundStyle(color)
+                .frame(width: 30)
+            Text(team).font(.subheadline.bold()).lineLimit(1)
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(standing.points.map { "\($0) \(appText("puan", "pts"))" } ?? "—").font(.subheadline.bold())
+                Text(appText(
+                    "\(standing.playedGames ?? 0) maç • Av. \(signed(standing.goalDifference))",
+                    "\(standing.playedGames ?? 0) played • GD \(signed(standing.goalDifference))"
+                ))
+                .font(.caption2)
+                .foregroundStyle(NeonTheme.secondaryText)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func insightMatchRow(_ match: FixtureInsightMatch) -> some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(match.homeTeamName ?? "—").font(.caption.bold()).lineLimit(1)
+                Text(match.awayTeamName ?? "—").font(.caption).foregroundStyle(NeonTheme.secondaryText).lineLimit(1)
+            }
+            Spacer()
+            Text("\(match.homeGoals.map(String.init) ?? "—")  :  \(match.awayGoals.map(String.init) ?? "—")")
+                .font(.subheadline.monospacedDigit().bold())
+                .foregroundStyle(NeonTheme.lime)
+            if let date = insightDate(match.utcDate) {
+                Text(date, format: .dateTime.day().month(.abbreviated))
+                    .font(.caption2)
+                    .foregroundStyle(NeonTheme.secondaryText)
+                    .frame(width: 42, alignment: .trailing)
+            }
+        }
+        .padding(.vertical, 5)
+    }
+
+    private var unavailableInsights: some View {
+        Label(
+            appText("Bu maç için ayrıntılı istatistik henüz sağlanmıyor.", "Detailed statistics are not yet available for this match."),
+            systemImage: "chart.bar.xaxis"
+        )
+        .font(.caption)
+        .foregroundStyle(NeonTheme.secondaryText)
+        .padding(.vertical, 8)
+    }
+
+    @MainActor
+    private func loadInsights() async {
+        isLoadingInsights = true
+        do {
+            insights = try await compositionRoot.fixtureInsights(fixtureKey: fixture.key)
+            insightsError = false
+        } catch {
+            insightsError = true
+        }
+        isLoadingInsights = false
+    }
+
+    private func localizedForm(_ result: String) -> String {
+        guard currentAppLocale.language.languageCode?.identifier == "tr" else { return result }
+        switch result { case "W": return "G"; case "D": return "B"; case "L": return "M"; default: return result }
+    }
+
+    private func formColor(_ result: String) -> Color {
+        switch result { case "W": NeonTheme.lime; case "D": NeonTheme.cyan; default: NeonTheme.pink }
+    }
+
+    private func signed(_ value: Int?) -> String {
+        guard let value else { return "—" }
+        return value > 0 ? "+\(value)" : String(value)
+    }
+
+    private func insightDate(_ value: String?) -> Date? {
+        guard let value else { return nil }
+        return ISO8601DateFormatter().date(from: value)
     }
 
     private var disclaimer: some View {
@@ -1033,51 +1250,51 @@ private enum LegalDocument {
     private var privacySections: [LegalSection] {
         if Locale.autoupdatingCurrent.language.languageCode?.identifier == "tr" {
             return [
-                .init(id: "scope", title: "1. Kapsam ve veri sorumlusu", paragraphs: ["Bu politika, com.footballai.predictions.com paket kimliğine sahip FootballAI iOS uygulamasını kapsar. FootballAI geliştiricisi, uygulama kapsamında işlenen kullanıcı verilerinden sorumludur. İletişim ve gizlilik talepleri App Store ürün sayfasındaki Destek bağlantısı üzerinden iletilebilir."]),
-                .init(id: "data", title: "2. İşlediğimiz veriler", paragraphs: ["Uygulama; Firebase tarafından oluşturulan anonim kullanıcı kimliğini, tercih edilen sistem dilini, hesap oluşturma ve son görülme zamanlarını, ücretsiz kullanım kotasını, favori maçları ve analiz geçmişini saklar.", "Maç verileri football-data.org kaynağından sunucu üzerinden alınır. Firebase App Check, Firebase Authentication ve altyapı sağlayıcıları güvenlik amacıyla cihaz bütünlüğü sinyalleri, IP adresi ve teknik günlükleri işleyebilir. FootballAI reklam kimliği toplamaz ve kullanıcı konumuna erişmez."]),
+                .init(id: "scope", title: "1. Kapsam ve veri sorumlusu", paragraphs: ["Bu politika, com.footballai.predictions.com paket kimliğine sahip NinetyLens iOS uygulamasını kapsar. NinetyLens geliştiricisi, uygulama kapsamında işlenen kullanıcı verilerinden sorumludur. İletişim ve gizlilik talepleri App Store ürün sayfasındaki Destek bağlantısı üzerinden iletilebilir."]),
+                .init(id: "data", title: "2. İşlediğimiz veriler", paragraphs: ["Uygulama; Firebase tarafından oluşturulan anonim kullanıcı kimliğini, tercih edilen sistem dilini, hesap oluşturma ve son görülme zamanlarını, kredi bakiyesi ve kullanımını, favori maçları ve analiz geçmişini saklar.", "Maç verileri football-data.org kaynağından sunucu üzerinden alınır. Firebase App Check, Firebase Authentication ve altyapı sağlayıcıları güvenlik amacıyla cihaz bütünlüğü sinyalleri, IP adresi ve teknik günlükleri işleyebilir. NinetyLens reklam kimliği toplamaz ve kullanıcı konumuna erişmez."]),
                 .init(id: "purpose", title: "3. Kullanım amaçları", paragraphs: ["Veriler; anonim oturumu sürdürebilmek, favorileri ve geçmişi cihazlar arası olmasa da yeniden kurulum sonrasında aynı Firebase hesabıyla sunmak, aylık kullanım hakkını uygulamak, maçları göstermek, kötüye kullanımı önlemek ve hizmet güvenliğini sağlamak için işlenir."]),
-                .init(id: "providers", title: "4. Hizmet sağlayıcılar", paragraphs: ["Firebase/Google Cloud; kimlik doğrulama, veritabanı, sunucu fonksiyonları, uzaktan yapılandırma ve uygulama bütünlüğü hizmetlerini sağlar. football-data.org yalnızca sunucumuzdan gelen maç verisi isteklerini alır; anonim kullanıcı kimliği bu sağlayıcıyla paylaşılmaz.", "RevenueCat, tek seferlik kredi satın alımlarını doğrulamak için anonim hesap kimliğini, ürün ve işlem bilgilerini işler. FootballAI kişisel verileri satmaz, davranışsal reklam veya üçüncü taraflar arası takip amacıyla kullanmaz. Gemini henüz etkin değildir; etkinleştirilmeden önce bu politika ve App Store gizlilik beyanı güncellenecektir."]),
+                .init(id: "providers", title: "4. Hizmet sağlayıcılar", paragraphs: ["Firebase/Google Cloud; kimlik doğrulama, veritabanı, sunucu fonksiyonları, uzaktan yapılandırma ve uygulama bütünlüğü hizmetlerini sağlar. football-data.org yalnızca sunucumuzdan gelen maç verisi isteklerini alır; anonim kullanıcı kimliği bu sağlayıcıyla paylaşılmaz.", "RevenueCat, tek seferlik kredi satın alımlarını doğrulamak için anonim hesap kimliğini, ürün ve işlem bilgilerini işler. Google Gemini, sunucumuz tarafından sağlanan maç verilerinden olasılık analizi üretir; API anahtarı ve çağrılar güvenli sunucu ortamında tutulur. NinetyLens kişisel verileri satmaz, davranışsal reklam veya üçüncü taraflar arası takip amacıyla kullanmaz."]),
                 .init(id: "retention", title: "5. Saklama ve silme", paragraphs: ["Hesap ve kullanıcıya bağlı veriler hesap silinene kadar saklanır. Profil ekranındaki Hesabı sil işlemi anonim Firebase hesabını; profil, kota, favoriler, geçmiş ve kullanıcıya bağlı istek kayıtlarıyla birlikte siler. Birden fazla kullanıcı için üretilmiş, kullanıcı kimliği içermeyen ortak maç analizleri hizmet bütünlüğü için saklanabilir.", "Çıkış yapmak hesabı sunucudan silmez; yalnızca bu cihazdaki oturumu kaldırır. Sağlayıcıların güvenlik ve operasyon günlükleri kendi sınırlı saklama sürelerine tabi olabilir."]),
                 .init(id: "security", title: "6. Güvenlik ve uluslararası aktarım", paragraphs: ["Veriler aktarım sırasında şifrelenir ve Firebase güvenlik kuralları, App Check ve kimlik doğrulama ile korunur. Google Cloud hizmetlerinin çalışması nedeniyle veriler kullanıcının ülkesi dışındaki altyapılarda işlenebilir. Hiçbir teknik yöntem mutlak güvenlik garantisi vermez."]),
                 .init(id: "rights", title: "7. Seçimleriniz ve haklarınız", paragraphs: ["Favorileri uygulama içinden kaldırabilir, çıkış yapabilir veya hesabınızı ve ilişkili verileri kalıcı olarak silebilirsiniz. Geçerli yerel mevzuat kapsamında erişim, düzeltme, silme veya itiraz taleplerinizi App Store Destek bağlantısı üzerinden iletebilirsiniz."]),
-                .init(id: "children", title: "8. Çocuklar ve değişiklikler", paragraphs: ["FootballAI özellikle çocuklara yönelik değildir ve bilerek ad, e-posta veya doğum tarihi toplamaz. Bu politika veri uygulamalarımız değiştiğinde güncellenebilir; önemli değişiklikler yeni yürürlük tarihiyle uygulamada yayımlanır."])
+                .init(id: "children", title: "8. Çocuklar ve değişiklikler", paragraphs: ["NinetyLens özellikle çocuklara yönelik değildir ve bilerek ad, e-posta veya doğum tarihi toplamaz. Bu politika veri uygulamalarımız değiştiğinde güncellenebilir; önemli değişiklikler yeni yürürlük tarihiyle uygulamada yayımlanır."])
             ]
         }
         return [
-            .init(id: "scope", title: "1. Scope and controller", paragraphs: ["This policy applies to the FootballAI iOS app with bundle identifier com.footballai.predictions.com. The FootballAI developer is responsible for user data processed by the app. Privacy requests can be submitted through the Support link on the App Store product page."]),
-            .init(id: "data", title: "2. Data we process", paragraphs: ["The app stores a Firebase-generated anonymous user identifier, system locale, account creation and last-seen times, free usage quota, favorite matches, and analysis history.", "Match data is requested server-side from football-data.org. Firebase App Check, Firebase Authentication, and infrastructure providers may process device-integrity signals, IP addresses, and technical logs for security. FootballAI does not access location or collect advertising identifiers."]),
+            .init(id: "scope", title: "1. Scope and controller", paragraphs: ["This policy applies to the NinetyLens iOS app with bundle identifier com.footballai.predictions.com. The NinetyLens developer is responsible for user data processed by the app. Privacy requests can be submitted through the Support link on the App Store product page."]),
+            .init(id: "data", title: "2. Data we process", paragraphs: ["The app stores a Firebase-generated anonymous user identifier, system locale, account creation and last-seen times, credit balance and usage, favorite matches, and analysis history.", "Match data is requested server-side from football-data.org. Firebase App Check, Firebase Authentication, and infrastructure providers may process device-integrity signals, IP addresses, and technical logs for security. NinetyLens does not access location or collect advertising identifiers."]),
             .init(id: "purpose", title: "3. Purposes", paragraphs: ["Data is processed to maintain the anonymous session, restore favorites and history for the same Firebase account, enforce monthly usage rights, display matches, prevent abuse, and secure the service."]),
-            .init(id: "providers", title: "4. Service providers", paragraphs: ["Firebase/Google Cloud provides authentication, database, server functions, remote configuration, and app-integrity services. football-data.org receives server-side match-data requests and does not receive the anonymous user identifier.", "RevenueCat processes the anonymous account identifier and product and transaction information to validate one-time credit purchases. FootballAI does not sell personal data or use it for behavioral advertising or cross-service tracking. Gemini is not active; this policy and App Store disclosures will be updated before it is enabled."]),
+            .init(id: "providers", title: "4. Service providers", paragraphs: ["Firebase/Google Cloud provides authentication, database, server functions, remote configuration, and app-integrity services. football-data.org receives server-side match-data requests and does not receive the anonymous user identifier.", "RevenueCat processes the anonymous account identifier and product and transaction information to validate one-time credit purchases. Google Gemini generates probability analysis from match data supplied by our server; API credentials and requests remain in the secure server environment. NinetyLens does not sell personal data or use it for behavioral advertising or cross-service tracking."]),
             .init(id: "retention", title: "5. Retention and deletion", paragraphs: ["Account-linked data is retained until account deletion. Delete Account removes the anonymous Firebase account, profile, quota, favorites, history, and user-linked request records. Shared match analyses that contain no user identifier may be retained for service integrity.", "Signing out removes only the session from this device and does not delete server data. Provider security and operational logs may follow their own limited retention periods."]),
             .init(id: "security", title: "6. Security and transfers", paragraphs: ["Data is encrypted in transit and protected with Firebase Security Rules, App Check, and authentication. Google Cloud may process data outside the user’s country. No technical measure can guarantee absolute security."]),
             .init(id: "rights", title: "7. Your choices and rights", paragraphs: ["You can remove favorites, sign out, or permanently delete your account and associated data in the app. Applicable access, correction, deletion, or objection requests can be submitted through the App Store Support link."]),
-            .init(id: "children", title: "8. Children and changes", paragraphs: ["FootballAI is not specifically directed to children and does not knowingly collect names, email addresses, or birth dates. This policy may be updated as data practices change; material changes will be shown with a new effective date."])
+            .init(id: "children", title: "8. Children and changes", paragraphs: ["NinetyLens is not specifically directed to children and does not knowingly collect names, email addresses, or birth dates. This policy may be updated as data practices change; material changes will be shown with a new effective date."])
         ]
     }
 
     private var termsSections: [LegalSection] {
         if Locale.autoupdatingCurrent.language.languageCode?.identifier == "tr" {
             return [
-                .init(id: "acceptance", title: "1. Koşulların kabulü", paragraphs: ["FootballAI’ı kullanarak bu Kullanım Koşullarını kabul edersiniz. Kabul etmiyorsanız uygulamayı kullanmayın. Anonim hesabınızı dilediğiniz zaman profil ekranından silebilirsiniz."]),
-                .init(id: "service", title: "2. Hizmetin kapsamı", paragraphs: ["FootballAI maç fikstürlerini, favorileri, analiz geçmişini ve etkinleştirildiğinde yapay zekâ destekli olasılık analizlerini sunar. Özellikler, lig kapsamı ve ücretsiz haklar zaman içinde değişebilir."]),
+                .init(id: "acceptance", title: "1. Koşulların kabulü", paragraphs: ["NinetyLens’i kullanarak bu Kullanım Koşullarını kabul edersiniz. Kabul etmiyorsanız uygulamayı kullanmayın. Anonim hesabınızı dilediğiniz zaman profil ekranından silebilirsiniz."]),
+                .init(id: "service", title: "2. Hizmetin kapsamı", paragraphs: ["NinetyLens maç fikstürlerini, favorileri, analiz geçmişini ve yapay zekâ destekli olasılık analizlerini sunar. Özellikler, lig kapsamı, kredi maliyeti ve ücretsiz haklar zaman içinde değişebilir."]),
                 .init(id: "disclaimer", title: "3. Tahmin ve bahis uyarısı", paragraphs: ["Tüm analizler yalnızca bilgilendirme ve eğlence amaçlı olasılık tahminleridir. Kesin sonuç, finansal tavsiye veya bahis tavsiyesi değildir. Veriler eksik, gecikmeli ya da hatalı olabilir. Kararlarınızdan ve kayıplarınızdan siz sorumlusunuz."]),
                 .init(id: "account", title: "4. Hesap ve ücretsiz kullanım", paragraphs: ["Uygulama varsayılan olarak anonim Firebase hesabı oluşturur. Hesabın ve cihazın güvenliğinden siz sorumlusunuz. Ücretsiz plan mevcut yapılandırmada aylık bir benzersiz analiz görüntüleme hakkı sunar; aynı maçın daha önce hazırlanmış analizi yeniden üretmeden gösterilebilir."]),
                 .init(id: "acceptable", title: "5. Kabul edilebilir kullanım", paragraphs: ["Hizmeti tersine mühendislik, otomatik toplu istek, kota veya güvenlik mekanizmalarını aşma, API verilerini izinsiz yeniden dağıtma ya da hukuka aykırı amaçlarla kullanamazsınız. Kötüye kullanımda erişim sınırlandırılabilir."]),
-                .init(id: "thirdparty", title: "6. Üçüncü taraf hizmetleri", paragraphs: ["Maç verileri football-data.org, altyapı Firebase/Google Cloud ve tek seferlik kredi satın alma doğrulaması RevenueCat tarafından sağlanır. Bu hizmetlerdeki kesinti, gecikme veya veri değişiklikleri FootballAI’ın kontrolü dışında olabilir. Gemini etkinleştirildiğinde ilgili koşullar ayrıca açıklanacaktır."]),
-                .init(id: "ip", title: "7. Fikri mülkiyet", paragraphs: ["FootballAI adı, tasarımı ve uygulama kodu ilgili hak sahiplerine aittir. Takım, lig ve sağlayıcı adları kendi sahiplerinin markaları olabilir. Uygulama size kişisel ve devredilemez sınırlı kullanım hakkı verir."]),
-                .init(id: "availability", title: "8. Kullanılabilirlik ve sorumluluk", paragraphs: ["Hizmet olduğu gibi sunulur; kesintisiz, hatasız veya belirli bir sonuca uygun olacağı garanti edilmez. Zorunlu hukuk kuralları saklı kalmak üzere FootballAI, uygulama kullanımından doğan dolaylı zarar veya kayıplardan sorumlu değildir."]),
+                .init(id: "thirdparty", title: "6. Üçüncü taraf hizmetleri", paragraphs: ["Maç verileri football-data.org, altyapı Firebase/Google Cloud, yapay zekâ analizi Google Gemini ve tek seferlik kredi satın alma doğrulaması RevenueCat tarafından sağlanır. Bu hizmetlerdeki kesinti, gecikme veya veri değişiklikleri NinetyLens’in kontrolü dışında olabilir."]),
+                .init(id: "ip", title: "7. Fikri mülkiyet", paragraphs: ["NinetyLens adı, tasarımı ve uygulama kodu ilgili hak sahiplerine aittir. Takım, lig ve sağlayıcı adları kendi sahiplerinin markaları olabilir. Uygulama size kişisel ve devredilemez sınırlı kullanım hakkı verir."]),
+                .init(id: "availability", title: "8. Kullanılabilirlik ve sorumluluk", paragraphs: ["Hizmet olduğu gibi sunulur; kesintisiz, hatasız veya belirli bir sonuca uygun olacağı garanti edilmez. Zorunlu hukuk kuralları saklı kalmak üzere NinetyLens, uygulama kullanımından doğan dolaylı zarar veya kayıplardan sorumlu değildir."]),
                 .init(id: "changes", title: "9. Değişiklikler ve sona erme", paragraphs: ["Hizmet veya bu koşullar güncellenebilir. Önemli değişiklikler yeni yürürlük tarihiyle uygulamada gösterilir. Koşulların ihlali halinde erişim durdurulabilir; kullanıcı hesabını silerek kullanımı her zaman sona erdirebilir. Uyuşmazlıklarda kullanıcının bulunduğu yerdeki zorunlu tüketici hakları korunur."])
             ]
         }
         return [
-            .init(id: "acceptance", title: "1. Acceptance", paragraphs: ["By using FootballAI, you accept these Terms of Use. If you do not agree, do not use the app. You may delete your anonymous account from the profile screen at any time."]),
-            .init(id: "service", title: "2. Service", paragraphs: ["FootballAI provides match schedules, favorites, analysis history, and—when enabled—AI-assisted probability analysis. Features, league coverage, and free allowances may change over time."]),
+            .init(id: "acceptance", title: "1. Acceptance", paragraphs: ["By using NinetyLens, you accept these Terms of Use. If you do not agree, do not use the app. You may delete your anonymous account from the profile screen at any time."]),
+            .init(id: "service", title: "2. Service", paragraphs: ["NinetyLens provides match schedules, favorites, analysis history, and AI-assisted probability analysis. Features, league coverage, credit costs, and free allowances may change over time."]),
             .init(id: "disclaimer", title: "3. Predictions and betting disclaimer", paragraphs: ["All analyses are probabilistic information for informational and entertainment purposes only. They are not guaranteed outcomes, financial advice, or betting advice. Data may be incomplete, delayed, or incorrect. You remain responsible for your decisions and losses."]),
             .init(id: "account", title: "4. Account and free use", paragraphs: ["The app creates an anonymous Firebase account by default. You are responsible for device and account security. The current free plan provides one unique analysis view per month; an existing analysis for the same match may be reused without generating it again."]),
             .init(id: "acceptable", title: "5. Acceptable use", paragraphs: ["You may not reverse engineer the service, send automated bulk requests, bypass quota or security controls, redistribute API data without authorization, or use the service unlawfully. Access may be limited in response to abuse."]),
-            .init(id: "thirdparty", title: "6. Third-party services", paragraphs: ["Match data is supplied by football-data.org, infrastructure by Firebase/Google Cloud, and one-time credit purchase validation by RevenueCat. Outages, delays, or data changes in those services may be outside FootballAI’s control. Gemini terms will be disclosed before that feature is enabled."]),
-            .init(id: "ip", title: "7. Intellectual property", paragraphs: ["The FootballAI name, design, and application code belong to their respective rights holders. Team, league, and provider names may be trademarks of their owners. You receive a limited, personal, non-transferable right to use the app."]),
-            .init(id: "availability", title: "8. Availability and liability", paragraphs: ["The service is provided as is, without a guarantee of uninterrupted or error-free operation or fitness for a particular outcome. Subject to mandatory law, FootballAI is not responsible for indirect damages or losses arising from app use."]),
+            .init(id: "thirdparty", title: "6. Third-party services", paragraphs: ["Match data is supplied by football-data.org, infrastructure by Firebase/Google Cloud, AI analysis by Google Gemini, and one-time credit purchase validation by RevenueCat. Outages, delays, or data changes in those services may be outside NinetyLens’s control."]),
+            .init(id: "ip", title: "7. Intellectual property", paragraphs: ["The NinetyLens name, design, and application code belong to their respective rights holders. Team, league, and provider names may be trademarks of their owners. You receive a limited, personal, non-transferable right to use the app."]),
+            .init(id: "availability", title: "8. Availability and liability", paragraphs: ["The service is provided as is, without a guarantee of uninterrupted or error-free operation or fitness for a particular outcome. Subject to mandatory law, NinetyLens is not responsible for indirect damages or losses arising from app use."]),
             .init(id: "changes", title: "9. Changes and termination", paragraphs: ["The service and these terms may be updated. Material changes will appear with a new effective date. Access may be suspended for violations; you may stop using the service by deleting your account. Mandatory consumer rights in your location remain unaffected."])
         ]
     }
@@ -1115,12 +1332,17 @@ private struct LegalDocumentView: View {
 private struct CreditStoreView: View {
     let compositionRoot: AppCompositionRoot
     let wallet: CreditWallet
+    var onWalletUpdated: (CreditWallet) -> Void = { _ in }
+    var onPurchaseCompleted: (CreditWallet) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
     @State private var packages: [CreditPackage] = []
     @State private var selectedPackageID: String?
     @State private var isLoading = true
     @State private var isPurchasing = false
     @State private var message: String?
+    @State private var syncedWallet: CreditWallet?
+
+    private var displayedWallet: CreditWallet { syncedWallet ?? wallet }
 
     var body: some View {
         NavigationStack {
@@ -1133,7 +1355,7 @@ private struct CreditStoreView: View {
                                 .font(.system(size: 54)).foregroundStyle(NeonTheme.gradient)
                             Text(appText("Sıradaki Maç Analizini Aç", "Unlock Your Next Match Analysis"))
                                 .font(.title2.bold()).multilineTextAlignment(.center)
-                            Text(appText("Mevcut bakiye: \(wallet.balance) kredi", "Current balance: \(creditText(wallet.balance))"))
+                            Text(appText("Mevcut bakiye: \(displayedWallet.balance) kredi", "Current balance: \(creditText(displayedWallet.balance))"))
                                 .font(.subheadline).foregroundStyle(NeonTheme.cyan)
                             Text(appText("Abonelik yok • Tek seferlik satın alma", "No subscription • One-time purchase"))
                                 .font(.caption).foregroundStyle(NeonTheme.secondaryText)
@@ -1169,7 +1391,7 @@ private struct CreditStoreView: View {
                             }
                         }
 
-                        Text(appText("Bir maç analizi şu anda \(wallet.analysisCreditCost) kredi.", "A match analysis currently costs \(creditText(wallet.analysisCreditCost))."))
+                        Text(appText("Bir maç analizi şu anda \(displayedWallet.analysisCreditCost) kredi.", "A match analysis currently costs \(creditText(displayedWallet.analysisCreditCost))."))
                             .font(.footnote).foregroundStyle(NeonTheme.secondaryText).frame(maxWidth: .infinity).padding(14).glassCard(radius: 16)
 
                         if let message { Text(message).font(.footnote).foregroundStyle(NeonTheme.cyan).multilineTextAlignment(.center) }
@@ -1219,14 +1441,41 @@ private struct CreditStoreView: View {
         Task {
             do {
                 let result = try await compositionRoot.purchaseCredits(packageID: selectedPackageID)
-                message = result == .purchased
-                    ? appText("Satın alma doğrulandı. Kredi bakiyesi sunucudan eşitleniyor.", "Purchase verified. Your credit balance is syncing from the server.")
-                    : appText("Satın alma iptal edildi.", "Purchase cancelled.")
+                if result == .purchased {
+                    message = appText("Satın alma doğrulandı. Kredi bakiyesi sunucudan eşitleniyor.", "Purchase verified. Your credit balance is syncing from the server.")
+                    await synchronizePurchasedCredits(previousBalance: displayedWallet.balance)
+                } else {
+                    message = appText("Satın alma iptal edildi.", "Purchase cancelled.")
+                }
             } catch {
                 message = appText("Satın alma tamamlanamadı. Lütfen tekrar dene.", "The purchase could not be completed. Please try again.")
             }
             isPurchasing = false
         }
+    }
+
+    private func synchronizePurchasedCredits(previousBalance: Int) async {
+        for attempt in 0..<30 {
+            if attempt > 0 {
+                try? await Task.sleep(for: attempt < 10 ? .seconds(1) : .seconds(2))
+            }
+            guard !Task.isCancelled else { return }
+            guard let updatedWallet = try? await compositionRoot.creditWallet() else { continue }
+            syncedWallet = updatedWallet
+            onWalletUpdated(updatedWallet)
+            if updatedWallet.balance > previousBalance {
+                message = appText(
+                    "Kredilerin hesabına eklendi. Yeni bakiye: \(updatedWallet.balance)",
+                    "Your credits were added. New balance: \(creditText(updatedWallet.balance))"
+                )
+                onPurchaseCompleted(updatedWallet)
+                return
+            }
+        }
+        message = appText(
+            "Satın alma tamamlandı ancak webhook henüz ulaşmadı. Bakiye uygulama yeniden açıldığında otomatik yenilenecek.",
+            "Purchase completed, but the webhook has not arrived yet. Your balance will refresh automatically when the app is reopened."
+        )
     }
 }
 
@@ -1255,7 +1504,7 @@ private struct BrandMark: View {
             }
             .frame(width: compact ? 44 : 36, height: compact ? 44 : 36)
             .shadow(color: NeonTheme.purple.opacity(0.55), radius: 12)
-            if !compact { Text("FootballAI").font(.headline.bold()).foregroundStyle(.white) }
+            if !compact { Text("NinetyLens").font(.headline.bold()).foregroundStyle(.white) }
         }
     }
 }

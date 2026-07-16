@@ -5,6 +5,7 @@ public protocol AnalysisRepository: Sendable {
     func request(_ command: RequestAnalysisCommand) async throws -> AnalysisRequest
     func observe(requestID: AnalysisRequestID) -> AsyncThrowingStream<AnalysisState, any Error>
     func analysis(id: AnalysisID, locale: SupportedLocale) async throws -> Analysis
+    func existing(fixtureKey: FixtureKey, locale: SupportedLocale) async throws -> Analysis?
 }
 public protocol RequestAnalysisUseCase: Sendable { func callAsFunction(_ command: RequestAnalysisCommand) async throws -> AnalysisRequest }
 public struct DefaultRequestAnalysisUseCase: RequestAnalysisUseCase {
@@ -23,6 +24,17 @@ public struct DefaultGetLocalizedAnalysisUseCase: GetLocalizedAnalysisUseCase {
     private let repository: any AnalysisRepository
     public init(repository: any AnalysisRepository) { self.repository = repository }
     public func callAsFunction(id: AnalysisID, locale: SupportedLocale) async throws -> Analysis { try await repository.analysis(id: id, locale: locale) }
+}
+
+public protocol FindExistingAnalysisUseCase: Sendable {
+    func callAsFunction(fixtureKey: FixtureKey, locale: SupportedLocale) async throws -> Analysis?
+}
+public struct DefaultFindExistingAnalysisUseCase: FindExistingAnalysisUseCase {
+    private let repository: any AnalysisRepository
+    public init(repository: any AnalysisRepository) { self.repository = repository }
+    public func callAsFunction(fixtureKey: FixtureKey, locale: SupportedLocale) async throws -> Analysis? {
+        try await repository.existing(fixtureKey: fixtureKey, locale: locale)
+    }
 }
 
 public protocol GetAnalysisEligibilityUseCase: Sendable {

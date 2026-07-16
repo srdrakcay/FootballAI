@@ -4,6 +4,7 @@ import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 // Secret values are bound only by functions that actively use them.
 export const footballDataApiToken = defineSecret("FOOTBALL_DATA_API_TOKEN");
 export const revenueCatWebhookAuthorization = defineSecret("REVENUECAT_WEBHOOK_AUTH");
+export const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
 const secretManager = new SecretManagerServiceClient();
 const secretCache = new Map<string, { value: string; expiresAt: number }>();

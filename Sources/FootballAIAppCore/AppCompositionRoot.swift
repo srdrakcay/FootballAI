@@ -85,6 +85,7 @@ public final class AppCompositionRoot {
     public func makeAnalysisViewModel(fixtureKey: FixtureKey, locale: SupportedLocale = .en) -> AnalysisViewModel {
         AnalysisViewModel(
             fixtureKey: fixtureKey, locale: locale,
+            findExistingAnalysis: DefaultFindExistingAnalysisUseCase(repository: analysisRepository),
             requestAnalysis: DefaultRequestAnalysisUseCase(repository: analysisRepository),
             observeAnalysis: DefaultObserveAnalysisUseCase(repository: analysisRepository),
             getAnalysis: DefaultGetLocalizedAnalysisUseCase(repository: analysisRepository)
@@ -93,6 +94,10 @@ public final class AppCompositionRoot {
 
     public func favoriteFixtureKeys() async throws -> Set<FixtureKey> {
         try await userLibraryRepository.favoriteFixtureKeys()
+    }
+
+    public func fixtureInsights(fixtureKey: FixtureKey) async throws -> FixtureInsights {
+        try await fixtureRepository.insights(id: fixtureKey)
     }
 
     public func favoriteFixtures() async throws -> [Fixture] {

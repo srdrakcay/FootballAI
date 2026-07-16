@@ -1,4 +1,10 @@
 {
   "functions": { "source": "functions", "runtime": "nodejs22" },
-  "firestore": { "rules": "firestore/firestore.rules", "indexes": "firestore/firestore.indexes.json" }
+  "firestore": { "rules": "firestore/firestore.rules", "indexes": "firestore/firestore.indexes.json" },
+  "hosting": {
+    "public": "hosting",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "cleanUrls": true,
+    "trailingSlash": false
+  }
 }

@@ -68,6 +68,10 @@ export class FootballDataClient {
     return this.get(`/competitions/${competition(competitionCode)}/standings`, filters);
   }
 
+  getTeamMatches<T = unknown>(teamId: number, filters: Readonly<Record<string, string>> = {}): Promise<FootballDataResponse<T>> {
+    return this.get(`/teams/${positiveInteger(teamId)}/matches`, filters);
+  }
+
   private async get<T>(path: string, query: Readonly<Record<string, string>> = {}): Promise<FootballDataResponse<T>> {
     const url = new URL(`${this.baseUrl}${path}`);
     for (const [key, value] of Object.entries(query)) url.searchParams.set(key, value);

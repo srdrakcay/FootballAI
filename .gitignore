@@ -3,6 +3,7 @@
 DerivedData/
 .adk/
 .pnpm-store/
+.firebase/
 .swiftpm/
 xcuserdata/
 *.xcresult
