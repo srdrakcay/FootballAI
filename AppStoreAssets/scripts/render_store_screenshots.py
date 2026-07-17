@@ -20,6 +20,24 @@ COPY = {
         ("history", "Her analiz\nelinin altında", "Favorilerin ve analiz geçmişin hesabınla birlikte saklanır."),
         ("profile", "Futbol merkezin,\nkontrol sende", "Kredileri, gizliliği, hesap verilerini ve belgeleri yönet."),
     ],
+    "de-DE": [
+        ("onboarding", "Jedes Spiel\nneu sehen", "Spielpläne, Form und Teamkontext in einer smarten Zentrale."),
+        ("matches", "Spieltage nach\nDatum planen", "Unterstützte Begegnungen im schnellen Tageskalender finden."),
+        ("history", "Jede Analyse\njederzeit öffnen", "Favoriten und Analyseverlauf bleiben mit deinem Konto verbunden."),
+        ("profile", "Dein Fußball,\ndeine Kontrolle", "Credits, Datenschutz, Kontodaten und Dokumente verwalten."),
+    ],
+    "fr-FR": [
+        ("onboarding", "Voyez chaque match\nautrement", "Calendrier, forme et contexte des équipes dans un seul espace."),
+        ("matches", "Planifiez les matchs\npar date", "Parcourez rapidement les rencontres prises en charge."),
+        ("history", "Gardez chaque\nanalyse à portée", "Favoris et historique restent liés à votre compte."),
+        ("profile", "Votre football,\nvos choix", "Gérez crédits, confidentialité, compte et documents."),
+    ],
+    "es-ES": [
+        ("onboarding", "Mira cada partido\nde otra forma", "Calendario, forma y contexto de equipos en un solo lugar."),
+        ("matches", "Planifica partidos\npor fecha", "Explora rápidamente los encuentros compatibles del día."),
+        ("history", "Tus análisis,\nsiempre a mano", "Favoritos e historial permanecen vinculados a tu cuenta."),
+        ("profile", "Tu fútbol,\ntu control", "Gestiona créditos, privacidad, cuenta y documentos."),
+    ],
 }
 
 
@@ -45,6 +63,8 @@ def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
 
 def render(locale: str, source_name: str, headline: str, subhead: str, index: int) -> None:
     source = ROOT / "raw" / locale / f"{source_name}.png"
+    if not source.exists():
+        source = ROOT / "raw" / "en-US" / f"{source_name}.png"
     if not source.exists():
         raise FileNotFoundError(source)
 

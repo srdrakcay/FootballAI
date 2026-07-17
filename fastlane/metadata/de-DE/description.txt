@@ -1,0 +1,24 @@
+Sieh jedes Spiel durch eine klarere, datenbasierte Linse.
+
+NinetyLens verbindet Spielpläne, Teamkontext, Favoriten, Analyseverlauf und KI-gestützte Wahrscheinlichkeiten in einer fokussierten Fußball-App.
+
+SPIELE NACH DATUM ENTDECKEN
+Wechsle im Kalender zwischen Tagen und finde unterstützte Begegnungen mit Anstoßzeit und Wettbewerbsinformationen.
+
+FAVORITEN SPEICHERN
+Markiere wichtige Spiele und öffne sie später erneut. Favoriten bleiben mit deinem anonymen Konto verbunden.
+
+TRANSPARENTE KI-ANALYSEN
+Nutze Credits für eine Analyse eines unterstützten Spiels. Du siehst Wahrscheinlichkeiten, verfügbare Daten und klare Einschränkungen. Eine bereits vorhandene Analyse desselben Spiels wird wiederverwendet, ohne erneut generiert zu werden.
+
+ANALYSEVERLAUF
+Öffne bisherige Analysen jederzeit über den Verlauf.
+
+KEIN ABONNEMENT
+Kaufe bei Bedarf einmalige Pakete mit 5 oder 10 Credits. Gekaufte Credits verfallen nicht. Die Kosten einer Analyse werden vor der Nutzung angezeigt.
+
+DATENSCHUTZ
+NinetyLens nutzt ein anonymes Firebase-Konto. Du kannst dich abmelden oder Konto und verknüpfte Daten dauerhaft in der App löschen.
+
+WICHTIG
+KI-Analysen sind informative Wahrscheinlichkeiten, keine garantierten Ergebnisse und keine Wettberatung. Daten können verspätet, unvollständig oder nicht verfügbar sein. NinetyLens ist unabhängig und nicht mit einem Verein, einer Liga oder einem Verband verbunden.

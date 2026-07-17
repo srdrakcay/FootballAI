@@ -1,0 +1,18 @@
+username("srdrakcay25@gmail.com")
+app_identifier("com.footballai.predictions.com")
+app_version("1.0.0")
+
+metadata_path("./fastlane/metadata")
+screenshots_path("./fastlane/screenshots")
+app_previews_path("./fastlane/app_previews")
+
+languages(["en-US", "tr", "de-DE", "fr-FR", "es-ES"])
+price_tier(0)
+
+skip_binary_upload(true)
+skip_metadata(false)
+skip_screenshots(false)
+overwrite_screenshots(true)
+submit_for_review(false)
+automatic_release(false)
+force(true)

@@ -10,7 +10,9 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if showsStoreScreenshot {
+            if showsAppPreview {
+                MainTabShell(compositionRoot: compositionRoot)
+            } else if showsStoreScreenshot {
                 CreditStoreView(compositionRoot: compositionRoot, wallet: .defaultValue)
             } else if completedOnboarding {
                 MainTabShell(compositionRoot: compositionRoot)
@@ -30,6 +32,14 @@ struct RootView: View {
     private var showsStoreScreenshot: Bool {
 #if DEBUG
         ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-store")
+#else
+        false
+#endif
+    }
+
+    private var showsAppPreview: Bool {
+#if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-footballai-app-preview")
 #else
         false
 #endif
@@ -100,7 +110,13 @@ private extension Color {
 }
 
 private func appText(_ turkish: String, _ english: String) -> String {
-    currentAppLocale.language.languageCode?.identifier == "tr" ? turkish : english
+    switch currentAppLocale.language.languageCode?.identifier {
+    case "tr": turkish
+    case "de": localizedInterfaceCopy[english]?.de ?? english
+    case "fr": localizedInterfaceCopy[english]?.fr ?? english
+    case "es": localizedInterfaceCopy[english]?.es ?? english
+    default: english
+    }
 }
 
 private var currentAppLocale: Locale {
@@ -108,9 +124,77 @@ private var currentAppLocale: Locale {
     if ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-tr") {
         return Locale(identifier: "tr_TR")
     }
+    if ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-de") {
+        return Locale(identifier: "de_DE")
+    }
+    if ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-fr") {
+        return Locale(identifier: "fr_FR")
+    }
+    if ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-es") {
+        return Locale(identifier: "es_ES")
+    }
 #endif
     return .autoupdatingCurrent
 }
+
+private struct InterfaceTranslation {
+    let de: String
+    let fr: String
+    let es: String
+}
+
+private let localizedInterfaceCopy: [String: InterfaceTranslation] = [
+    "Matches": .init(de: "Spiele", fr: "Matchs", es: "Partidos"),
+    "History": .init(de: "Verlauf", fr: "Historique", es: "Historial"),
+    "Profile": .init(de: "Profil", fr: "Profil", es: "Perfil"),
+    "Today": .init(de: "Heute", fr: "Aujourd’hui", es: "Hoy"),
+    "Tomorrow": .init(de: "Morgen", fr: "Demain", es: "Mañana"),
+    "Favorites": .init(de: "Favoriten", fr: "Favoris", es: "Favoritos"),
+    "Match calendar": .init(de: "Spielkalender", fr: "Calendrier des matchs", es: "Calendario de partidos"),
+    "Match Center": .init(de: "Spielzentrale", fr: "Centre des matchs", es: "Centro de partidos"),
+    "Matches of the day": .init(de: "Spiele des Tages", fr: "Matchs du jour", es: "Partidos del día"),
+    "Favorite matches": .init(de: "Favorisierte Spiele", fr: "Matchs favoris", es: "Partidos favoritos"),
+    "Match analysis": .init(de: "Spielanalyse", fr: "Analyse du match", es: "Análisis del partido"),
+    "NinetyLens Analysis": .init(de: "NinetyLens-Analyse", fr: "Analyse NinetyLens", es: "Análisis NinetyLens"),
+    "Analysis history": .init(de: "Analyseverlauf", fr: "Historique des analyses", es: "Historial de análisis"),
+    "Revisit analyses you have opened.": .init(de: "Öffne deine bisherigen Analysen erneut.", fr: "Retrouvez les analyses déjà consultées.", es: "Vuelve a consultar tus análisis."),
+    "Privacy Policy": .init(de: "Datenschutzerklärung", fr: "Politique de confidentialité", es: "Política de privacidad"),
+    "Terms of Use": .init(de: "Nutzungsbedingungen", fr: "Conditions d’utilisation", es: "Condiciones de uso"),
+    "Sign out": .init(de: "Abmelden", fr: "Se déconnecter", es: "Cerrar sesión"),
+    "Delete account": .init(de: "Account löschen", fr: "Supprimer le compte", es: "Eliminar cuenta"),
+    "Delete account and data": .init(de: "Account und Daten löschen", fr: "Supprimer le compte et les données", es: "Eliminar cuenta y datos"),
+    "Get Credits": .init(de: "Credits kaufen", fr: "Obtenir des crédits", es: "Obtener créditos"),
+    "Purchase selected credit pack": .init(de: "Ausgewähltes Credit-Paket kaufen", fr: "Acheter le pack de crédits sélectionné", es: "Comprar el paquete seleccionado"),
+    "No favorite matches": .init(de: "Keine Favoriten", fr: "Aucun match favori", es: "No hay partidos favoritos"),
+    "No matches on this date": .init(de: "Keine Spiele an diesem Tag", fr: "Aucun match à cette date", es: "No hay partidos en esta fecha"),
+    "Choose another day from the calendar.": .init(de: "Wähle einen anderen Tag im Kalender.", fr: "Choisissez un autre jour dans le calendrier.", es: "Elige otro día en el calendario."),
+    "Retry": .init(de: "Erneut versuchen", fr: "Réessayer", es: "Reintentar"),
+    "Skip": .init(de: "Überspringen", fr: "Passer", es: "Omitir"),
+    "Continue": .init(de: "Weiter", fr: "Continuer", es: "Continuar"),
+    "Get started": .init(de: "Loslegen", fr: "Commencer", es: "Empezar"),
+    "See every match differently.": .init(de: "Sieh jedes Spiel neu.", fr: "Voyez chaque match autrement.", es: "Mira cada partido de otra forma."),
+    "See every match\ndifferently.": .init(de: "Sieh jedes Spiel\nneu.", fr: "Voyez chaque match\nautrement.", es: "Mira cada partido\nde otra forma."),
+    "Explore form, fixtures, and team data in one intelligent match hub.": .init(de: "Form, Spielpläne und Teamdaten in einer smarten Zentrale.", fr: "Forme, calendrier et données d’équipe dans un espace intelligent.", es: "Forma, calendario y datos de equipos en un centro inteligente."),
+    "Welcome back": .init(de: "Willkommen zurück", fr: "Ravi de vous revoir", es: "Te damos la bienvenida"),
+    "All": .init(de: "Alle", fr: "Tous", es: "Todos"),
+    "MATCH CALENDAR": .init(de: "SPIELKALENDER", fr: "CALENDRIER", es: "CALENDARIO"),
+    "You have 1 credit": .init(de: "Du hast 1 Credit", fr: "Vous avez 1 crédit", es: "Tienes 1 crédito"),
+    "A match analysis currently costs 1 credit. The price can be updated remotely.": .init(de: "Eine Spielanalyse kostet aktuell 1 Credit. Der Preis kann zentral geändert werden.", fr: "Une analyse coûte actuellement 1 crédit. Ce coût peut être mis à jour à distance.", es: "Un análisis cuesta actualmente 1 crédito. El coste puede actualizarse a distancia."),
+    "Data ready": .init(de: "Daten bereit", fr: "Données prêtes", es: "Datos listos"),
+    "View match": .init(de: "Spiel öffnen", fr: "Voir le match", es: "Ver partido"),
+    "ARCHIVE": .init(de: "ARCHIV", fr: "ARCHIVES", es: "ARCHIVO"),
+    "YOUR ACCOUNT": .init(de: "DEIN KONTO", fr: "VOTRE COMPTE", es: "TU CUENTA"),
+    "Manage your account, data, and legal documents.": .init(de: "Verwalte Konto, Daten und rechtliche Dokumente.", fr: "Gérez votre compte, vos données et les documents légaux.", es: "Gestiona tu cuenta, tus datos y los documentos legales."),
+    "Anonymous account": .init(de: "Anonymes Konto", fr: "Compte anonyme", es: "Cuenta anónima"),
+    "Secure Firebase session": .init(de: "Sichere Firebase-Sitzung", fr: "Session Firebase sécurisée", es: "Sesión segura de Firebase"),
+    "CREDIT WALLET": .init(de: "CREDIT-GUTHABEN", fr: "SOLDE DE CRÉDITS", es: "SALDO DE CRÉDITOS"),
+    "Get credits": .init(de: "Credits kaufen", fr: "Obtenir des crédits", es: "Obtener créditos"),
+    "No subscription • One-time credit packs": .init(de: "Kein Abo • Einmalige Credit-Pakete", fr: "Sans abonnement • Packs ponctuels", es: "Sin suscripción • Paquetes únicos"),
+    "Match analysis cost": .init(de: "Kosten pro Analyse", fr: "Coût d’une analyse", es: "Coste del análisis"),
+    "1 credit": .init(de: "1 Credit", fr: "1 crédit", es: "1 crédito"),
+    "credit": .init(de: "Credit", fr: "crédit", es: "crédito"),
+    "credits": .init(de: "Credits", fr: "crédits", es: "créditos"),
+]
 
 private func creditText(_ count: Int) -> String {
     appText("\(count) kredi", "\(count) credit\(count == 1 ? "" : "s")")
@@ -285,7 +369,7 @@ private struct MainTabShell: View {
                     NavigationStack { ProfileView(compositionRoot: compositionRoot) }
                 }
             }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
                 if showsTabBar {
                     NeonTabBar(selection: $selectedTab)
                         .padding(.horizontal, 18)
@@ -295,6 +379,15 @@ private struct MainTabShell: View {
             }
         }
         .animation(.easeInOut(duration: 0.22), value: selectedTab)
+        .task {
+#if DEBUG
+            guard ProcessInfo.processInfo.arguments.contains("-footballai-app-preview") else { return }
+            try? await Task.sleep(for: .seconds(5))
+            withAnimation(.easeInOut(duration: 0.45)) { selectedTab = .history }
+            try? await Task.sleep(for: .seconds(5))
+            withAnimation(.easeInOut(duration: 0.45)) { selectedTab = .profile }
+#endif
+        }
     }
 }
 
@@ -374,7 +467,7 @@ private struct MatchDashboardView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
-            .padding(.bottom, 28)
+            .padding(.bottom, 90)
         }
         .background(Color.clear)
         .toolbar(.hidden, for: .navigationBar)
@@ -470,10 +563,10 @@ private struct MatchDashboardView: View {
             }
             .frame(width: 74, height: 74)
             VStack(alignment: .leading, spacing: 7) {
-                Label(appText("\(wallet.balance) kredin var", "You have \(creditText(wallet.balance))"), systemImage: "sparkles")
+                Label(appText("\(wallet.balance) kredin var", "You have \(wallet.balance) credit\(wallet.balance == 1 ? "" : "s")"), systemImage: "sparkles")
                     .font(.headline)
                     .foregroundStyle(.white)
-                Text(appText("Bir maç analizi şu anda \(wallet.analysisCreditCost) kredi. Tutar uzaktan güvenli biçimde güncellenebilir.", "A match analysis currently costs \(creditText(wallet.analysisCreditCost)). The price can be updated remotely."))
+                Text(appText("Bir maç analizi şu anda \(wallet.analysisCreditCost) kredi. Tutar uzaktan güvenli biçimde güncellenebilir.", "A match analysis currently costs \(wallet.analysisCreditCost) credit\(wallet.analysisCreditCost == 1 ? "" : "s"). The price can be updated remotely."))
                     .font(.caption)
                     .foregroundStyle(NeonTheme.secondaryText)
                     .lineSpacing(2)
@@ -1008,7 +1101,7 @@ private struct HistoryView: View {
                     }
                 }
             }
-            .padding(20).padding(.bottom, 24)
+            .padding(20).padding(.bottom, 90)
         }
         .toolbar(.hidden, for: .navigationBar)
         .task { items = (try? await compositionRoot.analysisHistory()) ?? []; isLoading = false }
@@ -1063,6 +1156,7 @@ private struct ProfileView: View {
     @State private var errorMessage: String?
     @State private var wallet = CreditWallet.defaultValue
     @State private var showsCreditStore = false
+    @State private var userID: String?
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -1077,14 +1171,22 @@ private struct ProfileView: View {
                 settingsCard
                 accountActions
             }
-            .padding(20).padding(.bottom, 24)
+            .padding(20).padding(.bottom, 90)
         }
         .toolbar(.hidden, for: .navigationBar)
-        .task { wallet = (try? await compositionRoot.creditWallet()) ?? wallet }
+        .task {
+            wallet = (try? await compositionRoot.creditWallet()) ?? wallet
+            userID = await compositionRoot.currentUserID()
+        }
         .sheet(isPresented: $showsCreditStore, onDismiss: {
             Task { wallet = (try? await compositionRoot.creditWallet()) ?? wallet }
         }) {
-            CreditStoreView(compositionRoot: compositionRoot, wallet: wallet)
+            CreditStoreView(
+                compositionRoot: compositionRoot,
+                wallet: wallet,
+                onWalletUpdated: { wallet = $0 },
+                onPurchaseCompleted: { wallet = $0; showsCreditStore = false }
+            )
                 .presentationDetents([.large])
                 .preferredColorScheme(.dark)
         }
@@ -1123,9 +1225,12 @@ private struct ProfileView: View {
             }
             .shadow(color: NeonTheme.purple.opacity(0.5), radius: 16)
             VStack(alignment: .leading, spacing: 5) {
-                Text("Football Fan").font(.title3.bold())
+                Text("NinetyLens Fan").font(.title3.bold())
                 Text(appText("Anonim hesap", "Anonymous account")).font(.subheadline).foregroundStyle(NeonTheme.secondaryText)
                 Label(appText("Firebase ile güvenli oturum", "Secure Firebase session"), systemImage: "lock.fill").font(.caption2).foregroundStyle(NeonTheme.lime)
+                if let userID {
+                    Text("ID: \(userID)").font(.caption2.monospaced()).foregroundStyle(NeonTheme.secondaryText).lineLimit(1).truncationMode(.middle)
+                }
             }
             Spacer()
         }
@@ -1238,7 +1343,15 @@ private enum LegalDocument {
         }
     }
 
-    var effectiveDate: String { appText("Yürürlük tarihi: 15 Temmuz 2026", "Effective date: July 15, 2026") }
+    var effectiveDate: String {
+        switch Locale.autoupdatingCurrent.language.languageCode?.identifier {
+        case "tr": "Yürürlük tarihi: 16 Temmuz 2026"
+        case "de": "Gültig ab: 16. Juli 2026"
+        case "fr": "Date d’entrée en vigueur : 16 juillet 2026"
+        case "es": "Fecha de entrada en vigor: 16 de julio de 2026"
+        default: "Effective date: July 16, 2026"
+        }
+    }
 
     var sections: [LegalSection] {
         switch self {
@@ -1248,26 +1361,63 @@ private enum LegalDocument {
     }
 
     private var privacySections: [LegalSection] {
-        if Locale.autoupdatingCurrent.language.languageCode?.identifier == "tr" {
+        let language = Locale.autoupdatingCurrent.language.languageCode?.identifier
+        if language == "tr" {
             return [
-                .init(id: "scope", title: "1. Kapsam ve veri sorumlusu", paragraphs: ["Bu politika, com.footballai.predictions.com paket kimliğine sahip NinetyLens iOS uygulamasını kapsar. NinetyLens geliştiricisi, uygulama kapsamında işlenen kullanıcı verilerinden sorumludur. İletişim ve gizlilik talepleri App Store ürün sayfasındaki Destek bağlantısı üzerinden iletilebilir."]),
-                .init(id: "data", title: "2. İşlediğimiz veriler", paragraphs: ["Uygulama; Firebase tarafından oluşturulan anonim kullanıcı kimliğini, tercih edilen sistem dilini, hesap oluşturma ve son görülme zamanlarını, kredi bakiyesi ve kullanımını, favori maçları ve analiz geçmişini saklar.", "Maç verileri football-data.org kaynağından sunucu üzerinden alınır. Firebase App Check, Firebase Authentication ve altyapı sağlayıcıları güvenlik amacıyla cihaz bütünlüğü sinyalleri, IP adresi ve teknik günlükleri işleyebilir. NinetyLens reklam kimliği toplamaz ve kullanıcı konumuna erişmez."]),
-                .init(id: "purpose", title: "3. Kullanım amaçları", paragraphs: ["Veriler; anonim oturumu sürdürebilmek, favorileri ve geçmişi cihazlar arası olmasa da yeniden kurulum sonrasında aynı Firebase hesabıyla sunmak, aylık kullanım hakkını uygulamak, maçları göstermek, kötüye kullanımı önlemek ve hizmet güvenliğini sağlamak için işlenir."]),
-                .init(id: "providers", title: "4. Hizmet sağlayıcılar", paragraphs: ["Firebase/Google Cloud; kimlik doğrulama, veritabanı, sunucu fonksiyonları, uzaktan yapılandırma ve uygulama bütünlüğü hizmetlerini sağlar. football-data.org yalnızca sunucumuzdan gelen maç verisi isteklerini alır; anonim kullanıcı kimliği bu sağlayıcıyla paylaşılmaz.", "RevenueCat, tek seferlik kredi satın alımlarını doğrulamak için anonim hesap kimliğini, ürün ve işlem bilgilerini işler. Google Gemini, sunucumuz tarafından sağlanan maç verilerinden olasılık analizi üretir; API anahtarı ve çağrılar güvenli sunucu ortamında tutulur. NinetyLens kişisel verileri satmaz, davranışsal reklam veya üçüncü taraflar arası takip amacıyla kullanmaz."]),
-                .init(id: "retention", title: "5. Saklama ve silme", paragraphs: ["Hesap ve kullanıcıya bağlı veriler hesap silinene kadar saklanır. Profil ekranındaki Hesabı sil işlemi anonim Firebase hesabını; profil, kota, favoriler, geçmiş ve kullanıcıya bağlı istek kayıtlarıyla birlikte siler. Birden fazla kullanıcı için üretilmiş, kullanıcı kimliği içermeyen ortak maç analizleri hizmet bütünlüğü için saklanabilir.", "Çıkış yapmak hesabı sunucudan silmez; yalnızca bu cihazdaki oturumu kaldırır. Sağlayıcıların güvenlik ve operasyon günlükleri kendi sınırlı saklama sürelerine tabi olabilir."]),
+                .init(id: "scope", title: "1. Kapsam ve veri sorumlusu", paragraphs: ["Bu politika, com.footballai.predictions.com paket kimliğine sahip NinetyLens iOS uygulamasını kapsar. Geliştirici ve veri sorumlusu Serdar Akçay’dır. Gizlilik ve destek talepleri srdrakcay25@gmail.com adresine iletilebilir."]),
+                .init(id: "data", title: "2. İşlediğimiz veriler", paragraphs: ["Uygulama; Firebase tarafından oluşturulan anonim kullanıcı kimliğini, sistem dilini, hesap oluşturma ve son görülme zamanlarını, kredi bakiyesi ve kullanım kayıtlarını, favori maçları, analiz geçmişini ve Apple üzerinden doğrulanan ürün/işlem kayıtlarını işler.", "Firebase ve altyapı sağlayıcıları güvenlik amacıyla IP adresi, uygulama kurulumu veya cihaz bütünlüğü sinyalleri ile teknik günlükleri işleyebilir. Kart numarası veya Apple ödeme bilgileri NinetyLens’e ulaşmaz. Uygulama kesin konuma, kişilere, fotoğraflara, mikrofona veya reklam kimliğine erişmez."]),
+                .init(id: "purpose", title: "3. Kullanım amaçları", paragraphs: ["Veriler; anonim oturumu sürdürmek, favorileri ve geçmişi göstermek, kredi satın alımlarını doğrulamak, kredi kullanımını uygulamak, mükerrer analiz ve işlemleri önlemek, fikstürleri sunmak, dolandırıcılık ve kötüye kullanımı azaltmak ve hizmet güvenliğini sağlamak için işlenir. Veriler reklam, profil oluşturma veya üçüncü taraflar arası takip amacıyla kullanılmaz."]),
+                .init(id: "providers", title: "4. Hizmet sağlayıcılar", paragraphs: ["Firebase/Google Cloud kimlik doğrulama, veritabanı, sunucu fonksiyonları, uzaktan yapılandırma ve App Check hizmetlerini sağlar. RevenueCat anonim hesap kimliği, ürün kimliği ve işlem durumunu kredi satın alımlarını doğrulamak için işler. Apple ödemeyi işler.", "football-data.org yalnızca sunucu tarafından istenen maç verilerini sağlar ve kullanıcı kimliğini almaz. Google Gemini’ye yalnızca maç ve takım bağlamı gönderilir; anonim kullanıcı kimliği, satın alma bilgisi veya cihaz verisi gönderilmez."]),
+                .init(id: "retention", title: "5. Saklama ve silme", paragraphs: ["Hesaba bağlı profil, kredi, favori ve geçmiş verileri hesap silinene kadar saklanır. Profil > Hesabı sil işlemi anonim Firebase hesabını ve kullanıcıyla bağlantılı verileri siler. Kullanıcı kimliği içermeyen ortak maç analizleri; yeniden üretimi önlemek, hizmet bütünlüğü ve maliyet kontrolü için saklanabilir.", "Çıkış yapmak sunucudaki hesabı silmez, yalnızca cihazdaki oturumu kaldırır. Apple, Google ve RevenueCat güvenlik, işlem ve mevzuat kayıtlarını kendi politikaları kapsamında daha uzun süre saklayabilir."]),
                 .init(id: "security", title: "6. Güvenlik ve uluslararası aktarım", paragraphs: ["Veriler aktarım sırasında şifrelenir ve Firebase güvenlik kuralları, App Check ve kimlik doğrulama ile korunur. Google Cloud hizmetlerinin çalışması nedeniyle veriler kullanıcının ülkesi dışındaki altyapılarda işlenebilir. Hiçbir teknik yöntem mutlak güvenlik garantisi vermez."]),
-                .init(id: "rights", title: "7. Seçimleriniz ve haklarınız", paragraphs: ["Favorileri uygulama içinden kaldırabilir, çıkış yapabilir veya hesabınızı ve ilişkili verileri kalıcı olarak silebilirsiniz. Geçerli yerel mevzuat kapsamında erişim, düzeltme, silme veya itiraz taleplerinizi App Store Destek bağlantısı üzerinden iletebilirsiniz."]),
+                .init(id: "rights", title: "7. Seçimleriniz ve haklarınız", paragraphs: ["Favorileri kaldırabilir, çıkış yapabilir veya hesabınızı ve ilişkili verileri uygulama içinden kalıcı olarak silebilirsiniz. Erişim, düzeltme, silme, kısıtlama veya itiraz talepleri için srdrakcay25@gmail.com adresine yazabilirsiniz. Satın alma iadeleri Apple’ın iade süreci üzerinden yönetilir."]),
                 .init(id: "children", title: "8. Çocuklar ve değişiklikler", paragraphs: ["NinetyLens özellikle çocuklara yönelik değildir ve bilerek ad, e-posta veya doğum tarihi toplamaz. Bu politika veri uygulamalarımız değiştiğinde güncellenebilir; önemli değişiklikler yeni yürürlük tarihiyle uygulamada yayımlanır."])
             ]
         }
+        if language == "de" {
+            return [
+                .init(id: "scope", title: "1. Geltungsbereich und Verantwortlicher", paragraphs: ["Diese Erklärung gilt für die NinetyLens iOS-App mit der Bundle-ID com.footballai.predictions.com. Verantwortlicher Entwickler ist Serdar Akçay. Datenschutz- und Supportanfragen können an srdrakcay25@gmail.com gesendet werden."]),
+                .init(id: "data", title: "2. Verarbeitete Daten", paragraphs: ["Die App verarbeitet eine von Firebase erzeugte anonyme Benutzer-ID, Systemsprache, Kontozeiten, Credit-Guthaben und -Nutzung, Favoriten, Analyseverlauf sowie von Apple bestätigte Produkt- und Transaktionsdaten.", "Firebase und Infrastrukturpartner können IP-Adresse, Installations- oder Geräteintegritätssignale und technische Protokolle zur Sicherheit verarbeiten. NinetyLens erhält keine Karten- oder Apple-Zahlungsdaten und greift nicht auf Standort, Kontakte, Fotos, Mikrofon oder Werbe-ID zu."]),
+                .init(id: "purpose", title: "3. Zwecke", paragraphs: ["Die Daten werden für Sitzung, Favoriten, Verlauf, Kaufprüfung, Credit-Verwendung, Vermeidung doppelter Analysen, Spielpläne, Betrugsprävention und Sicherheit genutzt. Sie werden nicht für Werbung, Profiling oder Tracking über Dienste hinweg verwendet."]),
+                .init(id: "providers", title: "4. Dienstleister", paragraphs: ["Firebase/Google Cloud stellt Authentifizierung, Datenbank, Serverfunktionen, Remote Config und App Check bereit. RevenueCat verarbeitet anonyme Konto-, Produkt- und Transaktionsdaten zur Kaufprüfung; Apple verarbeitet die Zahlung.", "football-data.org liefert serverseitig Spieldaten. An Google Gemini werden nur Spiel- und Teamdaten übertragen, keine anonyme Benutzer-ID, Kauf- oder Gerätedaten."]),
+                .init(id: "retention", title: "5. Speicherung und Löschung", paragraphs: ["Kontobezogene Daten bleiben bis zur Kontolöschung gespeichert. Profil > Account löschen entfernt das anonyme Firebase-Konto und zugehörige Daten. Geteilte Analysen ohne Benutzer-ID können zur Vermeidung erneuter Generierung und für die Dienstintegrität gespeichert bleiben.", "Abmelden löscht nur die Sitzung auf dem Gerät. Apple, Google und RevenueCat können Sicherheits- und Transaktionsprotokolle nach ihren eigenen Richtlinien aufbewahren."]),
+                .init(id: "security", title: "6. Sicherheit und Übermittlung", paragraphs: ["Daten werden bei der Übertragung verschlüsselt und durch Authentifizierung, Firebase Security Rules und App Check geschützt. Cloud-Anbieter können Daten außerhalb Ihres Landes verarbeiten. Absolute Sicherheit kann nicht garantiert werden."]),
+                .init(id: "rights", title: "7. Ihre Rechte", paragraphs: ["Sie können Favoriten entfernen, sich abmelden oder Konto und verknüpfte Daten in der App löschen. Für Auskunft, Berichtigung, Löschung, Einschränkung oder Widerspruch schreiben Sie an srdrakcay25@gmail.com. Rückerstattungen werden über Apple abgewickelt."]),
+                .init(id: "children", title: "8. Kinder und Änderungen", paragraphs: ["NinetyLens richtet sich nicht speziell an Kinder und erhebt wissentlich keine Namen, E-Mail-Adressen oder Geburtsdaten. Wesentliche Änderungen werden mit einem neuen Gültigkeitsdatum veröffentlicht."])
+            ]
+        }
+        if language == "fr" {
+            return [
+                .init(id: "scope", title: "1. Champ d’application et responsable", paragraphs: ["Cette politique s’applique à l’app iOS NinetyLens, identifiant com.footballai.predictions.com. Le développeur responsable est Serdar Akçay. Les demandes peuvent être envoyées à srdrakcay25@gmail.com."]),
+                .init(id: "data", title: "2. Données traitées", paragraphs: ["L’app traite un identifiant utilisateur anonyme Firebase, la langue système, les dates du compte, le solde et l’utilisation des crédits, les favoris, l’historique d’analyse ainsi que les données de produit et de transaction validées par Apple.", "Firebase et les fournisseurs d’infrastructure peuvent traiter l’adresse IP, des signaux d’installation ou d’intégrité de l’appareil et des journaux techniques à des fins de sécurité. NinetyLens ne reçoit aucune donnée de carte ou de paiement Apple et n’accède pas à la localisation, aux contacts, aux photos, au microphone ni à l’identifiant publicitaire."]),
+                .init(id: "purpose", title: "3. Finalités", paragraphs: ["Les données servent à maintenir la session, afficher favoris et historique, valider les achats, appliquer les crédits, éviter les analyses dupliquées, fournir les calendriers, prévenir la fraude et sécuriser le service. Elles ne servent ni à la publicité, ni au profilage, ni au suivi interservices."]),
+                .init(id: "providers", title: "4. Prestataires", paragraphs: ["Firebase/Google Cloud fournit l’authentification, la base de données, les fonctions serveur, Remote Config et App Check. RevenueCat traite l’identifiant anonyme, le produit et l’état de transaction pour valider les achats ; Apple traite le paiement.", "football-data.org fournit les données de match côté serveur. Seules les données de match et d’équipe sont envoyées à Google Gemini, sans identifiant utilisateur, donnée d’achat ou donnée d’appareil."]),
+                .init(id: "retention", title: "5. Conservation et suppression", paragraphs: ["Les données liées au compte sont conservées jusqu’à sa suppression. Profil > Supprimer le compte efface le compte Firebase anonyme et les données liées. Les analyses partagées sans identifiant utilisateur peuvent être conservées pour éviter une nouvelle génération et protéger l’intégrité du service.", "La déconnexion retire seulement la session de l’appareil. Apple, Google et RevenueCat peuvent conserver leurs journaux de sécurité et de transaction selon leurs propres politiques."]),
+                .init(id: "security", title: "6. Sécurité et transferts", paragraphs: ["Les données sont chiffrées en transit et protégées par l’authentification, les règles Firebase et App Check. Les fournisseurs cloud peuvent traiter des données hors de votre pays. Aucune mesure ne garantit une sécurité absolue."]),
+                .init(id: "rights", title: "7. Vos droits", paragraphs: ["Vous pouvez retirer des favoris, vous déconnecter ou supprimer votre compte et ses données dans l’app. Pour l’accès, la rectification, l’effacement, la limitation ou l’opposition, écrivez à srdrakcay25@gmail.com. Les remboursements sont gérés par Apple."]),
+                .init(id: "children", title: "8. Enfants et modifications", paragraphs: ["NinetyLens ne cible pas spécifiquement les enfants et ne collecte pas sciemment leur nom, adresse e-mail ou date de naissance. Toute modification importante sera publiée avec une nouvelle date d’entrée en vigueur."])
+            ]
+        }
+        if language == "es" {
+            return [
+                .init(id: "scope", title: "1. Alcance y responsable", paragraphs: ["Esta política se aplica a la app iOS NinetyLens con identificador com.footballai.predictions.com. El desarrollador responsable es Serdar Akçay. Las solicitudes pueden enviarse a srdrakcay25@gmail.com."]),
+                .init(id: "data", title: "2. Datos tratados", paragraphs: ["La app trata un identificador anónimo de Firebase, idioma del sistema, fechas de la cuenta, saldo y uso de créditos, favoritos, historial de análisis y datos de producto y transacción validados por Apple.", "Firebase y los proveedores de infraestructura pueden tratar la dirección IP, señales de instalación o integridad del dispositivo y registros técnicos por seguridad. NinetyLens no recibe datos de tarjeta o pago de Apple ni accede a ubicación, contactos, fotos, micrófono o identificador publicitario."]),
+                .init(id: "purpose", title: "3. Finalidades", paragraphs: ["Los datos se usan para mantener la sesión, mostrar favoritos e historial, validar compras, aplicar créditos, evitar análisis duplicados, ofrecer calendarios, prevenir fraude y proteger el servicio. No se usan para publicidad, perfiles ni seguimiento entre servicios."]),
+                .init(id: "providers", title: "4. Proveedores", paragraphs: ["Firebase/Google Cloud ofrece autenticación, base de datos, funciones de servidor, Remote Config y App Check. RevenueCat trata el identificador anónimo, producto y estado de transacción para validar compras; Apple procesa el pago.", "football-data.org proporciona datos de partidos desde el servidor. A Google Gemini solo se envían datos del partido y los equipos, sin identificador de usuario, compras ni datos del dispositivo."]),
+                .init(id: "retention", title: "5. Conservación y eliminación", paragraphs: ["Los datos vinculados a la cuenta se conservan hasta su eliminación. Perfil > Eliminar cuenta borra la cuenta anónima de Firebase y sus datos. Los análisis compartidos sin identificador pueden conservarse para evitar regeneraciones y proteger la integridad del servicio.", "Cerrar sesión solo elimina la sesión del dispositivo. Apple, Google y RevenueCat pueden conservar registros de seguridad y transacciones según sus políticas."]),
+                .init(id: "security", title: "6. Seguridad y transferencias", paragraphs: ["Los datos se cifran en tránsito y se protegen con autenticación, reglas de Firebase y App Check. Los proveedores cloud pueden tratar datos fuera de tu país. Ninguna medida garantiza seguridad absoluta."]),
+                .init(id: "rights", title: "7. Tus derechos", paragraphs: ["Puedes quitar favoritos, cerrar sesión o eliminar la cuenta y sus datos desde la app. Para acceso, rectificación, eliminación, limitación u oposición, escribe a srdrakcay25@gmail.com. Los reembolsos se gestionan mediante Apple."]),
+                .init(id: "children", title: "8. Menores y cambios", paragraphs: ["NinetyLens no está dirigida específicamente a menores y no recopila conscientemente nombres, correos o fechas de nacimiento. Los cambios importantes se publicarán con una nueva fecha de entrada en vigor."])
+            ]
+        }
         return [
-            .init(id: "scope", title: "1. Scope and controller", paragraphs: ["This policy applies to the NinetyLens iOS app with bundle identifier com.footballai.predictions.com. The NinetyLens developer is responsible for user data processed by the app. Privacy requests can be submitted through the Support link on the App Store product page."]),
-            .init(id: "data", title: "2. Data we process", paragraphs: ["The app stores a Firebase-generated anonymous user identifier, system locale, account creation and last-seen times, credit balance and usage, favorite matches, and analysis history.", "Match data is requested server-side from football-data.org. Firebase App Check, Firebase Authentication, and infrastructure providers may process device-integrity signals, IP addresses, and technical logs for security. NinetyLens does not access location or collect advertising identifiers."]),
-            .init(id: "purpose", title: "3. Purposes", paragraphs: ["Data is processed to maintain the anonymous session, restore favorites and history for the same Firebase account, enforce monthly usage rights, display matches, prevent abuse, and secure the service."]),
-            .init(id: "providers", title: "4. Service providers", paragraphs: ["Firebase/Google Cloud provides authentication, database, server functions, remote configuration, and app-integrity services. football-data.org receives server-side match-data requests and does not receive the anonymous user identifier.", "RevenueCat processes the anonymous account identifier and product and transaction information to validate one-time credit purchases. Google Gemini generates probability analysis from match data supplied by our server; API credentials and requests remain in the secure server environment. NinetyLens does not sell personal data or use it for behavioral advertising or cross-service tracking."]),
-            .init(id: "retention", title: "5. Retention and deletion", paragraphs: ["Account-linked data is retained until account deletion. Delete Account removes the anonymous Firebase account, profile, quota, favorites, history, and user-linked request records. Shared match analyses that contain no user identifier may be retained for service integrity.", "Signing out removes only the session from this device and does not delete server data. Provider security and operational logs may follow their own limited retention periods."]),
+            .init(id: "scope", title: "1. Scope and controller", paragraphs: ["This policy applies to the NinetyLens iOS app with bundle identifier com.footballai.predictions.com. The responsible developer is Serdar Akçay. Privacy and support requests can be sent to srdrakcay25@gmail.com."]),
+            .init(id: "data", title: "2. Data we process", paragraphs: ["The app processes a Firebase-generated anonymous user identifier, system language, account timestamps, credit balance and usage records, favorite matches, analysis history, and Apple-validated product and transaction records.", "Firebase and infrastructure providers may process IP address, app-installation or device-integrity signals, and technical logs for security. NinetyLens never receives card details or Apple payment credentials and does not access precise location, contacts, photos, microphone, or advertising identifiers."]),
+            .init(id: "purpose", title: "3. Purposes", paragraphs: ["Data is used to maintain the anonymous session, display favorites and history, validate purchases, enforce credit usage, prevent duplicate analyses and transactions, provide fixtures, reduce fraud and abuse, and secure the service. It is not used for advertising, profiling, or cross-service tracking."]),
+            .init(id: "providers", title: "4. Service providers", paragraphs: ["Firebase/Google Cloud provides authentication, database, server functions, Remote Config, and App Check. RevenueCat processes the anonymous account identifier, product identifier, and transaction status to validate credit purchases; Apple processes the payment.", "football-data.org supplies match data through server-side requests and does not receive the user identifier. Only match and team context is sent to Google Gemini; the anonymous user identifier, purchase information, and device data are not sent to Gemini."]),
+            .init(id: "retention", title: "5. Retention and deletion", paragraphs: ["Account-linked profile, credit, favorite, and history data is retained until account deletion. Profile > Delete Account removes the anonymous Firebase account and user-linked data. Shared match analyses containing no user identifier may be retained to prevent duplicate generation, control cost, and protect service integrity.", "Signing out removes only the session from the device. Apple, Google, and RevenueCat may retain security, transaction, and compliance records under their own policies."]),
             .init(id: "security", title: "6. Security and transfers", paragraphs: ["Data is encrypted in transit and protected with Firebase Security Rules, App Check, and authentication. Google Cloud may process data outside the user’s country. No technical measure can guarantee absolute security."]),
-            .init(id: "rights", title: "7. Your choices and rights", paragraphs: ["You can remove favorites, sign out, or permanently delete your account and associated data in the app. Applicable access, correction, deletion, or objection requests can be submitted through the App Store Support link."]),
+            .init(id: "rights", title: "7. Your choices and rights", paragraphs: ["You can remove favorites, sign out, or permanently delete your account and associated data in the app. For access, correction, deletion, restriction, or objection requests, email srdrakcay25@gmail.com. Purchase refunds are handled through Apple’s refund process."]),
             .init(id: "children", title: "8. Children and changes", paragraphs: ["NinetyLens is not specifically directed to children and does not knowingly collect names, email addresses, or birth dates. This policy may be updated as data practices change; material changes will be shown with a new effective date."])
         ]
     }
@@ -1279,11 +1429,42 @@ private enum LegalDocument {
                 .init(id: "service", title: "2. Hizmetin kapsamı", paragraphs: ["NinetyLens maç fikstürlerini, favorileri, analiz geçmişini ve yapay zekâ destekli olasılık analizlerini sunar. Özellikler, lig kapsamı, kredi maliyeti ve ücretsiz haklar zaman içinde değişebilir."]),
                 .init(id: "disclaimer", title: "3. Tahmin ve bahis uyarısı", paragraphs: ["Tüm analizler yalnızca bilgilendirme ve eğlence amaçlı olasılık tahminleridir. Kesin sonuç, finansal tavsiye veya bahis tavsiyesi değildir. Veriler eksik, gecikmeli ya da hatalı olabilir. Kararlarınızdan ve kayıplarınızdan siz sorumlusunuz."]),
                 .init(id: "account", title: "4. Hesap ve ücretsiz kullanım", paragraphs: ["Uygulama varsayılan olarak anonim Firebase hesabı oluşturur. Hesabın ve cihazın güvenliğinden siz sorumlusunuz. Ücretsiz plan mevcut yapılandırmada aylık bir benzersiz analiz görüntüleme hakkı sunar; aynı maçın daha önce hazırlanmış analizi yeniden üretmeden gösterilebilir."]),
-                .init(id: "acceptable", title: "5. Kabul edilebilir kullanım", paragraphs: ["Hizmeti tersine mühendislik, otomatik toplu istek, kota veya güvenlik mekanizmalarını aşma, API verilerini izinsiz yeniden dağıtma ya da hukuka aykırı amaçlarla kullanamazsınız. Kötüye kullanımda erişim sınırlandırılabilir."]),
-                .init(id: "thirdparty", title: "6. Üçüncü taraf hizmetleri", paragraphs: ["Maç verileri football-data.org, altyapı Firebase/Google Cloud, yapay zekâ analizi Google Gemini ve tek seferlik kredi satın alma doğrulaması RevenueCat tarafından sağlanır. Bu hizmetlerdeki kesinti, gecikme veya veri değişiklikleri NinetyLens’in kontrolü dışında olabilir."]),
-                .init(id: "ip", title: "7. Fikri mülkiyet", paragraphs: ["NinetyLens adı, tasarımı ve uygulama kodu ilgili hak sahiplerine aittir. Takım, lig ve sağlayıcı adları kendi sahiplerinin markaları olabilir. Uygulama size kişisel ve devredilemez sınırlı kullanım hakkı verir."]),
-                .init(id: "availability", title: "8. Kullanılabilirlik ve sorumluluk", paragraphs: ["Hizmet olduğu gibi sunulur; kesintisiz, hatasız veya belirli bir sonuca uygun olacağı garanti edilmez. Zorunlu hukuk kuralları saklı kalmak üzere NinetyLens, uygulama kullanımından doğan dolaylı zarar veya kayıplardan sorumlu değildir."]),
-                .init(id: "changes", title: "9. Değişiklikler ve sona erme", paragraphs: ["Hizmet veya bu koşullar güncellenebilir. Önemli değişiklikler yeni yürürlük tarihiyle uygulamada gösterilir. Koşulların ihlali halinde erişim durdurulabilir; kullanıcı hesabını silerek kullanımı her zaman sona erdirebilir. Uyuşmazlıklarda kullanıcının bulunduğu yerdeki zorunlu tüketici hakları korunur."])
+                .init(id: "purchases", title: "5. Krediler ve satın almalar", paragraphs: ["Krediler Apple’ın uygulama içi satın alma sistemiyle sunulan tüketilebilir dijital ürünlerdir. Satın alınan kredilerin süresi dolmaz. Apple tarafından onaylanan bir iade, ilgili kullanılmamış kredilerin bakiyeden kaldırılmasına neden olabilir. Ödemeler ve iadeler Apple tarafından işlenir."]),
+                .init(id: "acceptable", title: "6. Kabul edilebilir kullanım", paragraphs: ["Hizmeti tersine mühendislik, otomatik toplu istek, kota veya güvenlik mekanizmalarını aşma, API verilerini izinsiz yeniden dağıtma ya da hukuka aykırı amaçlarla kullanamazsınız. Kötüye kullanımda erişim sınırlandırılabilir."]),
+                .init(id: "thirdparty", title: "7. Üçüncü taraf hizmetleri", paragraphs: ["Maç verileri football-data.org, altyapı Firebase/Google Cloud, yapay zekâ analizi Google Gemini ve tek seferlik kredi satın alma doğrulaması RevenueCat tarafından sağlanır. Bu hizmetlerdeki kesinti, gecikme veya veri değişiklikleri NinetyLens’in kontrolü dışında olabilir."]),
+                .init(id: "ip", title: "8. Fikri mülkiyet", paragraphs: ["NinetyLens adı, tasarımı ve uygulama kodu ilgili hak sahiplerine aittir. Takım, lig ve sağlayıcı adları kendi sahiplerinin markaları olabilir. Uygulama size kişisel ve devredilemez sınırlı kullanım hakkı verir."]),
+                .init(id: "availability", title: "9. Kullanılabilirlik ve sorumluluk", paragraphs: ["Hizmet olduğu gibi sunulur; kesintisiz, hatasız veya belirli bir sonuca uygun olacağı garanti edilmez. Zorunlu hukuk kuralları saklı kalmak üzere NinetyLens, uygulama kullanımından doğan dolaylı zarar veya kayıplardan sorumlu değildir."]),
+                .init(id: "changes", title: "10. Değişiklikler ve sona erme", paragraphs: ["Hizmet veya bu koşullar güncellenebilir. Önemli değişiklikler yeni yürürlük tarihiyle uygulamada gösterilir. Koşulların ihlali halinde erişim durdurulabilir; kullanıcı hesabını silerek kullanımı her zaman sona erdirebilir. Uyuşmazlıklarda kullanıcının bulunduğu yerdeki zorunlu tüketici hakları korunur."])
+            ]
+        }
+        if Locale.autoupdatingCurrent.language.languageCode?.identifier == "de" {
+            return [
+                .init(id: "acceptance", title: "1. Annahme und Dienst", paragraphs: ["Mit der Nutzung von NinetyLens akzeptieren Sie diese Bedingungen. Die App bietet Spielpläne, Favoriten, Verlauf und KI-gestützte Wahrscheinlichkeitsanalysen."]),
+                .init(id: "disclaimer", title: "2. Analysehinweis", paragraphs: ["Analysen sind nur Information und Unterhaltung. Sie garantieren kein Ergebnis und sind keine Finanz- oder Wettberatung. Daten können verspätet, unvollständig oder falsch sein."]),
+                .init(id: "purchases", title: "3. Credits und Käufe", paragraphs: ["Credits sind verbrauchbare digitale Güter, die über Apples In-App-Kaufsystem angeboten werden. Gekaufte Credits verfallen nicht. Eine von Apple bestätigte Rückerstattung kann die entsprechenden ungenutzten Credits entfernen."]),
+                .init(id: "acceptable", title: "4. Zulässige Nutzung", paragraphs: ["Sicherheits-, Credit- oder Kontrollen dürfen nicht umgangen, automatisierte Massenanfragen nicht gesendet und API-Daten nicht unbefugt weitergegeben werden."]),
+                .init(id: "account", title: "5. Konto und Löschung", paragraphs: ["Die App verwendet standardmäßig ein anonymes Firebase-Konto. Sie können das Konto und verknüpfte Daten jederzeit im Profil dauerhaft löschen."]),
+                .init(id: "changes", title: "6. Verfügbarkeit und Rechte", paragraphs: ["Der Dienst wird ohne Garantie eines bestimmten Ergebnisses bereitgestellt. Änderungen werden mit einem neuen Gültigkeitsdatum angezeigt. Zwingende Verbraucherrechte an Ihrem Wohnort bleiben unberührt."])
+            ]
+        }
+        if Locale.autoupdatingCurrent.language.languageCode?.identifier == "fr" {
+            return [
+                .init(id: "acceptance", title: "1. Acceptation et service", paragraphs: ["En utilisant NinetyLens, vous acceptez ces conditions. L’app fournit calendrier, favoris, historique et analyses probabilistes assistées par IA."]),
+                .init(id: "disclaimer", title: "2. Avertissement", paragraphs: ["Les analyses sont fournies uniquement à titre informatif et de divertissement. Elles ne garantissent aucun résultat et ne constituent ni un conseil financier ni un conseil de pari."]),
+                .init(id: "purchases", title: "3. Crédits et achats", paragraphs: ["Les crédits sont des biens numériques consommables proposés via les achats intégrés Apple. Les crédits achetés n’expirent pas. Un remboursement confirmé par Apple peut retirer les crédits non utilisés correspondants."]),
+                .init(id: "acceptable", title: "4. Utilisation autorisée", paragraphs: ["Il est interdit de contourner les contrôles de sécurité ou de crédits, d’envoyer des requêtes automatisées en masse ou de redistribuer les données API sans autorisation."]),
+                .init(id: "account", title: "5. Compte et suppression", paragraphs: ["L’app utilise par défaut un compte Firebase anonyme. Vous pouvez supprimer définitivement le compte et ses données depuis le profil."]),
+                .init(id: "changes", title: "6. Disponibilité et droits", paragraphs: ["Le service est fourni sans garantie de résultat particulier. Les modifications importantes seront affichées avec une nouvelle date. Les droits impératifs des consommateurs restent applicables."])
+            ]
+        }
+        if Locale.autoupdatingCurrent.language.languageCode?.identifier == "es" {
+            return [
+                .init(id: "acceptance", title: "1. Aceptación y servicio", paragraphs: ["Al usar NinetyLens aceptas estas condiciones. La app ofrece calendario, favoritos, historial y análisis probabilísticos asistidos por IA."]),
+                .init(id: "disclaimer", title: "2. Aviso", paragraphs: ["Los análisis son solo informativos y de entretenimiento. No garantizan resultados ni constituyen asesoramiento financiero o de apuestas."]),
+                .init(id: "purchases", title: "3. Créditos y compras", paragraphs: ["Los créditos son bienes digitales consumibles ofrecidos mediante compras integradas de Apple. Los créditos comprados no caducan. Un reembolso confirmado por Apple puede retirar los créditos no utilizados correspondientes."]),
+                .init(id: "acceptable", title: "4. Uso permitido", paragraphs: ["No se pueden eludir controles de seguridad o créditos, enviar solicitudes automatizadas masivas ni redistribuir datos de API sin autorización."]),
+                .init(id: "account", title: "5. Cuenta y eliminación", paragraphs: ["La app usa por defecto una cuenta anónima de Firebase. Puedes eliminar permanentemente la cuenta y sus datos desde el perfil."]),
+                .init(id: "changes", title: "6. Disponibilidad y derechos", paragraphs: ["El servicio se ofrece sin garantía de un resultado concreto. Los cambios importantes se mostrarán con una nueva fecha. Se mantienen los derechos obligatorios del consumidor."])
             ]
         }
         return [
@@ -1291,11 +1472,12 @@ private enum LegalDocument {
             .init(id: "service", title: "2. Service", paragraphs: ["NinetyLens provides match schedules, favorites, analysis history, and AI-assisted probability analysis. Features, league coverage, credit costs, and free allowances may change over time."]),
             .init(id: "disclaimer", title: "3. Predictions and betting disclaimer", paragraphs: ["All analyses are probabilistic information for informational and entertainment purposes only. They are not guaranteed outcomes, financial advice, or betting advice. Data may be incomplete, delayed, or incorrect. You remain responsible for your decisions and losses."]),
             .init(id: "account", title: "4. Account and free use", paragraphs: ["The app creates an anonymous Firebase account by default. You are responsible for device and account security. The current free plan provides one unique analysis view per month; an existing analysis for the same match may be reused without generating it again."]),
-            .init(id: "acceptable", title: "5. Acceptable use", paragraphs: ["You may not reverse engineer the service, send automated bulk requests, bypass quota or security controls, redistribute API data without authorization, or use the service unlawfully. Access may be limited in response to abuse."]),
-            .init(id: "thirdparty", title: "6. Third-party services", paragraphs: ["Match data is supplied by football-data.org, infrastructure by Firebase/Google Cloud, AI analysis by Google Gemini, and one-time credit purchase validation by RevenueCat. Outages, delays, or data changes in those services may be outside NinetyLens’s control."]),
-            .init(id: "ip", title: "7. Intellectual property", paragraphs: ["The NinetyLens name, design, and application code belong to their respective rights holders. Team, league, and provider names may be trademarks of their owners. You receive a limited, personal, non-transferable right to use the app."]),
-            .init(id: "availability", title: "8. Availability and liability", paragraphs: ["The service is provided as is, without a guarantee of uninterrupted or error-free operation or fitness for a particular outcome. Subject to mandatory law, NinetyLens is not responsible for indirect damages or losses arising from app use."]),
-            .init(id: "changes", title: "9. Changes and termination", paragraphs: ["The service and these terms may be updated. Material changes will appear with a new effective date. Access may be suspended for violations; you may stop using the service by deleting your account. Mandatory consumer rights in your location remain unaffected."])
+            .init(id: "purchases", title: "5. Credits and purchases", paragraphs: ["Credits are consumable digital goods offered through Apple’s in-app purchase system. Purchased credits do not expire. A refund confirmed by Apple may remove the corresponding unused credits. Apple processes payments and refunds."]),
+            .init(id: "acceptable", title: "6. Acceptable use", paragraphs: ["You may not reverse engineer the service, send automated bulk requests, bypass quota or security controls, redistribute API data without authorization, or use the service unlawfully. Access may be limited in response to abuse."]),
+            .init(id: "thirdparty", title: "7. Third-party services", paragraphs: ["Match data is supplied by football-data.org, infrastructure by Firebase/Google Cloud, AI analysis by Google Gemini, and one-time credit purchase validation by RevenueCat. Outages, delays, or data changes in those services may be outside NinetyLens’s control."]),
+            .init(id: "ip", title: "8. Intellectual property", paragraphs: ["The NinetyLens name, design, and application code belong to their respective rights holders. Team, league, and provider names may be trademarks of their owners. You receive a limited, personal, non-transferable right to use the app."]),
+            .init(id: "availability", title: "9. Availability and liability", paragraphs: ["The service is provided as is, without a guarantee of uninterrupted or error-free operation or fitness for a particular outcome. Subject to mandatory law, NinetyLens is not responsible for indirect damages or losses arising from app use."]),
+            .init(id: "changes", title: "10. Changes and termination", paragraphs: ["The service and these terms may be updated. Material changes will appear with a new effective date. Access may be suspended for violations; you may stop using the service by deleting your account. Mandatory consumer rights in your location remain unaffected."])
         ]
     }
 }

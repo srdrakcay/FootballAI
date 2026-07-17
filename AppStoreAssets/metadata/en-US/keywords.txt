@@ -1,1 +1,1 @@
-scores,fixtures,form,teams,calendar,favorites,history,analytics,soccer,prediction
+fixtures,scores,form,teams,calendar,favorites,stats,soccer,schedule,standings,h2h,history,lineup

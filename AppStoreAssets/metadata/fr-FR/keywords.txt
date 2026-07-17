@@ -1,0 +1,1 @@
+score,calendrier,forme,équipe,statistiques,pronostic,favoris,classement,historique,ligue,clubs

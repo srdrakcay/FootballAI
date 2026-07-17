@@ -124,6 +124,10 @@ public final class AppCompositionRoot {
         try await creditPurchaseService.purchase(packageID: packageID)
     }
 
+    public func currentUserID() async -> String? {
+        try? await authenticationService?.ensureAnonymousUser()
+    }
+
     public func signOut() async throws {
         await creditPurchaseService.resetUser()
         try await authenticationService?.signOut()

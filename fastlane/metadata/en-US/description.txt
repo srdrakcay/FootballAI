@@ -1,0 +1,31 @@
+See every match through a clearer, data-informed lens.
+
+NinetyLens brings fixtures, team context, favorites, analysis history, and AI-assisted match probabilities into one focused football experience.
+
+EXPLORE MATCHES BY DATE
+
+Move through the calendar and find supported fixtures for the day. Keep match times and competition information together in a fast, distraction-free match hub.
+
+SAVE YOUR FAVORITES
+
+Mark the fixtures you care about and return to them after closing the app. Favorites are connected to your anonymous account so your match list stays personal.
+
+UNLOCK TRANSPARENT AI ANALYSIS
+
+Use credits to request an AI-assisted analysis for a supported fixture. Each analysis presents probability-based insights together with available context and clear limitations. If an analysis already exists for the same match and data snapshot, it can be reused instead of charging for a duplicate generation.
+
+KEEP YOUR ANALYSIS HISTORY
+
+Revisit previously opened analyses from the History tab. See whether an analysis is still valid and quickly return to the matches you followed.
+
+BUY CREDITS WITHOUT A SUBSCRIPTION
+
+There is no recurring subscription. Choose a one-time 5-credit or 10-credit pack whenever you need more analyses. Purchased credits do not expire. The credit cost of an analysis is always shown in the app before use.
+
+BUILT WITH PRIVACY IN MIND
+
+NinetyLens uses a Firebase-generated anonymous account. You can sign out or permanently delete the account and its linked profile data from inside the app. Read the in-app Privacy Policy and Terms of Use at any time.
+
+IMPORTANT
+
+AI-assisted analyses are informational and express probabilities, not certain outcomes or betting advice. Match data may be delayed, incomplete, or unavailable. NinetyLens is independent and is not affiliated with or endorsed by any club, league, federation, or data provider.

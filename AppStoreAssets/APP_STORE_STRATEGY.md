@@ -76,7 +76,7 @@ The credit store/paywall must not be included in the App Store screenshot set.
   - 5 credits: USD 2.99
   - 10 credits: USD 4.99
 - Primary locale: English (U.S.)
-- Additional launch locale: Turkish
+- Additional launch locales: Turkish, German, French, Spanish (Spain)
 
 ## Review-safe disclaimer
 

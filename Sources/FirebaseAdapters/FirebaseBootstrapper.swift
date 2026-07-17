@@ -12,13 +12,43 @@ public enum FirebaseBootstrapper {
         // Keep process-local idempotency without touching Firebase until configure().
         guard !didConfigure else { return true }
         guard bundle.url(forResource: "GoogleService-Info", withExtension: "plist") != nil else { return false }
-#if DEBUG
+
+        // Simülatörde debug provider, fiziksel cihazlarda her zaman App Attest kullan.
+        // Böylece her cihaz için ayrı debug token eklemeye gerek kalmaz.
+#if targetEnvironment(simulator)
+        print("🔧 [AppCheck] Simülatör — Debug Provider kullanılıyor")
         AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
 #else
-        AppCheck.setAppCheckProviderFactory(AppAttestProviderFactory())
+        print("🚀 [AppCheck] Fiziksel cihaz — App Attest Provider kullanılıyor")
+        AppCheck.setAppCheckProviderFactory(FootballAIAppCheckProviderFactory())
 #endif
+
+#if DEBUG
+        print("🟡 [Build] DEBUG mode")
+#else
+        print("🟢 [Build] RELEASE mode")
+#endif
+
         FirebaseApp.configure()
         didConfigure = true
         return true
     }
 }
+
+// MARK: - Custom App Check Provider Factory (Physical devices)
+
+/// Fiziksel cihazlarda App Attest kullanır (iOS 14+),
+/// desteklemeyenlerde DeviceCheck'e fallback yapar.
+#if !targetEnvironment(simulator)
+final class FootballAIAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
+    func createProvider(with app: FirebaseApp) -> (any AppCheckProvider)? {
+        if #available(iOS 14.0, *) {
+            return AppAttestProvider(app: app)
+        } else {
+            return DeviceCheckProvider(app: app)
+        }
+    }
+}
+#endif
+
+
