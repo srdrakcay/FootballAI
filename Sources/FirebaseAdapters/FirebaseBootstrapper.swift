@@ -15,11 +15,11 @@ public enum FirebaseBootstrapper {
 
         // Simülatörde debug provider, fiziksel cihazlarda her zaman App Attest kullan.
         // Böylece her cihaz için ayrı debug token eklemeye gerek kalmaz.
-#if targetEnvironment(simulator)
-        print("🔧 [AppCheck] Simülatör — Debug Provider kullanılıyor")
+#if DEBUG
+        print("🔧 [AppCheck] Geliştirme (DEBUG) — Debug Provider kullanılıyor")
         AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
 #else
-        print("🚀 [AppCheck] Fiziksel cihaz — App Attest Provider kullanılıyor")
+        print("🚀 [AppCheck] Canlı (RELEASE) — App Attest Provider kullanılıyor")
         AppCheck.setAppCheckProviderFactory(FootballAIAppCheckProviderFactory())
 #endif
 
