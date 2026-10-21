@@ -1,1 +1,1 @@
-score,calendrier,forme,équipe,statistiques,pronostic,favoris,classement,historique,ligue,clubs
+score,calendrier,forme,équipe,statistique,favori,classement,historique,ligue,club,analyse,h2h

@@ -1,0 +1,32 @@
+{
+  "locale": "pl",
+  "name": "NinetyLens: Piłka nożna AI",
+  "subtitle": "Analizy meczów i statystyki",
+  "keywords": "prognoza,prawdopodobieństwo,terminarz,wynik,kalendarz,ulubione,historia,forma,drużyna,skład,tabela",
+  "promotional_text": "Wybierz dowolny mecz, wydaj kredyt i zobacz prawdopodobieństwa oparte na AI z jasnym kontekstem. Bez subskrypcji: kredyty kupujesz tylko wtedy, gdy ich potrzebujesz.",
+  "description": "Spójrz na każdy mecz przez wyraźniejszy, oparty na danych obiektyw. NinetyLens zamienia terminarze piłki nożnej i kontekst drużyn w prawdopodobieństwa oparte na AI, które naprawdę da się czytać.\n\nDLACZEGO NINETYLENS\n• Prawdopodobieństwa wyniku, goli i najbardziej prawdopodobnych rezultatów, wraz z danymi, na których się opierają\n• Analizy pisane dla Ciebie: język, głębokość i skupienie zależą od Twojego profilu\n• Ulubione i historia, które zostają z Tobą\n• Bez subskrypcji: jednorazowe pakiety kredytów, koszt widzisz przed wydaniem\n\nJAK TO DZIAŁA\n1. Przeglądaj mecze dnia w szybkim kalendarzu.\n2. Otwórz mecz i odblokuj analizę za kredyty. Koszt zawsze widać z góry.\n3. Czytaj prawdopodobieństwa, poziom pewności, dostępne dane i jasne ograniczenia. Wracaj do analizy w każdej chwili w zakładce Analizy.\n\nMECZE WEDŁUG DAT\nPrzesuwaj kalendarz, zobacz godziny rozpoczęcia i rozgrywki w jednym miejscu oraz filtruj swoje ulubione drużyny.\n\nZAPISUJ ULUBIONE\nOznacz mecze, na których Ci zależy, i znajdź je po ponownym otwarciu aplikacji.\n\nPRZEJRZYSTA ANALIZA AI\nKażda analiza pokazuje prawdopodobieństwa wyniku meczu, goli i prawdopodobnych rezultatów, poziom pewności modelu oraz dostępne dane. Jeśli analiza tego samego meczu na tych samych danych już istnieje, zostanie użyta ponownie, a Ty nie zapłacisz drugi raz.\n\nHISTORIA ANALIZ\nOtwieraj wcześniejsze analizy w zakładce Analizy i od razu sprawdzaj, czy nadal są aktualne.\n\nKREDYTY BEZ SUBSKRYPCJI\nKup jednorazowy pakiet 5 lub 10 kredytów, kiedy chcesz więcej analiz. Zakupione kredyty nie wygasają.\n\nPRYWATNOŚĆ PRZEDE WSZYSTKIM\nNinetyLens korzysta z anonimowego konta. W aplikacji możesz się wylogować albo trwale usunąć konto wraz z powiązanymi danymi. Polityka prywatności i Warunki użytkowania są zawsze dostępne w aplikacji.\n\nOBSŁUGIWANE JĘZYKI\nEnglish, Türkçe, Deutsch, Español, Français.\n\nWAŻNE\nAnalizy oparte na AI mają charakter informacyjny. Wyrażają prawdopodobieństwa, a nie pewne wyniki, i nie są poradą dotyczącą zakładów. Dane meczowe mogą być opóźnione, niepełne lub niedostępne. NinetyLens jest niezależną aplikacją i nie jest powiązany z żadnym klubem, ligą, federacją ani dostawcą danych ani przez nich popierany.\n\nPobierz NinetyLens i zobacz następny mecz inaczej.",
+  "release_notes": "Nowy wygląd: NinetyLens ma wyrazistszy ciemny motyw, nową ikonę aplikacji i szybszą listę meczów.\nDopasuj analizy do siebie: wybierz ulubioną drużynę, obserwowane ligi i głębokość każdej analizy.\nKredyty są teraz czytelniejsze: saldo i każdy ruch kredytów zobaczysz w profilu.\nPoprawki wydajności i stabilności.",
+  "screens": {
+    "matches": [
+      "Każdy mecz\nw jednym kalendarzu",
+      "Dzisiejsze mecze i ulubione drużyny w jednym miejscu."
+    ],
+    "detail": [
+      "Prawdopodobieństwa,\nktóre da się czytać",
+      "Wynik, gole i rezultaty wraz z danymi, na których się opierają."
+    ],
+    "history": [
+      "Każda analiza\nzawsze pod ręką",
+      "Wracaj do analiz i sprawdzaj, czy nadal są aktualne."
+    ],
+    "profile": [
+      "Dopasowane do Ciebie,\nbez subskrypcji",
+      "Twoja drużyna, ligi i głębokość. Kredyty tylko wtedy, gdy ich chcesz."
+    ],
+    "onboarding-welcome": [
+      "Czytaj każdy mecz\nswoim okiem",
+      "Analiza meczów oparta na AI, napisana dla Twojej drużyny."
+    ]
+  },
+  "tagline": "Prawdopodobieństwa\nktóre da się czytać."
+}

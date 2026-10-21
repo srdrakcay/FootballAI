@@ -1,0 +1,32 @@
+{
+  "locale": "es-MX",
+  "name": "NinetyLens: Futbol e IA",
+  "subtitle": "Probabilidades y estadísticas",
+  "keywords": "partido,resultado,calendario,equipo,marcador,favorito,historial,liga,alineación,pronóstico,goles",
+  "promotional_text": "Elige un partido, usa un crédito y obtén probabilidades con IA y contexto claro. Sin suscripción: compra créditos solo cuando los necesites.",
+  "release_notes": "Nuevo look: NinetyLens estrena un diseño oscuro más nítido, un ícono nuevo y una lista de partidos más rápida.\nPersonaliza tus análisis: elige a tu equipo favorito, las ligas que sigues y qué tan a fondo quieres cada análisis.\nCréditos más claros: tu saldo y cada movimiento aparecen en tu perfil.\nMejoras de rendimiento y estabilidad.",
+  "description": "Mira cada partido con una lente más clara y basada en datos. NinetyLens convierte los calendarios de futbol y el contexto de los equipos en probabilidades con IA que sí puedes leer.\n\nPOR QUÉ NINETYLENS\n• Probabilidades de resultado, goles y marcadores probables, con los datos que las respaldan\n• Análisis escritos para ti: idioma, profundidad y enfoque siguen tu perfil\n• Favoritos e historial siempre contigo\n• Sin suscripción: paquetes de créditos de una sola compra, con el costo visible antes de gastar\n\nCÓMO FUNCIONA\n1. Explora los partidos del día en un calendario diario rápido.\n2. Abre un partido y desbloquea el análisis con créditos. El costo siempre se muestra antes.\n3. Lee probabilidades, confianza, datos disponibles y limitaciones claras. Vuelve a él cuando quieras desde Análisis.\n\nEXPLORA PARTIDOS POR FECHA\nRecorre el calendario, consulta horarios y competencias juntos y filtra por tus equipos favoritos.\n\nGUARDA TUS FAVORITOS\nMarca los partidos que te importan y encuéntralos de nuevo después de cerrar la app.\n\nANÁLISIS CON IA TRANSPARENTE\nCada análisis muestra las probabilidades de resultado, goles y marcadores probables, qué tan confiable es el modelo y qué datos había disponibles. Si ya existe un análisis del mismo partido con los mismos datos, se reutiliza sin cobrarte dos veces.\n\nHISTORIAL DE ANÁLISIS\nVuelve a abrir análisis anteriores desde la pestaña Análisis y revisa de un vistazo si siguen vigentes.\n\nCRÉDITOS SIN SUSCRIPCIÓN\nCompra un paquete único de 5 o 10 créditos cuando quieras más análisis. Los créditos comprados no caducan.\n\nPRIVACIDAD ANTES QUE TODO\nNinetyLens usa una cuenta anónima. Puedes cerrar sesión o eliminar de forma permanente tu cuenta y los datos vinculados desde la app. El Aviso de privacidad y los Términos de uso siempre están disponibles en la app.\n\nIDIOMAS COMPATIBLES\nEnglish, Türkçe, Deutsch, Español, Français.\n\nIMPORTANTE\nLos análisis con IA son informativos. Expresan probabilidades, no resultados seguros, y no son una recomendación de apuestas. Los datos de los partidos pueden llegar con retraso, estar incompletos o no estar disponibles. NinetyLens es independiente y no está afiliada ni respaldada por ningún club, liga, federación o proveedor de datos.\n\nDescarga NinetyLens y mira el próximo partido de otra forma.",
+  "screens": {
+    "matches": [
+      "Cada partido,\nen un solo calendario",
+      "Los partidos de hoy y tus equipos favoritos de un vistazo."
+    ],
+    "detail": [
+      "Probabilidades que\nsí se entienden",
+      "Resultado, goles y marcadores probables, con los datos que los respaldan."
+    ],
+    "history": [
+      "Cada análisis,\nsiempre a la mano",
+      "Abre de nuevo análisis anteriores y checa si siguen vigentes."
+    ],
+    "profile": [
+      "A tu medida,\nsin suscripción",
+      "Tu equipo, tus ligas, tu nivel. Créditos solo cuando los necesites."
+    ],
+    "onboarding-welcome": [
+      "Lee cada partido\ncon tu propia lente",
+      "Análisis de partidos con IA, escritos para tu equipo."
+    ]
+  },
+  "tagline": "Probabilidades de\npartido que se leen."
+}

@@ -1,0 +1,1 @@
+football,match,prediction,fixture,score,stats,team,lineup,भविष्यवाणी,स्कोर,गोल,पसंदीदा,इतिहास,लीग

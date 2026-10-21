@@ -1,0 +1,4 @@
+Novi izgled: NinetyLens ima oštriji tamni dizajn, novu ikonu aplikacije i bržu listu utakmica.
+Prilagodi analize sebi: odaberi omiljenu momčad, ligu koju pratiš i dubinu svake analize.
+Krediti su jasniji: stanje i svako kretanje kredita vidiš u profilu.
+Poboljšanja performansi i stabilnosti.

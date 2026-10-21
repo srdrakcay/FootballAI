@@ -1,0 +1,1 @@
+rezultat,calendar,echipă,goluri,scor,favorit,istoric,campionat,formație,predicție,formă,clasament

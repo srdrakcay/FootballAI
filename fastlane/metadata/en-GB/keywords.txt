@@ -1,0 +1,1 @@
+scoreline,table,squad,form,favourite,results,preview,calendar,kick-off,stats,matchday,probability

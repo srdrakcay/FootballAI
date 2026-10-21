@@ -1,0 +1,4 @@
+Nowy wygląd: NinetyLens ma wyrazistszy ciemny motyw, nową ikonę aplikacji i szybszą listę meczów.
+Dopasuj analizy do siebie: wybierz ulubioną drużynę, obserwowane ligi i głębokość każdej analizy.
+Kredyty są teraz czytelniejsze: saldo i każdy ruch kredytów zobaczysz w profilu.
+Poprawki wydajności i stabilności.

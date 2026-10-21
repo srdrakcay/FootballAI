@@ -1,0 +1,4 @@
+Giao diện mới: thiết kế tối sắc nét hơn, biểu tượng ứng dụng mới và danh sách trận tải nhanh hơn.
+Cá nhân hóa phân tích: chọn đội bóng yêu thích, giải đấu theo dõi và độ sâu của mỗi phân tích.
+Lượt phân tích rõ ràng hơn: số dư và mọi biến động đều hiển thị trong hồ sơ của bạn.
+Cải thiện hiệu năng và độ ổn định.

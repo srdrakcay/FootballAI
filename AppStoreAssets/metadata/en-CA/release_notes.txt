@@ -1,0 +1,4 @@
+New look: NinetyLens now has a sharper dark design, a new app icon and a faster game list.
+Personalize your analyses: choose your favorite team, followed competitions and the depth of each analysis.
+Credits are clearer: your balance and every credit movement show up in your profile.
+Performance and stability improvements.

@@ -1,13 +1,13 @@
 username("srdrakcay25@gmail.com")
 app_identifier("com.footballai.predictions.com")
-app_version("1.0.0")
+app_version("1.0.2")
 
 metadata_path("./fastlane/metadata")
-screenshots_path("./fastlane/screenshots")
-app_previews_path("./fastlane/app_previews")
+screenshots_path("./AppStoreAssets/final") # Pitch Night redesign, rendered by AppStoreAssets/scripts/render_store_assets.py
+# App Preview videos still show the old design; re-record them before enabling:
+# app_previews_path("./fastlane/app_previews")
 
-languages(["en-US", "tr", "de-DE", "fr-FR", "es-ES"])
-price_tier(0)
+languages(["ar-SA", "ca", "cs", "da", "de-DE", "el", "en-AU", "en-CA", "en-GB", "en-US", "es-ES", "es-MX", "fi", "fr-CA", "fr-FR", "he", "hi", "hr", "hu", "id", "it", "ja", "ko", "ms", "nl-NL", "no", "pl", "pt-BR", "pt-PT", "ro", "ru", "sk", "sl-SI", "sv", "th", "tr", "uk", "vi", "zh-Hans", "zh-Hant"])
 
 skip_binary_upload(true)
 skip_metadata(false)

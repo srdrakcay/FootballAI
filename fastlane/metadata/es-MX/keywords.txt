@@ -1,0 +1,1 @@
+partido,resultado,calendario,equipo,marcador,favorito,historial,liga,alineación,pronóstico,goles

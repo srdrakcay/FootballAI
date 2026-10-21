@@ -1,0 +1,1 @@
+partit,resultat,calendari,equip,gols,favorit,historial,lliga,alineació,pronòstic,forma,h2h,marcador

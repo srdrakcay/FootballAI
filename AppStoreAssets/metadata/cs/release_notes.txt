@@ -1,0 +1,4 @@
+Nový vzhled: NinetyLens má ostřejší tmavý design, novou ikonu aplikace a rychlejší seznam zápasů.
+Analýzy na míru: vyberte oblíbený tým, sledované soutěže a hloubku každé analýzy.
+Kredity jsou přehlednější: zůstatek i každý pohyb kreditů najdete v profilu.
+Vylepšení výkonu a stability.

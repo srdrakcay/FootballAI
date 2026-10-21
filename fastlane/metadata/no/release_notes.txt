@@ -1,0 +1,4 @@
+Nytt utseende: NinetyLens har fått et skarpere mørkt design, et nytt app-ikon og en raskere kampliste.
+Gjør analysene personlige: velg favorittlaget, turneringene dine og hvor dypt hver analyse går.
+Kreditter er blitt tydeligere: saldoen og alle bevegelser vises i profilen din.
+Forbedringer av ytelse og stabilitet.

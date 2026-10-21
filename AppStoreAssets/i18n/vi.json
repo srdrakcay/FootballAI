@@ -1,0 +1,32 @@
+{
+  "locale": "vi",
+  "name": "NinetyLens: Bóng đá AI",
+  "subtitle": "Nhận định trận đấu & xác suất",
+  "keywords": "dự,đoán,kết,quả,lịch,đội,hình,thống,kê,yêu,thích,sử,phong,độ,cầu,thủ,bàn,thắng,tỷ,số,điểm,bảng",
+  "promotional_text": "Chọn một trận bất kỳ, dùng 1 lượt phân tích và nhận xác suất do AI tính toán kèm bối cảnh rõ ràng. Không cần đăng ký tháng: chỉ mua lượt khi bạn cần.",
+  "release_notes": "Giao diện mới: thiết kế tối sắc nét hơn, biểu tượng ứng dụng mới và danh sách trận tải nhanh hơn.\nCá nhân hóa phân tích: chọn đội bóng yêu thích, giải đấu theo dõi và độ sâu của mỗi phân tích.\nLượt phân tích rõ ràng hơn: số dư và mọi biến động đều hiển thị trong hồ sơ của bạn.\nCải thiện hiệu năng và độ ổn định.",
+  "description": "Xem mọi trận đấu qua một lăng kính rõ ràng hơn, dựa trên dữ liệu. NinetyLens biến lịch thi đấu bóng đá và bối cảnh của các đội thành xác suất do AI tính toán mà bạn thực sự đọc được.\n\nVÌ SAO CHỌN NINETYLENS\n• Xác suất cho kết quả, số bàn thắng và tỷ số có khả năng xảy ra, kèm dữ liệu phía sau\n• Phân tích viết riêng cho bạn: ngôn ngữ, độ sâu và trọng tâm theo hồ sơ của bạn\n• Mục yêu thích và lịch sử luôn đi cùng bạn\n• Không đăng ký tháng: gói tín dụng mua một lần, thấy chi phí trước khi dùng\n\nCÁCH HOẠT ĐỘNG\n1. Xem các trận trong ngày trên lịch hằng ngày tải nhanh.\n2. Mở một trận và mở khóa phân tích bằng tín dụng. Chi phí luôn hiển thị trước.\n3. Đọc xác suất, mức độ tin cậy, dữ liệu hiện có và các giới hạn một cách rõ ràng. Có thể xem lại bất cứ lúc nào trong tab Phân tích.\n\nXEM TRẬN THEO NGÀY\nLướt qua lịch, xem giờ bóng lăn và giải đấu cùng lúc, rồi lọc theo các đội bạn yêu thích.\n\nLƯU MỤC YÊU THÍCH\nĐánh dấu những trận bạn quan tâm và tìm lại chúng sau khi đóng ứng dụng.\n\nPHÂN TÍCH AI MINH BẠCH\nMỗi phân tích hiển thị xác suất cho kết quả trận, bàn thắng và tỷ số có thể xảy ra, mức độ tự tin của mô hình và dữ liệu nào đã có. Nếu đã có phân tích cho cùng trận và cùng dữ liệu, hệ thống dùng lại thay vì tính phí bạn hai lần.\n\nLỊCH SỬ PHÂN TÍCH\nMở lại các phân tích trước đó từ tab Phân tích và xem ngay chúng còn mới hay không.\n\nTÍN DỤNG KHÔNG CẦN ĐĂNG KÝ THÁNG\nMua gói một lần 5 hoặc 10 tín dụng bất cứ khi nào bạn muốn thêm phân tích. Tín dụng đã mua không hết hạn.\n\nQUYỀN RIÊNG TƯ LÀ ƯU TIÊN\nNinetyLens dùng tài khoản ẩn danh. Bạn có thể đăng xuất hoặc xóa vĩnh viễn tài khoản cùng dữ liệu liên kết ngay trong ứng dụng. Chính sách quyền riêng tư và Điều khoản sử dụng luôn có trong ứng dụng.\n\nNGÔN NGỮ HỖ TRỢ\nEnglish, Türkçe, Deutsch, Español, Français.\n\nLƯU Ý QUAN TRỌNG\nPhân tích do AI chỉ mang tính tham khảo. Đó là xác suất, không phải kết quả chắc chắn, và không phải lời khuyên cá cược. Dữ liệu trận đấu có thể bị chậm, thiếu hoặc không khả dụng. NinetyLens độc lập và không liên kết hay được bảo trợ bởi bất kỳ câu lạc bộ, giải đấu, liên đoàn hay nhà cung cấp dữ liệu nào.\n\nTải NinetyLens và nhìn trận đấu tiếp theo theo cách khác.",
+  "screens": {
+    "matches": [
+      "Mọi trận đấu\ntrong một lịch",
+      "Các trận hôm nay và đội yêu thích của bạn trong một cái nhìn."
+    ],
+    "detail": [
+      "Xác suất bạn thật\nsự đọc được",
+      "Kết quả, bàn thắng và tỷ số có thể, kèm dữ liệu phía sau."
+    ],
+    "history": [
+      "Mọi phân tích\nluôn trong tầm tay",
+      "Mở lại phân tích cũ và xem chúng còn mới hay không."
+    ],
+    "profile": [
+      "Đúng ý bạn,\nkhông đăng ký tháng",
+      "Đội của bạn, giải của bạn, độ sâu của bạn. Chỉ mua tín dụng khi cần."
+    ],
+    "onboarding-welcome": [
+      "Đọc mọi trận đấu\nbằng góc nhìn riêng",
+      "Phân tích trận bằng AI, viết riêng cho đội bóng của bạn."
+    ]
+  },
+  "tagline": "Xác suất trận đấu\nbạn đọc được."
+}

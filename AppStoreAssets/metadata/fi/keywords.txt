@@ -1,0 +1,1 @@
+todennäköisyys,ennuste,otteluohjelma,tulos,kalenteri,suosikki,historia,muoto,joukkue,kokoonpano

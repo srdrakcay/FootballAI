@@ -1,0 +1,1 @@
+uitslag,speelschema,team,doelpunt,favoriet,geschiedenis,competitie,opstelling,voorspelling,vorm,h2h

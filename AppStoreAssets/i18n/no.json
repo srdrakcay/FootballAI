@@ -1,0 +1,32 @@
+{
+  "locale": "no",
+  "name": "NinetyLens: Fotball KI",
+  "subtitle": "Sannsynlighet og kampanalyse",
+  "keywords": "kampprogram,resultat,form,tabell,statistikk,favoritt,lag,kalender,historikk,laguttak,prediksjon,h2h",
+  "promotional_text": "Velg en kamp, bruk en kreditt og få KI-baserte sannsynligheter med tydelig kontekst. Uten abonnement: du kjøper kreditter bare når du trenger dem.",
+  "release_notes": "Nytt utseende: NinetyLens har fått et skarpere mørkt design, et nytt app-ikon og en raskere kampliste.\nGjør analysene personlige: velg favorittlaget, turneringene dine og hvor dypt hver analyse går.\nKreditter er blitt tydeligere: saldoen og alle bevegelser vises i profilen din.\nForbedringer av ytelse og stabilitet.",
+  "description": "Se hver fotballkamp gjennom en klarere, datadrevet linse. NinetyLens gjør kampprogram og lagkontekst om til KI-baserte sannsynligheter du faktisk kan lese.\n\nDERFOR NINETYLENS\n• Sannsynligheter for resultat, mål og sannsynlige sluttresultater, med dataene bak\n• Analyser skrevet for deg: språk, dybde og fokus følger din egen profil\n• Favoritter og historikk som blir hos deg\n• Uten abonnement: engangspakker med kreditter, og prisen vises før du bruker dem\n\nSLIK FUNGERER DET\n1. Bla gjennom dagens kamper i en rask dagskalender.\n2. Åpne en kamp og lås opp analysen med kreditter. Prisen vises alltid først.\n3. Les sannsynligheter, sikkerhet, tilgjengelige data og tydelige begrensninger. Finn analysen igjen når som helst under Analyser.\n\nFINN KAMPER ETTER DATO\nBeveg deg gjennom kalenderen, se avspark og turneringer samlet, og filtrer på favorittlagene dine.\n\nLAGRE FAVORITTENE DINE\nMerk kampene du bryr deg om, og finn dem igjen etter at du har lukket appen.\n\nÅPEN KI-ANALYSE\nHver analyse viser sannsynligheter for kampresultat, mål og sannsynlige sluttresultater, hvor sikker modellen er, og hvilke data som var tilgjengelige. Finnes det allerede en analyse for samme kamp og data, gjenbrukes den slik at du ikke betaler to ganger.\n\nANALYSEHISTORIKK\nÅpne tidligere analyser fra fanen Analyser, og se med en gang om de fortsatt er oppdaterte.\n\nKREDITTER UTEN ABONNEMENT\nKjøp en engangspakke med 5 eller 10 kreditter når du vil ha flere analyser. Kjøpte kreditter utløper ikke.\n\nPERSONVERN FØRST\nNinetyLens bruker en anonym konto. Du kan logge ut eller slette kontoen og tilknyttede data permanent i appen. Personvernerklæring og vilkår er alltid tilgjengelige i appen.\n\nSTØTTEDE SPRÅK\nEnglish, Türkçe, Deutsch, Español, Français.\n\nVIKTIG\nKI-baserte analyser er kun til informasjon. De uttrykker sannsynligheter, ikke sikre utfall, og er ikke spillråd. Kampdata kan være forsinket, ufullstendig eller utilgjengelig. NinetyLens er uavhengig og er ikke tilknyttet eller støttet av noen klubb, serie, forbund eller dataleverandør.\n\nLast ned NinetyLens og se neste kamp med nye øyne.",
+  "screens": {
+    "matches": [
+      "Hver kamp,\nsamlet i én kalender",
+      "Dagens kamper og favorittlagene dine med et blikk."
+    ],
+    "detail": [
+      "Sannsynligheter\ndu kan lese",
+      "Resultat, mål og sannsynlige sluttresultater, med dataene bak."
+    ],
+    "history": [
+      "Alle analyser\nalltid for hånden",
+      "Åpne tidligere analyser og se om de fortsatt er oppdaterte."
+    ],
+    "profile": [
+      "Tilpasset deg,\nuten abonnement",
+      "Ditt lag, din dybde. Kreditter bare når du trenger dem."
+    ],
+    "onboarding-welcome": [
+      "Se hver kamp\nmed din egen linse",
+      "KI-baserte kampanalyser, skrevet for laget ditt."
+    ]
+  },
+  "tagline": "Kampsannsynligheter\ndu kan lese."
+}

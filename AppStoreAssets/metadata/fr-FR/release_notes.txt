@@ -1,0 +1,4 @@
+Nouveau look : NinetyLens adopte un design sombre plus net, une nouvelle icône et une liste de matchs plus rapide.
+Personnalisez vos analyses : choisissez votre équipe favorite, vos ligues suivies et la profondeur de chaque analyse.
+Crédits plus clairs : votre solde et chaque mouvement apparaissent dans votre profil.
+Améliorations des performances et de la stabilité.

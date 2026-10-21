@@ -1,31 +1,38 @@
-Her maça daha net ve veriye dayalı bir gözle bak.
+Her maça daha net ve veriye dayalı bir gözle bak. NinetyLens, futbol fikstürlerini ve takım bağlamını gerçekten okuyabileceğin yapay zekâ destekli olasılıklara dönüştürür.
 
-NinetyLens; fikstürleri, takım bağlamını, favorileri, analiz geçmişini ve yapay zekâ destekli maç olasılıklarını odaklı bir futbol deneyiminde bir araya getirir.
+NEDEN NINETYLENS
+• Maç sonucu, gol ve olası skorlar için olasılıklar ve arkasındaki veriler
+• Sana göre yazılan analizler: dil, derinlik ve odak profilinle şekillenir
+• Seninle kalan favoriler ve geçmiş
+• Abonelik yok: tek seferlik kredi paketleri, maliyet harcamadan önce görünür
+
+NASIL ÇALIŞIR
+1. Günün fikstürlerini hızlı günlük takvimde incele.
+2. Bir maçı aç ve analizi kredi ile aç. Maliyet her zaman önceden gösterilir.
+3. Olasılıkları, güven düzeyini, mevcut verileri ve açık sınırlamaları oku. İstediğin zaman Analizlerim sekmesinden geri dön.
 
 MAÇLARI TARİHE GÖRE KEŞFET
-
-Takvim üzerinde günler arasında ilerle ve desteklenen fikstürleri bul. Maç saatlerini ve turnuva bilgilerini hızlı, dikkat dağıtmayan bir maç merkezinde görüntüle.
+Takvimde günler arasında ilerle, başlama saatlerini ve turnuvaları birlikte gör, favori takımlarına göre filtrele.
 
 FAVORİLERİNİ SAKLA
+İlgilendiğin maçları işaretle, uygulamayı kapattıktan sonra da kolayca bul.
 
-İlgilendiğin maçları favoriye ekle ve uygulamayı kapattıktan sonra yeniden görüntüle. Favorilerin anonim hesabınla ilişkilendirilir.
+ŞEFFAF YAPAY ZEKÂ ANALİZİ
+Her analiz; maç sonucu, gol ve olası skor olasılıklarını, modelin ne kadar emin olduğunu ve hangi verilerin mevcut olduğunu gösterir. Aynı maç ve veri için analiz zaten varsa, ikinci kez kredi harcamadan mevcut analiz kullanılır.
 
-ŞEFFAF YAPAY ZEKÂ ANALİZİNİ AÇ
+ANALİZ GEÇMİŞİ
+Önceki analizlerini Analizlerim sekmesinden yeniden aç ve hâlâ güncel olup olmadığını tek bakışta gör.
 
-Desteklenen bir maç için yapay zekâ destekli analiz istemek üzere kredi kullan. Her analiz, olasılığa dayalı içgörüleri mevcut bağlam ve açık sınırlamalarla birlikte sunar. Aynı maç ve veri anlık görüntüsü için analiz zaten oluşturulmuşsa yeniden üretmek ve tekrar kredi harcamak yerine mevcut analiz kullanılabilir.
+ABONELİK OLMADAN KREDİ
+Daha fazla analiz istediğinde tek seferlik 5 veya 10 kredilik paket al. Satın alınan kredilerin süresi dolmaz.
 
-ANALİZ GEÇMİŞİNE DÖN
+ÖNCE GİZLİLİK
+NinetyLens anonim bir hesap kullanır. Uygulama içinden çıkış yapabilir veya hesabını ve bağlantılı verileri kalıcı olarak silebilirsin. Gizlilik Politikası ve Kullanım Koşulları uygulamada her zaman erişilebilir.
 
-Daha önce açtığın analizleri Geçmiş sekmesinden yeniden incele. Analizin hâlâ geçerli olup olmadığını gör ve takip ettiğin maçlara hızla dön.
-
-ABONELİK OLMADAN KREDİ AL
-
-Yinelenen abonelik yoktur. Daha fazla analiz gerektiğinde tek seferlik 5 veya 10 kredilik paket seç. Satın alınan kredilerin süresi dolmaz. Bir analizin kredi maliyeti, kullanım öncesinde uygulamada gösterilir.
-
-GİZLİLİK ODAKLI
-
-NinetyLens, Firebase tarafından oluşturulan anonim bir hesap kullanır. Uygulama içinden çıkış yapabilir veya hesabı ve bağlantılı profil verilerini kalıcı olarak silebilirsin. Gizlilik Politikası ve Kullanım Koşulları uygulama içinde her zaman erişilebilir.
+DESTEKLENEN DİLLER
+English, Türkçe, Deutsch, Español, Français.
 
 ÖNEMLİ
+Yapay zekâ destekli analizler bilgilendirme amaçlıdır. Olasılıkları ifade eder; kesin sonuç veya bahis tavsiyesi sunmaz. Maç verileri gecikebilir, eksik olabilir ya da kullanılamayabilir. NinetyLens bağımsızdır; herhangi bir kulüp, lig, federasyon veya veri sağlayıcısı ile bağlantılı değildir ve onlar tarafından onaylanmamıştır.
 
-Yapay zekâ destekli analizler bilgilendirme amaçlıdır; kesin sonuç veya bahis tavsiyesi sunmaz. Maç verileri gecikebilir, eksik olabilir ya da kullanılamayabilir. NinetyLens bağımsız bir uygulamadır; herhangi bir kulüp, lig, federasyon veya veri sağlayıcısı tarafından desteklenmez.
+NinetyLens'i indir ve bir sonraki maça farklı bir gözle bak.

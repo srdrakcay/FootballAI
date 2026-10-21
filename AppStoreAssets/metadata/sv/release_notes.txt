@@ -1,0 +1,4 @@
+Ny look: NinetyLens har fått en skarpare mörk design, en ny appikon och en snabbare matchlista.
+Gör analyserna personliga: välj ditt favoritlag, dina turneringar och hur djup varje analys ska vara.
+Krediter är tydligare: ditt saldo och varje kreditrörelse visas i din profil.
+Förbättrad prestanda och stabilitet.

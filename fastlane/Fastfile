@@ -6,6 +6,53 @@ platform :ios do
     deliver
   end
 
+  desc "Upload only the localized text metadata (name, subtitle, keywords, promo text, description, release notes). No screenshots, no binary, no review submission"
+  lane :store_metadata do
+    # Prefer an App Store Connect API key (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH); otherwise deliver asks for the Apple ID login.
+    api_key = if ENV["ASC_KEY_ID"] && ENV["ASC_ISSUER_ID"] && ENV["ASC_KEY_PATH"]
+      app_store_connect_api_key(key_id: ENV["ASC_KEY_ID"], issuer_id: ENV["ASC_ISSUER_ID"], key_filepath: ENV["ASC_KEY_PATH"])
+    end
+    deliver(
+      api_key: api_key,
+      skip_screenshots: true,
+      skip_binary_upload: true,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true
+    )
+  end
+
+  desc "Replace the App Store screenshots with AppStoreAssets/final. No text metadata, no binary, no review submission"
+  lane :store_screenshots do
+    deliver(
+      skip_metadata: true,
+      skip_binary_upload: true,
+      submit_for_review: false,
+      automatic_release: false,
+      overwrite_screenshots: true,
+      force: true
+    )
+  end
+
+  desc "Delete every App Preview video from the editable App Store version, in all localizations"
+  lane :remove_app_previews do
+    Spaceship::ConnectAPI.login(CredentialsManager::AppfileConfig.try_fetch_value(:apple_id), nil, use_portal: false, use_tunes: true, tunes_team_id: CredentialsManager::AppfileConfig.try_fetch_value(:itc_team_id))
+    app = Spaceship::ConnectAPI::App.find(CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier))
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+    UI.user_error!("No editable App Store version") unless version
+    removed = 0
+    version.get_app_store_version_localizations.each do |localization|
+      localization.get_app_preview_sets.each do |set|
+        (set.app_previews || []).each do |preview|
+          UI.message("Deleting #{localization.locale} #{set.preview_type} #{preview.file_name}")
+          preview.delete!
+          removed += 1
+        end
+      end
+    end
+    UI.success("Deleted #{removed} app preview video(s)")
+  end
+
   desc "Generate App Store Connect's local HTML metadata preview without uploading"
   lane :store_content_preview do
     deliver(

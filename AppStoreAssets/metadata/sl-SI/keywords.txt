@@ -1,0 +1,1 @@
+verjetnost,napoved,razpored,rezultat,koledar,priljubljene,zgodovina,forma,ekipa,postava,lestvica

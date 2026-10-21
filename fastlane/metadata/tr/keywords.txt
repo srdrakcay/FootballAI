@@ -1,1 +1,1 @@
-fikstür,skor,form,takım,takvim,favori,istatistik,olasılık,tahmin,lig,puan,durum,kadro,geçmiş
+fikstür,skor,form,takım,takvim,favori,istatistik,tahmin,lig,puan,durum,kadro,geçmiş,içgörü,sonuç

@@ -1,0 +1,32 @@
+{
+  "locale": "ms",
+  "name": "NinetyLens: Bola Sepak AI",
+  "subtitle": "Analisis & Kebarangkalian",
+  "keywords": "ramalan,skor,jadual,keputusan,statistik,pasukan,pemain,kegemaran,sejarah,kalendar,liga,gol,formasi",
+  "promotional_text": "Pilih mana-mana perlawanan, guna satu kredit dan dapatkan kebarangkalian berasaskan AI dengan konteks yang jelas. Tiada langganan: beli kredit apabila perlu sahaja.",
+  "release_notes": "Rupa baharu: reka bentuk gelap yang lebih tajam, ikon aplikasi baharu dan senarai perlawanan yang lebih pantas.\nPeribadikan analisis anda: pilih pasukan kegemaran, liga yang diikuti dan kedalaman setiap analisis.\nKredit lebih jelas: baki dan setiap pergerakan kredit dipaparkan dalam profil anda.\nPeningkatan prestasi dan kestabilan.",
+  "description": "Lihat setiap perlawanan melalui lensa yang lebih jelas dan berasaskan data. NinetyLens menukar jadual bola sepak dan konteks pasukan kepada kebarangkalian berasaskan AI yang benar-benar boleh anda baca.\n\nKENAPA NINETYLENS\n• Kebarangkalian untuk keputusan, jumlah gol dan skor yang mungkin, berserta data di sebaliknya\n• Analisis yang ditulis untuk anda: bahasa, kedalaman dan fokus mengikut profil anda\n• Kegemaran dan sejarah yang sentiasa bersama anda\n• Tiada langganan: pek kredit sekali beli, kos dipaparkan sebelum anda membayar\n\nCARA IA BERFUNGSI\n1. Layari perlawanan hari ini dalam kalendar harian yang pantas.\n2. Buka satu perlawanan dan buka kunci analisis dengan kredit. Kos sentiasa dipaparkan dahulu.\n3. Baca kebarangkalian, tahap keyakinan, data yang ada dan had dengan jelas. Buka semula pada bila-bila masa dari tab Analisis.\n\nLAYARI PERLAWANAN MENGIKUT TARIKH\nGerakkan kalendar, lihat masa sepak mula dan pertandingan sekali gus, kemudian tapis kepada pasukan kegemaran anda.\n\nSIMPAN KEGEMARAN\nTandakan perlawanan yang penting bagi anda dan temui semula selepas aplikasi ditutup.\n\nANALISIS AI YANG TELUS\nSetiap analisis memaparkan kebarangkalian untuk keputusan perlawanan, gol dan skor yang mungkin, setakat mana keyakinan model dan data yang tersedia. Jika analisis untuk perlawanan dan data yang sama sudah wujud, ia digunakan semula dan anda tidak dicaj dua kali.\n\nSEJARAH ANALISIS\nBuka semula analisis terdahulu dari tab Analisis dan lihat sekali imbas sama ada ia masih terkini.\n\nKREDIT TANPA LANGGANAN\nBeli pek sekali bayar sebanyak 5 atau 10 kredit bila-bila masa anda mahu lebih banyak analisis. Kredit yang dibeli tidak tamat tempoh.\n\nPRIVASI DAHULU\nNinetyLens menggunakan akaun tanpa nama. Anda boleh log keluar atau memadam akaun dan data berkaitan secara kekal dalam aplikasi. Dasar Privasi dan Terma Penggunaan sentiasa tersedia dalam aplikasi.\n\nBAHASA DISOKONG\nEnglish, Türkçe, Deutsch, Español, Français.\n\nPENTING\nAnalisis berasaskan AI adalah untuk maklumat semata-mata. Ia menyatakan kebarangkalian, bukan keputusan yang pasti, dan bukan nasihat pertaruhan. Data perlawanan mungkin lewat, tidak lengkap atau tidak tersedia. NinetyLens bebas dan tidak bergabung dengan atau disokong oleh mana-mana kelab, liga, persekutuan atau pembekal data.\n\nMuat turun NinetyLens dan lihat perlawanan seterusnya dengan cara berbeza.",
+  "screens": {
+    "matches": [
+      "Semua perlawanan\ndalam satu kalendar",
+      "Jadual hari ini dan pasukan kegemaran anda dalam sekali pandang."
+    ],
+    "detail": [
+      "Kebarangkalian yang\nbenar-benar jelas",
+      "Keputusan, gol dan skor yang mungkin, berserta data di sebaliknya."
+    ],
+    "history": [
+      "Setiap analisis,\nsentiasa di tangan",
+      "Buka semula analisis lama dan semak sama ada ia masih terkini."
+    ],
+    "profile": [
+      "Disesuaikan untuk anda,\ntanpa langganan",
+      "Pasukan anda, liga anda, kedalaman anda. Kredit apabila perlu."
+    ],
+    "onboarding-welcome": [
+      "Baca setiap perlawanan\ndengan lensa anda",
+      "Analisis perlawanan berasaskan AI, ditulis untuk pasukan anda."
+    ]
+  },
+  "tagline": "Kebarangkalian bola\nyang mudah dibaca."
+}

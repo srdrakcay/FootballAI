@@ -1,0 +1,4 @@
+Nou aspecte: NinetyLens estrena un disseny fosc més nítid, una icona nova i una llista de partits més ràpida.
+Personalitza les teves anàlisis: tria el teu equip favorit, les lligues que segueixes i la profunditat de cada anàlisi.
+Crèdits més clars: el teu saldo i cada moviment apareixen al teu perfil.
+Millores de rendiment i estabilitat.

@@ -1,0 +1,4 @@
+Yeni görünüm: NinetyLens artık daha net bir koyu tasarıma, yeni bir uygulama simgesine ve daha hızlı bir maç listesine sahip.
+Analizlerini kişiselleştir: favori takımını, takip ettiğin ligleri ve analizin derinliğini seç.
+Krediler artık daha anlaşılır: bakiyen ve her kredi hareketi profilinde görünür.
+Performans ve kararlılık iyileştirmeleri.

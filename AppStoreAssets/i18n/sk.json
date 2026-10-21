@@ -1,0 +1,32 @@
+{
+  "locale": "sk",
+  "name": "NinetyLens: Futbal AI",
+  "subtitle": "Analýzy zápasov a štatistiky",
+  "keywords": "pravdepodobnosť,predpoveď,rozpis,výsledok,kalendár,obľúbené,história,forma,tím,zostava,tabuľka,liga",
+  "promotional_text": "Vyberte si ľubovoľný zápas, použite kredit a získajte pravdepodobnosti od AI s jasným kontextom. Bez predplatného: kredity kupujete len vtedy, keď ich potrebujete.",
+  "description": "Pozrite sa na každý zápas jasnejšou optikou založenou na dátach. NinetyLens mení futbalové rozpisy a kontext tímov na pravdepodobnosti od AI, ktorým naozaj porozumiete.\n\nPREČO NINETYLENS\n• Pravdepodobnosti výsledku, gólov a najpravdepodobnejších skóre, vrátane dát, ktoré za nimi stoja\n• Analýzy písané pre vás: jazyk, hĺbka aj zameranie sa riadia vaším profilom\n• Obľúbené a história, ktoré vám zostanú\n• Bez predplatného: jednorazové balíky kreditov, cenu vidíte pred útratou\n\nAKO TO FUNGUJE\n1. Prehliadajte zápasy dňa v rýchlom dennom kalendári.\n2. Otvorte zápas a odomknite analýzu za kredity. Cena je vždy uvedená vopred.\n3. Čítajte pravdepodobnosti, istotu modelu, dostupné dáta a jasné obmedzenia. K analýze sa kedykoľvek vrátite v záložke Analýzy.\n\nZÁPASY PODĽA DÁTUMU\nPosúvajte sa kalendárom, uvidíte časy výkopov aj súťaže pokope a filtrujte svoje obľúbené tímy.\n\nUKLADAJTE OBĽÚBENÉ\nOznačte zápasy, na ktorých vám záleží, a po zatvorení aplikácie ich znova nájdete.\n\nTRANSPARENTNÁ ANALÝZA AI\nKaždá analýza ukazuje pravdepodobnosti výsledku zápasu, gólov aj pravdepodobných skóre, ako si je model istý a aké dáta boli k dispozícii. Ak analýza rovnakého zápasu a rovnakých dát už existuje, použije sa znova a neplatíte dvakrát.\n\nHISTÓRIA ANALÝZ\nOtvorte skoršie analýzy v záložke Analýzy a na prvý pohľad uvidíte, či sú stále aktuálne.\n\nKREDITY BEZ PREDPLATNÉHO\nKúpte si jednorazový balík 5 alebo 10 kreditov, kedykoľvek chcete viac analýz. Zakúpené kredity nevyprší.\n\nSÚKROMIE NA PRVOM MIESTE\nNinetyLens používa anonymný účet. V aplikácii sa môžete odhlásiť alebo účet aj s prepojenými dátami natrvalo odstrániť. Zásady ochrany osobných údajov a Podmienky používania sú vždy k dispozícii v aplikácii.\n\nPODPOROVANÉ JAZYKY\nEnglish, Türkçe, Deutsch, Español, Français.\n\nDÔLEŽITÉ\nAnalýzy od AI majú informatívny charakter. Vyjadrujú pravdepodobnosti, nie isté výsledky, a nie sú radou na stávkovanie. Dáta o zápasoch môžu byť oneskorené, neúplné alebo nedostupné. NinetyLens je nezávislá aplikácia a nemá žiadne prepojenie so žiadnym klubom, súťažou, zväzom ani poskytovateľom dát ani nimi nie je podporovaná.\n\nStiahnite si NinetyLens a pozrite sa na ďalší zápas inak.",
+  "release_notes": "Nový vzhľad: NinetyLens má ostrejší tmavý dizajn, novú ikonu aplikácie a rýchlejší zoznam zápasov.\nAnalýzy na mieru: vyberte obľúbený tím, sledované súťaže a hĺbku každej analýzy.\nKredity sú prehľadnejšie: zostatok aj každý pohyb kreditov nájdete v profile.\nVylepšenia výkonu a stability.",
+  "screens": {
+    "matches": [
+      "Každý zápas\nv jednom kalendári",
+      "Dnešné zápasy a vaše obľúbené tímy na prvý pohľad."
+    ],
+    "detail": [
+      "Pravdepodobnosti,\nktorým porozumiete",
+      "Výsledok, góly a skóre aj s dátami, ktoré za nimi stoja."
+    ],
+    "history": [
+      "Každá analýza\nstále poruke",
+      "Otvorte skoršie analýzy a zistite, či sú aktuálne."
+    ],
+    "profile": [
+      "Ušité na mieru,\nbez predplatného",
+      "Váš tím, súťaže aj hĺbka. Kredity len keď ich chcete."
+    ],
+    "onboarding-welcome": [
+      "Čítajte každý zápas\nvlastnou optikou",
+      "Analýza zápasov od AI, písaná pre váš tím."
+    ]
+  },
+  "tagline": "Pravdepodobnosti,\nktorým porozumiete."
+}

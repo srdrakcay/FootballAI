@@ -1,0 +1,32 @@
+{
+  "locale": "hu",
+  "name": "NinetyLens: Foci AI",
+  "subtitle": "Meccselemzés és statisztika",
+  "keywords": "valószínűség,előrejelzés,menetrend,eredmény,naptár,kedvenc,előzmények,forma,csapat,tabella,liga,h2h",
+  "promotional_text": "Válassz ki bármelyik meccset, költs egy kreditet, és kapj MI-alapú valószínűségeket világos háttérrel. Előfizetés nélkül: kreditet csak akkor veszel, ha kell.",
+  "description": "Nézz minden meccset egy tisztább, adatalapú lencsén át. A NinetyLens a focimeccsek menetrendjét és a csapatok körülményeit olyan MI-alapú valószínűségekké alakítja, amelyeket tényleg el tudsz olvasni.\n\nMIÉRT NINETYLENS\n• Valószínűségek az eredményre, a gólokra és a legvalószínűbb végeredményekre, a mögöttük álló adatokkal\n• Neked írt elemzések: a nyelv, a mélység és a fókusz a profilodat követi\n• Kedvencek és előzmények, amelyek megmaradnak\n• Előfizetés nélkül: egyszeri kreditcsomagok, a költséget költés előtt látod\n\nHOGYAN MŰKÖDIK\n1. Böngészd a nap meccseit a gyors napi naptárban.\n2. Nyiss meg egy meccset, és oldd fel az elemzést kreditekkel. A költség mindig előre látszik.\n3. Olvasd el a valószínűségeket, a bizonyosságot, az elérhető adatokat és a világos korlátokat. Az elemzésre bármikor visszatérhetsz az Elemzések fülön.\n\nMECCSEK DÁTUM SZERINT\nLépkedj a naptárban, egy helyen látod a kezdési időpontokat és a sorozatokat, és szűrhetsz a kedvenc csapataidra.\n\nKEDVENCEK MENTÉSE\nJelöld meg a számodra fontos meccseket, és az app bezárása után is megtalálod őket.\n\nÁTLÁTHATÓ MI-ELEMZÉS\nMinden elemzés megmutatja a meccs eredményének, a góloknak és a valószínű végeredményeknek a valószínűségét, mennyire biztos a modell, és milyen adatok álltak rendelkezésre. Ha ugyanarra a meccsre és adatra már van elemzés, azt használjuk újra, így nem fizetsz kétszer.\n\nELEMZÉSEK ELŐZMÉNYEI\nNyisd meg újra a korábbi elemzéseket az Elemzések fülön, és egy pillantással láthatod, naprakészek-e még.\n\nKREDITEK ELŐFIZETÉS NÉLKÜL\nVegyél egyszeri 5 vagy 10 kreditből álló csomagot, amikor több elemzést szeretnél. A megvásárolt kreditek nem járnak le.\n\nELŐSZÖR AZ ADATVÉDELEM\nA NinetyLens névtelen fiókot használ. Az appban kijelentkezhetsz, vagy véglegesen törölheted a fiókodat és a kapcsolódó adatokat. Az Adatvédelmi irányelvek és a Felhasználási feltételek mindig elérhetők az appban.\n\nTÁMOGATOTT NYELVEK\nEnglish, Türkçe, Deutsch, Español, Français.\n\nFONTOS\nAz MI-alapú elemzések tájékoztató jellegűek. Valószínűségeket fejeznek ki, nem biztos kimeneteleket, és nem fogadási tanácsok. A meccsadatok késhetnek, hiányosak vagy elérhetetlenek lehetnek. A NinetyLens független, és nem áll kapcsolatban egyetlen klubbal, bajnoksággal, szövetséggel vagy adatszolgáltatóval sem, és azok nem támogatják.\n\nTöltsd le a NinetyLenst, és nézd másképp a következő meccset.",
+  "release_notes": "Új megjelenés: a NinetyLens élesebb sötét dizájnt, új appikont és gyorsabb meccslistát kapott.\nSzabd személyre az elemzéseket: válaszd ki kedvenc csapatod, követett bajnokságaid és az elemzések mélységét.\nÁtláthatóbb kreditek: az egyenleged és minden kreditmozgás látszik a profilodban.\nTeljesítmény- és stabilitásjavítások.",
+  "screens": {
+    "matches": [
+      "Minden meccs\negy naptárban",
+      "A mai meccsek és a kedvenc csapataid egy pillantásra."
+    ],
+    "detail": [
+      "Valószínűségek,\namiket el is olvasol",
+      "Eredmény, gólok és végeredmények a mögöttük álló adatokkal."
+    ],
+    "history": [
+      "Minden elemzés\nmindig kéznél",
+      "Nyisd meg a korábbi elemzéseket, és nézd meg, naprakészek-e."
+    ],
+    "profile": [
+      "Rád szabva,\nelőfizetés nélkül",
+      "A csapatod, a bajnokságaid, a mélység. Kredit csak ha kell."
+    ],
+    "onboarding-welcome": [
+      "Olvass minden meccset\na saját lencséddel",
+      "MI-alapú meccselemzés, a te csapatodnak írva."
+    ]
+  },
+  "tagline": "Valószínűségek,\namiket el is olvasol."
+}

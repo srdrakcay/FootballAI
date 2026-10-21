@@ -1,0 +1,32 @@
+{
+  "locale": "nl-NL",
+  "name": "NinetyLens: Voetbal AI",
+  "subtitle": "Kansen en wedstrijdstatistiek",
+  "keywords": "uitslag,speelschema,team,doelpunt,favoriet,geschiedenis,competitie,opstelling,voorspelling,vorm,h2h",
+  "promotional_text": "Kies een wedstrijd, gebruik een tegoed en krijg AI-kansen met duidelijke context. Geen abonnement: koop tegoed alleen wanneer je het nodig hebt.",
+  "release_notes": "Nieuwe look: NinetyLens heeft een scherper donker ontwerp, een nieuw icoon en een snellere wedstrijdlijst.\nPersonaliseer je analyses: kies je favoriete team, de competities die je volgt en de diepgang van elke analyse.\nDuidelijker tegoed: je saldo en elke mutatie staan in je profiel.\nVerbeteringen in prestaties en stabiliteit.",
+  "description": "Kijk naar elke wedstrijd met een helderdere, datagedreven blik. NinetyLens zet voetbalprogramma's en teamcontext om in AI-kansen die je echt kunt lezen.\n\nWAAROM NINETYLENS\n• Kansen op uitslag, doelpunten en waarschijnlijke eindstanden, met de data erachter\n• Analyses voor jou geschreven: taal, diepgang en focus volgen je eigen profiel\n• Favorieten en geschiedenis die bij je blijven\n• Geen abonnement: eenmalige tegoedpakketten, met de kosten vooraf zichtbaar\n\nZO WERKT HET\n1. Bekijk de wedstrijden van de dag in een snelle dagkalender.\n2. Open een wedstrijd en ontgrendel de analyse met tegoed. De kosten zie je altijd eerst.\n3. Lees kansen, betrouwbaarheid, beschikbare data en duidelijke beperkingen. Open de analyse op elk moment opnieuw via Analyses.\n\nVERKEN WEDSTRIJDEN PER DATUM\nBlader door de kalender, zie aftrapsijden en competities bij elkaar en filter op je favoriete teams.\n\nBEWAAR FAVORIETEN\nMarkeer de wedstrijden die je belangrijk vindt en vind ze terug nadat je de app hebt gesloten.\n\nTRANSPARANTE AI-ANALYSE\nElke analyse toont kansen op de uitslag, doelpunten en waarschijnlijke eindstanden, hoe zeker het model is en welke data beschikbaar was. Bestaat er al een analyse voor dezelfde wedstrijd en dezelfde data, dan wordt die hergebruikt en betaal je niet dubbel.\n\nANALYSEGESCHIEDENIS\nOpen eerdere analyses opnieuw via het tabblad Analyses en zie in één oogopslag of ze nog actueel zijn.\n\nTEGOED ZONDER ABONNEMENT\nKoop een eenmalig pakket van 5 of 10 tegoeden wanneer je meer analyses wilt. Gekocht tegoed verloopt niet.\n\nPRIVACY EERST\nNinetyLens gebruikt een anoniem account. Je kunt in de app uitloggen of je account en gekoppelde gegevens definitief verwijderen. Het privacybeleid en de gebruiksvoorwaarden zijn altijd beschikbaar in de app.\n\nONDERSTEUNDE TALEN\nEnglish, Türkçe, Deutsch, Español, Français.\n\nBELANGRIJK\nAI-analyses zijn informatief. Ze geven kansen weer, geen zekere uitkomsten, en zijn geen gokadvies. Wedstrijddata kan vertraagd, onvolledig of niet beschikbaar zijn. NinetyLens is onafhankelijk en niet verbonden aan of goedgekeurd door een club, competitie, bond of dataleverancier.\n\nDownload NinetyLens en bekijk de volgende wedstrijd met andere ogen.",
+  "screens": {
+    "matches": [
+      "Elke wedstrijd,\nin één kalender",
+      "De wedstrijden van vandaag en je favoriete teams in één oogopslag."
+    ],
+    "detail": [
+      "Kansen die je echt\nkunt lezen",
+      "Uitslag, doelpunten en waarschijnlijke standen, met de data erachter."
+    ],
+    "history": [
+      "Elke analyse,\naltijd binnen handbereik",
+      "Open eerdere analyses opnieuw en zie of ze nog actueel zijn."
+    ],
+    "profile": [
+      "Op jou afgestemd,\nzonder abonnement",
+      "Jouw team, jouw competities. Tegoed alleen wanneer je het nodig hebt."
+    ],
+    "onboarding-welcome": [
+      "Lees elke wedstrijd\nmet jouw blik",
+      "AI-wedstrijdanalyse, geschreven voor jouw team."
+    ]
+  },
+  "tagline": "Wedstrijdkansen\ndie je kunt lezen."
+}

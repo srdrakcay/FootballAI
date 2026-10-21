@@ -1,0 +1,1 @@
+matchschema,resultat,form,tabell,statistik,favorit,lag,kalender,historik,laguppställning,prognos,h2h

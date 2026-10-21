@@ -1,0 +1,32 @@
+{
+  "locale": "fi",
+  "name": "NinetyLens: Jalkapallo AI",
+  "subtitle": "Ottelut, tilastot ja analyysi",
+  "keywords": "todennäköisyys,ennuste,otteluohjelma,tulos,kalenteri,suosikki,historia,muoto,joukkue,kokoonpano",
+  "promotional_text": "Valitse mikä tahansa ottelu, käytä yksi krediitti ja saat tekoälyn laskemat todennäköisyydet selkeine taustatietoineen. Ei tilausta: krediitit ostat vain tarvittaessa.",
+  "description": "Katso jokaista ottelua selkeämmän, dataan perustuvan linssin läpi. NinetyLens muuttaa jalkapallon otteluohjelmat ja joukkueiden taustat tekoälyn laskemiksi todennäköisyyksiksi, jotka todella ymmärtää.\n\nMIKSI NINETYLENS\n• Todennäköisyydet tulokselle, maaleille ja todennäköisimmille lukemille sekä data niiden takana\n• Sinulle kirjoitetut analyysit: kieli, syvyys ja painotus seuraavat profiiliasi\n• Suosikit ja historia säilyvät mukanasi\n• Ei tilausta: kertaluonteiset krediittipaketit, hinta näkyy ennen käyttöä\n\nNÄIN SE TOIMII\n1. Selaa päivän otteluita nopeasta päiväkalenterista.\n2. Avaa ottelu ja avaa analyysi krediiteillä. Hinta näytetään aina ensin.\n3. Lue todennäköisyydet, varmuus, käytettävissä oleva data ja selkeät rajoitukset. Palaa analyysiin milloin tahansa Analyysit-välilehdeltä.\n\nOTTELUT PÄIVÄMÄÄRÄN MUKAAN\nLiiku kalenterissa, näe aloitusajat ja sarjat yhdessä ja suodata suosikkijoukkueesi.\n\nTALLENNA SUOSIKIT\nMerkitse sinulle tärkeät ottelut ja löydät ne uudelleen sovelluksen sulkemisen jälkeen.\n\nLÄPINÄKYVÄ TEKOÄLYANALYYSI\nJokainen analyysi näyttää ottelun tuloksen, maalien ja todennäköisten lukemien todennäköisyydet, kuinka varma malli on ja mikä data oli käytettävissä. Jos samalle ottelulle ja datalle on jo analyysi, se käytetään uudelleen etkä maksa kahdesti.\n\nANALYYSIHISTORIA\nAvaa aiemmat analyysit uudelleen Analyysit-välilehdeltä ja näe yhdellä silmäyksellä, ovatko ne vielä ajan tasalla.\n\nKREDIITIT ILMAN TILAUSTA\nOsta kertaluonteinen 5 tai 10 krediitin paketti aina kun haluat lisää analyyseja. Ostetut krediitit eivät vanhene.\n\nYKSITYISYYS EDELLÄ\nNinetyLens käyttää nimetöntä tiliä. Voit kirjautua ulos tai poistaa tilisi ja siihen liittyvät tiedot pysyvästi sovelluksessa. Tietosuojakäytäntö ja Käyttöehdot ovat aina saatavilla sovelluksessa.\n\nTUETUT KIELET\nEnglish, Türkçe, Deutsch, Español, Français.\n\nTÄRKEÄÄ\nTekoälyn tekemät analyysit ovat tiedoksi. Ne ilmaisevat todennäköisyyksiä, eivät varmoja lopputuloksia, eivätkä ole vedonlyöntineuvoja. Ottelutiedot voivat viivästyä, olla puutteellisia tai puuttua. NinetyLens on riippumaton eikä sillä ole yhteyttä mihinkään seuraan, sarjaan, liittoon tai datan toimittajaan, eivätkä ne tue sitä.\n\nLataa NinetyLens ja katso seuraavaa ottelua toisin silmin.",
+  "release_notes": "Uusi ilme: NinetyLensissä on terävämpi tumma ulkoasu, uusi sovelluskuvake ja nopeampi otteluluettelo.\nMuokkaa analyysit itsellesi: valitse suosikkijoukkue, seuratut sarjat ja jokaisen analyysin syvyys.\nKrediitit ovat nyt selkeämmät: saldo ja jokainen krediittitapahtuma näkyvät profiilissasi.\nSuorituskyky- ja vakausparannuksia.",
+  "screens": {
+    "matches": [
+      "Jokainen ottelu\nyhdessä kalenterissa",
+      "Päivän ottelut ja suosikkijoukkueesi yhdellä silmäyksellä."
+    ],
+    "detail": [
+      "Todennäköisyydet,\njotka voi ymmärtää",
+      "Tulos, maalit ja lukemat sekä data niiden takana."
+    ],
+    "history": [
+      "Jokainen analyysi\naina käden ulottuvilla",
+      "Avaa aiemmat analyysit ja katso, ovatko ne ajan tasalla."
+    ],
+    "profile": [
+      "Sinulle räätälöity,\nei tilausta",
+      "Joukkueesi, sarjasi ja syvyys. Krediittejä vain tarvittaessa."
+    ],
+    "onboarding-welcome": [
+      "Lue jokainen ottelu\nomalla linssillä",
+      "Tekoälyn otteluanalyysi, kirjoitettu joukkueellesi."
+    ]
+  },
+  "tagline": "Todennäköisyydet,\njotka voi ymmärtää."
+}

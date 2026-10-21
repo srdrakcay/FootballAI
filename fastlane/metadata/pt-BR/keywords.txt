@@ -1,0 +1,1 @@
+jogo,resultado,calendário,time,placar,favorito,histórico,campeonato,escalação,gols,previsão,forma

@@ -1,0 +1,32 @@
+{
+  "locale": "ro",
+  "name": "NinetyLens: Fotbal cu IA",
+  "subtitle": "Probabilități și analize meci",
+  "keywords": "rezultat,calendar,echipă,goluri,scor,favorit,istoric,campionat,formație,predicție,formă,clasament",
+  "promotional_text": "Alege un meci, folosește un credit și primești probabilități cu IA și context clar. Fără abonament: cumperi credite doar când ai nevoie.",
+  "release_notes": "Aspect nou: NinetyLens are un design întunecat mai clar, o pictogramă nouă și o listă de meciuri mai rapidă.\nPersonalizează-ți analizele: alege echipa favorită, competițiile urmărite și profunzimea fiecărei analize.\nCredite mai clare: soldul și fiecare mișcare apar în profilul tău.\nÎmbunătățiri de performanță și stabilitate.",
+  "description": "Privește fiecare meci printr-o lentilă mai clară, bazată pe date. NinetyLens transformă programul de fotbal și contextul echipelor în probabilități cu IA pe care chiar le poți citi.\n\nDE CE NINETYLENS\n• Probabilități pentru rezultat, goluri și scoruri probabile, cu datele din spatele lor\n• Analize scrise pentru tine: limba, profunzimea și accentul urmează profilul tău\n• Favorite și istoric mereu cu tine\n• Fără abonament: pachete de credite o singură dată, cu costul afișat înainte să cheltuiești\n\nCUM FUNCȚIONEAZĂ\n1. Parcurge meciurile zilei într-un calendar zilnic rapid.\n2. Deschide un meci și deblochează analiza cu credite. Costul este afișat mereu înainte.\n3. Citește probabilitățile, încrederea, datele disponibile și limitările clare. Revino oricând din fila Analize.\n\nEXPLOREAZĂ MECIURILE DUPĂ DATĂ\nMișcă-te prin calendar, vezi orele și competițiile împreună și filtrează după echipele tale favorite.\n\nSALVEAZĂ FAVORITELE\nMarchează meciurile care te interesează și găsește-le din nou după ce închizi aplicația.\n\nANALIZĂ IA TRANSPARENTĂ\nFiecare analiză arată probabilitățile pentru rezultat, goluri și scoruri probabile, cât de încrezător este modelul și ce date au fost disponibile. Dacă există deja o analiză pentru același meci și aceleași date, este refolosită fără să plătești de două ori.\n\nISTORICUL ANALIZELOR\nRedeschide analizele anterioare din fila Analize și vezi dintr-o privire dacă sunt încă actuale.\n\nCREDITE FĂRĂ ABONAMENT\nCumpără un pachet unic de 5 sau 10 credite oricând vrei mai multe analize. Creditele cumpărate nu expiră.\n\nCONFIDENȚIALITATEA ÎNTÂI\nNinetyLens folosește un cont anonim. Te poți deconecta sau poți șterge definitiv contul și datele asociate direct din aplicație. Politica de confidențialitate și Termenii de utilizare sunt mereu disponibile în aplicație.\n\nLIMBI SUPORTATE\nEnglish, Türkçe, Deutsch, Español, Français.\n\nIMPORTANT\nAnalizele cu IA au caracter informativ. Exprimă probabilități, nu rezultate sigure, și nu reprezintă un sfat pentru pariuri. Datele meciurilor pot fi întârziate, incomplete sau indisponibile. NinetyLens este independentă și nu este afiliată sau susținută de vreun club, ligă, federație sau furnizor de date.\n\nDescarcă NinetyLens și privește următorul meci altfel.",
+  "screens": {
+    "matches": [
+      "Fiecare meci,\nîntr-un singur calendar",
+      "Meciurile de azi și echipele tale favorite dintr-o privire."
+    ],
+    "detail": [
+      "Probabilități pe care\nchiar le poți citi",
+      "Rezultat, goluri și scoruri probabile, cu datele din spatele lor."
+    ],
+    "history": [
+      "Fiecare analiză,\nmereu la îndemână",
+      "Redeschide analizele trecute și vezi dacă sunt încă actuale."
+    ],
+    "profile": [
+      "Pe măsura ta,\nfără abonament",
+      "Echipa ta, competițiile tale. Credite doar când ai nevoie."
+    ],
+    "onboarding-welcome": [
+      "Citește fiecare meci\ncu lentila ta",
+      "Analiză de meciuri cu IA, scrisă pentru echipa ta."
+    ]
+  },
+  "tagline": "Probabilități de meci\npe care le poți citi."
+}

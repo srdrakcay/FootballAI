@@ -1,0 +1,1 @@
+kampprogram,resultat,form,stilling,statistik,favorit,hold,kalender,historik,opstilling,forudsigelse

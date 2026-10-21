@@ -1,1 +1,1 @@
-spielplan,ergebnisse,form,tabelle,statistik,favoriten,teams,kalender,liga,h2h,verlauf,kader,vereine
+spielplan,ergebnis,form,tabelle,statistik,favorit,team,kalender,verlauf,kader,analyse,liga,h2h

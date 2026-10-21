@@ -23,6 +23,30 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Upload localized metadata, screenshots, and App Preview videos without submitting for review
 
+### ios store_metadata
+
+```sh
+[bundle exec] fastlane ios store_metadata
+```
+
+Upload only the localized text metadata (name, subtitle, keywords, promo text, description, release notes). No screenshots, no binary, no review submission
+
+### ios store_screenshots
+
+```sh
+[bundle exec] fastlane ios store_screenshots
+```
+
+Replace the App Store screenshots with AppStoreAssets/final. No text metadata, no binary, no review submission
+
+### ios remove_app_previews
+
+```sh
+[bundle exec] fastlane ios remove_app_previews
+```
+
+Delete every App Preview video from the editable App Store version, in all localizations
+
 ### ios store_content_preview
 
 ```sh

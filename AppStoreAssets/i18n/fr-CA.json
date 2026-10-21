@@ -1,0 +1,32 @@
+{
+  "locale": "fr-CA",
+  "name": "NinetyLens: Soccer IA",
+  "subtitle": "Probabilités & stats de match",
+  "keywords": "calendrier,résultat,forme,statistique,favori,équipe,historique,prédiction,analyse,horaire,h2h",
+  "promotional_text": "Choisis un match, utilise un crédit et obtiens des probabilités propulsées par l'IA, avec un contexte clair. Aucun abonnement : des crédits au besoin seulement.",
+  "release_notes": "Nouveau look : NinetyLens adopte un design sombre plus net, une nouvelle icône et une liste de matchs plus rapide.\nPersonnalise tes analyses : choisis ton équipe favorite, tes compétitions suivies et la profondeur de chaque analyse.\nCrédits plus clairs : ton solde et chaque mouvement s'affichent dans ton profil.\nAméliorations de performance et de stabilité.",
+  "description": "Regarde chaque match de soccer avec un regard plus clair, fondé sur les données. NinetyLens transforme les calendriers et le contexte des équipes en probabilités propulsées par l'IA, que tu peux vraiment lire.\n\nPOURQUOI NINETYLENS\n• Probabilités pour le résultat, les buts et les pointages probables, avec les données derrière\n• Des analyses écrites pour toi : langue, profondeur et angle suivent ton profil\n• Des favoris et un historique qui restent avec toi\n• Aucun abonnement : des forfaits de crédits à l'achat unique, avec le coût affiché avant de dépenser\n\nCOMMENT ÇA MARCHE\n1. Parcours les matchs du jour dans un calendrier quotidien rapide.\n2. Ouvre un match et débloque l'analyse avec des crédits. Le coût est toujours affiché d'abord.\n3. Lis les probabilités, la confiance, les données disponibles et les limites. Retrouve l'analyse en tout temps dans Analyses.\n\nTROUVE LES MATCHS PAR DATE\nNavigue dans le calendrier, vois les heures de botté d'envoi et les compétitions ensemble, et filtre selon tes équipes favorites.\n\nGARDE TES FAVORIS\nMarque les matchs qui t'intéressent et retrouve-les après avoir fermé l'application.\n\nANALYSE IA TRANSPARENTE\nChaque analyse montre les probabilités du résultat, des buts et des pointages probables, le niveau de confiance du modèle et les données disponibles. Si une analyse existe déjà pour le même match et les mêmes données, elle est réutilisée : tu ne paies pas deux fois.\n\nHISTORIQUE DES ANALYSES\nRouvre tes analyses précédentes depuis l'onglet Analyses et vois d'un coup d'œil si elles sont encore à jour.\n\nDES CRÉDITS SANS ABONNEMENT\nAchète un forfait unique de 5 ou 10 crédits quand tu veux plus d'analyses. Les crédits achetés n'expirent pas.\n\nVIE PRIVÉE D'ABORD\nNinetyLens utilise un compte anonyme. Tu peux te déconnecter ou supprimer définitivement ton compte et les données liées dans l'application. La politique de confidentialité et les conditions d'utilisation sont toujours accessibles dans l'application.\n\nLANGUES PRISES EN CHARGE\nEnglish, Türkçe, Deutsch, Español, Français.\n\nIMPORTANT\nLes analyses propulsées par l'IA sont fournies à titre informatif. Elles expriment des probabilités, pas des résultats certains, et ne constituent pas des conseils de paris. Les données de match peuvent être en retard, incomplètes ou indisponibles. NinetyLens est indépendante et n'est affiliée ni approuvée par aucun club, aucune ligue, aucune fédération ni aucun fournisseur de données.\n\nTélécharge NinetyLens et regarde le prochain match autrement.",
+  "screens": {
+    "matches": [
+      "Chaque match,\nun seul calendrier",
+      "Les matchs du jour et tes équipes favorites en un coup d'œil."
+    ],
+    "detail": [
+      "Des probabilités\nfaciles à lire",
+      "Résultat, buts et pointages probables, avec les données derrière."
+    ],
+    "history": [
+      "Chaque analyse\ntoujours sous la main",
+      "Rouvre tes analyses et vois si elles sont encore à jour."
+    ],
+    "profile": [
+      "Adapté à toi,\nsans abonnement",
+      "Ton équipe, ta profondeur. Des crédits seulement au besoin."
+    ],
+    "onboarding-welcome": [
+      "Lis chaque match\navec ton propre regard",
+      "Analyse de soccer par IA, écrite pour ton équipe."
+    ]
+  },
+  "tagline": "Des probabilités de\nmatch faciles à lire."
+}

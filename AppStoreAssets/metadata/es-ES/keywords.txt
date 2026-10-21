@@ -1,1 +1,1 @@
-partidos,resultados,calendario,forma,equipos,estadísticas,pronóstico,favoritos,tabla,historial
+partido,resultado,calendario,forma,equipo,estadística,pronóstico,favorito,tabla,historial,liga,h2h

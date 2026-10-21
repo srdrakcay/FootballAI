@@ -1,0 +1,32 @@
+{
+  "locale": "sv",
+  "name": "NinetyLens: Fotboll AI",
+  "subtitle": "Sannolikheter & matchanalys",
+  "keywords": "matchschema,resultat,form,tabell,statistik,favorit,lag,kalender,historik,laguppställning,prognos,h2h",
+  "promotional_text": "Välj en match, använd en kredit och få AI-baserade sannolikheter med tydlig kontext. Ingen prenumeration: du köper krediter bara när du behöver dem.",
+  "release_notes": "Ny look: NinetyLens har fått en skarpare mörk design, en ny appikon och en snabbare matchlista.\nGör analyserna personliga: välj ditt favoritlag, dina turneringar och hur djup varje analys ska vara.\nKrediter är tydligare: ditt saldo och varje kreditrörelse visas i din profil.\nFörbättrad prestanda och stabilitet.",
+  "description": "Se varje fotbollsmatch genom en tydligare, datadriven lins. NinetyLens förvandlar matchschema och lagkontext till AI-baserade sannolikheter som du faktiskt kan läsa.\n\nDÄRFÖR NINETYLENS\n• Sannolikheter för resultat, mål och trolig slutresultat, med datan bakom\n• Analyser skrivna för dig: språk, djup och fokus följer din egen profil\n• Favoriter och historik som stannar hos dig\n• Ingen prenumeration: engångspaket med krediter, och priset visas innan du använder dem\n\nSÅ HÄR FUNGERAR DET\n1. Bläddra bland dagens matcher i en snabb dagskalender.\n2. Öppna en match och lås upp analysen med krediter. Priset visas alltid först.\n3. Läs sannolikheter, säkerhet, tillgänglig data och tydliga begränsningar. Hitta analysen igen när som helst under Analyser.\n\nHITTA MATCHER EFTER DATUM\nBläddra i kalendern, se avsparkstider och tävlingar samlat och filtrera på dina favoritlag.\n\nSPARA DINA FAVORITER\nMarkera matcherna du bryr dig om och hitta dem igen när du har stängt appen.\n\nTRANSPARENT AI-ANALYS\nVarje analys visar sannolikheter för matchens resultat, mål och trolig slutresultat, hur säker modellen är och vilken data som fanns tillgänglig. Finns redan en analys för samma match och data återanvänds den, så du slipper betala två gånger.\n\nANALYSHISTORIK\nÖppna tidigare analyser under fliken Analyser och se direkt om de fortfarande är aktuella.\n\nKREDITER UTAN PRENUMERATION\nKöp ett engångspaket med 5 eller 10 krediter när du vill ha fler analyser. Köpta krediter går inte ut.\n\nINTEGRITET FÖRST\nNinetyLens använder ett anonymt konto. Du kan logga ut eller radera ditt konto och tillhörande data permanent i appen. Integritetspolicy och användarvillkor finns alltid i appen.\n\nSPRÅK SOM STÖDS\nEnglish, Türkçe, Deutsch, Español, Français.\n\nVIKTIGT\nAI-baserade analyser är endast informativa. De uttrycker sannolikheter, inte säkra utfall, och är inte spelråd. Matchdata kan vara försenad, ofullständig eller otillgänglig. NinetyLens är oberoende och är inte anknutet till eller godkänt av någon klubb, serie, förbund eller dataleverantör.\n\nLadda ner NinetyLens och se nästa match med nya ögon.",
+  "screens": {
+    "matches": [
+      "Varje match,\nsamlad i en kalender",
+      "Dagens matcher och dina favoritlag med en blick."
+    ],
+    "detail": [
+      "Sannolikheter\nsom går att läsa",
+      "Resultat, mål och trolig slutresultat, med datan bakom."
+    ],
+    "history": [
+      "Varje analys\nalltid nära till hands",
+      "Öppna tidigare analyser och se om de fortfarande gäller."
+    ],
+    "profile": [
+      "Anpassat efter dig,\nutan prenumeration",
+      "Ditt lag, ditt djup. Krediter bara när du behöver dem."
+    ],
+    "onboarding-welcome": [
+      "Se varje match\nmed din egen lins",
+      "AI-baserad matchanalys, skriven för ditt lag."
+    ]
+  },
+  "tagline": "Matchsannolikheter\nsom går att läsa."
+}

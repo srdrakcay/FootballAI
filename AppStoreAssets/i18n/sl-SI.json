@@ -1,0 +1,32 @@
+{
+  "locale": "sl-SI",
+  "name": "NinetyLens: Nogomet AI",
+  "subtitle": "Analize tekem in statistika",
+  "keywords": "verjetnost,napoved,razpored,rezultat,koledar,priljubljene,zgodovina,forma,ekipa,postava,lestvica",
+  "promotional_text": "Izberi katero koli tekmo, porabi kredit in prejmi AI verjetnosti z jasnim kontekstom. Brez naročnine: kredite kupiš le, ko jih potrebuješ.",
+  "description": "Poglej vsako tekmo skozi jasnejšo, na podatkih temelječo lečo. NinetyLens pretvori nogometne razporede in kontekst ekip v AI verjetnosti, ki jih res lahko prebereš.\n\nZAKAJ NINETYLENS\n• Verjetnosti izida, golov in najverjetnejših rezultatov, skupaj s podatki zanje\n• Analize, napisane zate: jezik, globina in poudarek sledijo tvojemu profilu\n• Priljubljene in zgodovina, ki ostaneta s tabo\n• Brez naročnine: enkratni paketi kreditov, ceno vidiš, preden jo porabiš\n\nKAKO DELUJE\n1. Prebrskaj tekme dneva v hitrem dnevnem koledarju.\n2. Odpri tekmo in odkleni analizo s krediti. Cena je vedno prikazana vnaprej.\n3. Beri verjetnosti, zanesljivost modela, razpoložljive podatke in jasne omejitve. K analizi se lahko vrneš kadar koli v zavihku Analize.\n\nTEKME PO DATUMU\nPremikaj se po koledarju, poglej ure začetka in tekmovanja skupaj ter filtriraj svoje priljubljene ekipe.\n\nSHRANI PRILJUBLJENE\nOznači tekme, ki ti pomenijo največ, in jih najdi tudi po zaprtju aplikacije.\n\nPREGLEDNA AI ANALIZA\nVsaka analiza prikaže verjetnosti izida tekme, golov in verjetnih rezultatov, kako zanesljiv je model in kateri podatki so bili na voljo. Če analiza za isto tekmo in iste podatke že obstaja, se uporabi znova in ne plačaš dvakrat.\n\nZGODOVINA ANALIZ\nZnova odpri prejšnje analize v zavihku Analize in na prvi pogled poglej, ali so še aktualne.\n\nKREDITI BREZ NAROČNINE\nKupi enkratni paket 5 ali 10 kreditov, kadar želiš več analiz. Kupljeni krediti ne potečejo.\n\nZASEBNOST NA PRVEM MESTU\nNinetyLens uporablja anonimen račun. V aplikaciji se lahko odjaviš ali trajno izbrišeš račun in povezane podatke. Pravilnik o zasebnosti in Pogoji uporabe so vedno na voljo v aplikaciji.\n\nPODPRTI JEZIKI\nEnglish, Türkçe, Deutsch, Español, Français.\n\nPOMEMBNO\nAI analize so informativne. Izražajo verjetnosti, ne gotovih izidov, in niso nasvet za stave. Podatki o tekmah so lahko zakasnjeni, nepopolni ali nedostopni. NinetyLens je neodvisen in ni povezan z nobenim klubom, ligo, zvezo ali ponudnikom podatkov niti ga ti ne podpirajo.\n\nPrenesi NinetyLens in poglej naslednjo tekmo drugače.",
+  "release_notes": "Nov videz: NinetyLens ima ostrejšo temno zasnovo, novo ikono aplikacije in hitrejši seznam tekem.\nPrilagodi analize sebi: izberi priljubljeno ekipo, spremljane lige in globino vsake analize.\nKrediti so preglednejši: stanje in vsak premik kreditov vidiš v profilu.\nIzboljšave zmogljivosti in stabilnosti.",
+  "screens": {
+    "matches": [
+      "Vsaka tekma\nv enem koledarju",
+      "Današnje tekme in tvoje priljubljene ekipe na dlani."
+    ],
+    "detail": [
+      "Verjetnosti, ki jih\nres lahko prebereš",
+      "Izid, goli in rezultati s podatki, ki stojijo za njimi."
+    ],
+    "history": [
+      "Vsaka analiza\nvedno pri roki",
+      "Odpri pretekle analize in poglej, ali so še aktualne."
+    ],
+    "profile": [
+      "Po tvoji meri,\nbrez naročnine",
+      "Tvoja ekipa, lige in globina. Krediti le, ko jih želiš."
+    ],
+    "onboarding-welcome": [
+      "Beri vsako tekmo\ns svojo lečo",
+      "AI analiza tekem, napisana za tvojo ekipo."
+    ]
+  },
+  "tagline": "Verjetnosti, ki jih\nres lahko prebereš."
+}

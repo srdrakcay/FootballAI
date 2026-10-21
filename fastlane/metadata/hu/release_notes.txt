@@ -1,0 +1,4 @@
+Új megjelenés: a NinetyLens élesebb sötét dizájnt, új appikont és gyorsabb meccslistát kapott.
+Szabd személyre az elemzéseket: válaszd ki kedvenc csapatod, követett bajnokságaid és az elemzések mélységét.
+Átláthatóbb kreditek: az egyenleged és minden kreditmozgás látszik a profilodban.
+Teljesítmény- és stabilitásjavítások.
