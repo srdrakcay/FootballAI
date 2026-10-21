@@ -12,6 +12,8 @@ public struct AnalysisHistoryItem: Identifiable, Hashable, Sendable {
     public let generatedAt: Date
     public let validUntil: Date
     public let homeWinProbability: Int?
+    public let drawProbability: Int?
+    public let awayWinProbability: Int?
 
     public init(
         id: String,
@@ -24,7 +26,9 @@ public struct AnalysisHistoryItem: Identifiable, Hashable, Sendable {
         viewedAt: Date,
         generatedAt: Date,
         validUntil: Date,
-        homeWinProbability: Int?
+        homeWinProbability: Int?,
+        drawProbability: Int? = nil,
+        awayWinProbability: Int? = nil
     ) {
         self.id = id
         self.fixtureKey = fixtureKey
@@ -37,7 +41,12 @@ public struct AnalysisHistoryItem: Identifiable, Hashable, Sendable {
         self.generatedAt = generatedAt
         self.validUntil = validUntil
         self.homeWinProbability = homeWinProbability
+        self.drawProbability = drawProbability
+        self.awayWinProbability = awayWinProbability
     }
+
+    /// True when all three outcome probabilities are known (history written by schema v2).
+    public var hasFullResult: Bool { homeWinProbability != nil && drawProbability != nil && awayWinProbability != nil }
 }
 
 public protocol UserLibraryRepository: Sendable {

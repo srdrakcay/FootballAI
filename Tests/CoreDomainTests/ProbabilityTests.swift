@@ -24,6 +24,7 @@ final class ProbabilityTests: XCTestCase {
 
     func testLocaleResolutionUsesBaseThenEnglish() {
         XCTAssertEqual(SupportedLocale.resolve(identifier: "tr-TR"), .tr)
-        XCTAssertEqual(SupportedLocale.resolve(identifier: "de-DE"), .en)
+        XCTAssertEqual(SupportedLocale.resolve(identifier: "de-DE"), .de)
+        XCTAssertEqual(SupportedLocale.resolve(identifier: "pt-BR"), .en)
     }
 }

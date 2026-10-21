@@ -15,6 +15,7 @@
 		A10000000000000000000006 /* CoreDomain in Frameworks */ = {isa = PBXBuildFile; productRef = A90000000000000000000004 /* CoreDomain */; };
 		A10000000000000000000007 /* ../GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* ../GoogleService-Info.plist */; };
 		A10000000000000000000008 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* AppDelegate.swift */; };
+		A1000000000000000000000A /* AppUI in Frameworks */ = {isa = PBXBuildFile; productRef = A90000000000000000000006 /* AppUI */; };
 		A10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -37,6 +38,7 @@
 				A10000000000000000000004 /* FeatureFixtures in Frameworks */,
 				A10000000000000000000005 /* FeatureAnalysis in Frameworks */,
 				A10000000000000000000006 /* CoreDomain in Frameworks */,
+				A1000000000000000000000A /* AppUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +103,7 @@
 				A90000000000000000000002 /* FeatureFixtures */,
 				A90000000000000000000003 /* FeatureAnalysis */,
 				A90000000000000000000004 /* CoreDomain */,
+				A90000000000000000000006 /* AppUI */,
 			);
 			productName = FootballAI;
 			productReference = A20000000000000000000003 /* FootballAI.app */;
@@ -133,6 +136,7 @@
 			knownRegions = (
 				en,
 				tr,
+				de,
 				es,
 				fr,
 				Base,
@@ -156,7 +160,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000007 /* ../GoogleService-Info.plist in Resources */,
-				A10000000000000000000009 /* Assets.xcassets in Resources */,
+		A10000000000000000000009 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,6 +305,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */;
 			productName = CoreDomain;
+		};
+		A90000000000000000000006 /* AppUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000005 /* XCLocalSwiftPackageReference ".." */;
+			productName = AppUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

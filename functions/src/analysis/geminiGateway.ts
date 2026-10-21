@@ -22,6 +22,19 @@ export class GeminiGateway implements ModelGateway {
   }
 
   async generate(invocation: ModelInvocation): Promise<ModelGatewayResult> {
+    return this.generateStructured({
+      systemInstruction: systemInstruction(invocation),
+      userText: `ANALYSIS_INPUT_JSON\n${JSON.stringify(invocation.snapshot)}`,
+      responseSchema: this.options.responseSchema,
+      timeoutMs: invocation.timeoutMs,
+      correlationId: invocation.correlationId,
+      maxOutputTokens: 2_500,
+      temperature: 0.15,
+    });
+  }
+
+  /** Generic structured call used by both the shared analysis and the personal layer. */
+  async generateStructured(request: StructuredRequest): Promise<ModelGatewayResult> {
     const response = await this.fetchImplementation(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.options.model)}:generateContent`,
       {
@@ -31,22 +44,17 @@ export class GeminiGateway implements ModelGateway {
           "x-goog-api-key": this.options.apiKey,
         },
         body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemInstruction(invocation) }],
-          },
-          contents: [{
-            role: "user",
-            parts: [{ text: `ANALYSIS_INPUT_JSON\n${JSON.stringify(invocation.snapshot)}` }],
-          }],
+          systemInstruction: { parts: [{ text: request.systemInstruction }] },
+          contents: [{ role: "user", parts: [{ text: request.userText }] }],
           generationConfig: {
             responseMimeType: "application/json",
-            responseJsonSchema: geminiCompatibleSchema(this.options.responseSchema),
-            temperature: 0.15,
-            maxOutputTokens: 2_500,
+            responseJsonSchema: geminiCompatibleSchema(request.responseSchema),
+            temperature: request.temperature ?? 0.2,
+            maxOutputTokens: request.maxOutputTokens ?? 1_200,
             thinkingConfig: { thinkingLevel: "low" },
           },
         }),
-        signal: AbortSignal.timeout(invocation.timeoutMs),
+        signal: AbortSignal.timeout(request.timeoutMs),
       },
     );
 
@@ -67,12 +75,22 @@ export class GeminiGateway implements ModelGateway {
     }
 
     return {
-      providerRequestId: payload.responseId ?? invocation.correlationId,
+      providerRequestId: payload.responseId ?? request.correlationId,
       rawJson,
       ...(payload.usageMetadata?.promptTokenCount !== undefined ? { inputTokens: payload.usageMetadata.promptTokenCount } : {}),
       ...(payload.usageMetadata?.candidatesTokenCount !== undefined ? { outputTokens: payload.usageMetadata.candidatesTokenCount } : {}),
     };
   }
+}
+
+export interface StructuredRequest {
+  systemInstruction: string;
+  userText: string;
+  responseSchema: Record<string, unknown>;
+  timeoutMs: number;
+  correlationId: string;
+  maxOutputTokens?: number;
+  temperature?: number;
 }
 
 export class GeminiProviderError extends Error {
@@ -90,6 +108,7 @@ function systemInstruction(invocation: ModelInvocation): string {
     "Every rationale must cite one or more available sections using evidenceRefs.",
     "Never promise an outcome, recommend betting, or use certainty language.",
     "Reflect missing information in limitations and lower confidence.",
+    "Write rationale text in plain English; it is a neutral base that is localized and personalized later.",
     "Every rationale code and every limitations item must be an uppercase underscore code matching ^[A-Z0-9_]{1,64}$, never a sentence.",
     `Use schemaVersion=${invocation.schemaVersion}, promptVersion=${invocation.promptVersion}, modelVersion=${invocation.modelAlias}.`,
     "Copy all identity, timestamp, language, status and analysisId fields exactly from outputIdentity in the input.",

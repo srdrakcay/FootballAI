@@ -10,6 +10,8 @@ public enum FirebaseEnvironment {
 
 public protocol AuthenticationService: Sendable {
     func ensureAnonymousUser() async throws -> String
+    /// Signs in if needed and returns the bootstrap payload (wallet, AI profile) in one call.
+    func session(locale: SupportedLocale) async throws -> SessionInfo
     func signOut() async throws
     func deleteAccount() async throws
 }
@@ -17,8 +19,37 @@ public protocol AuthenticationService: Sendable {
 public actor FirebaseAuthenticationService: AuthenticationService {
     private var pendingSignIn: Task<String, any Error>?
     private var bootstrappedUIDs: Set<String> = []
+    private var sessions: [String: SessionInfo] = [:]
 
     public init() {}
+
+    public func session(locale: SupportedLocale) async throws -> SessionInfo {
+        let uid = try await ensureAnonymousUser()
+        if let cached = sessions[uid] { return cached }
+        let result = try await Functions.functions(region: FirebaseEnvironment.functionsRegion)
+            .httpsCallable("bootstrapUser")
+            .call(["locale": locale.rawValue])
+        let info = Self.sessionInfo(uid: uid, data: result.data)
+        sessions[uid] = info
+        bootstrappedUIDs.insert(uid)
+        return info
+    }
+
+    private static func sessionInfo(uid: String, data: Any) -> SessionInfo {
+        let payload = data as? [String: Any] ?? [:]
+        let walletData = payload["wallet"] as? [String: Any]
+        let wallet = CreditWallet(
+            balance: integer(walletData?["balance"] ?? payload["balance"]) ?? 0,
+            reserved: integer(walletData?["reserved"]) ?? 0,
+            analysisCreditCost: integer(walletData?["analysisCreditCost"] ?? payload["analysisCreditCost"]) ?? 1
+        )
+        var profile: AIProfile?
+        if let raw = payload["aiProfile"], JSONSerialization.isValidJSONObject(raw),
+           let encoded = try? JSONSerialization.data(withJSONObject: raw) {
+            profile = try? JSONDecoder().decode(AIProfile.self, from: encoded)
+        }
+        return SessionInfo(uid: uid, wallet: wallet, aiProfile: profile)
+    }
     public func ensureAnonymousUser() async throws -> String {
         let uid: String
         if let current = Auth.auth().currentUser { uid = current.uid }
@@ -53,6 +84,7 @@ public actor FirebaseAuthenticationService: AuthenticationService {
     }
 
     public func signOut() throws {
+        sessions.removeAll()
         pendingSignIn?.cancel()
         pendingSignIn = nil
         bootstrappedUIDs.removeAll()
@@ -66,6 +98,7 @@ public actor FirebaseAuthenticationService: AuthenticationService {
             .httpsCallable("deleteAccount")
             .call(["confirmation": "DELETE"])
         bootstrappedUIDs.remove(uid)
+        sessions[uid] = nil
         pendingSignIn?.cancel()
         pendingSignIn = nil
         try? Auth.auth().signOut()

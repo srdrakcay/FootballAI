@@ -7,7 +7,7 @@ export type AnalysisState = (typeof analysisStates)[number];
 
 export interface RequestAnalysisPayload {
   fixtureKey: string;
-  locale: "tr" | "en" | "es" | "fr";
+  locale: "tr" | "en" | "de" | "es" | "fr";
   clientRequestId: string;
   acceptedDisclaimerVersion: string;
 }

@@ -24,11 +24,14 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if owns(uid);
-      allow create: if owns(uid) && request.resource.data.keys().hasOnly(['locale']) && request.resource.data.locale in ['tr', 'en', 'es', 'fr'];
-      allow update: if owns(uid) && onlyAllowed(['locale']) && request.resource.data.locale in ['tr', 'en', 'es', 'fr'];
+      allow create: if owns(uid) && request.resource.data.keys().hasOnly(['locale']) && request.resource.data.locale in ['tr', 'en', 'de', 'es', 'fr'];
+      allow update: if owns(uid) && onlyAllowed(['locale']) && request.resource.data.locale in ['tr', 'en', 'de', 'es', 'fr'];
       allow delete: if false;
       match /private/{document} { allow read: if owns(uid); allow write: if false; }
       match /history/{versionId} { allow read: if owns(uid); allow write: if false; }
+      // Credit movements and personal analysis layers are written only by Cloud Functions.
+      match /ledger/{entryId} { allow read: if owns(uid); allow write: if false; }
+      match /personal/{fixtureHash} { allow read: if owns(uid); allow write: if false; }
       match /favorites/{fixtureKey} {
         allow read: if owns(uid);
         allow create, update: if owns(uid)

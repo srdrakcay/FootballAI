@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import Ajv2020Module, { type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import addFormatsModule from "ajv-formats";
+import { violatesLanguagePolicy } from "../shared/languagePolicy.js";
 
 const Ajv2020 = Ajv2020Module as unknown as new (options: object) => { compile(schema: object): ValidateFunction };
 const addFormats = addFormatsModule as unknown as (ajv: object) => void;
@@ -27,7 +28,7 @@ export interface ExpectedAnalysisIdentity {
 interface AnalysisResultShape {
   schemaVersion: string; fixtureKey: string; fixtureVersion: number;
   snapshotId: string; snapshotVersion: number; promptVersion: string; modelVersion: string;
-  generatedAt: string; validUntil: string; language: "tr" | "en" | "es" | "fr";
+  generatedAt: string; validUntil: string; language: "tr" | "en" | "de" | "es" | "fr";
   markets: {
     matchResult: { homePct: number; drawPct: number; awayPct: number };
     goals25: { overPct: number; underPct: number };
@@ -46,12 +47,7 @@ export type ValidationIssueCode =
 export interface ValidationIssue { code: ValidationIssueCode; path: string; detail?: string }
 export type ValidationResult = { ok: true; value: AnalysisResultShape } | { ok: false; issues: ValidationIssue[] };
 
-const prohibitedPatterns: Readonly<Record<AnalysisResultShape["language"], readonly RegExp[]>> = {
-  en: [/\bguaranteed?\b/i, /\bcertain (result|win)\b/i, /\bbet (on|now)\b/i, /\bsure win\b/i],
-  tr: [/\bgaranti\b/i, /\bkesin (sonuç|kazan)/i, /\bbahis (yap|oyna)/i, /\bkesinlikle kazan/i],
-  es: [/\bgarantizad[oa]\b/i, /\bresultado seguro\b/i, /\bapuesta (por|ahora)\b/i, /\bvictoria segura\b/i],
-  fr: [/\bgaranti[e]?\b/i, /\brésultat certain\b/i, /\bpariez (sur|maintenant)\b/i, /\bvictoire certaine\b/i],
-};
+
 
 export class AnalysisResultValidator {
   private readonly schemaValidator: ValidateFunction;
@@ -128,7 +124,7 @@ function validateTemporal(value: AnalysisResultShape, snapshot: ValidationSnapsh
 
 function validateLanguagePolicy(value: AnalysisResultShape, issues: ValidationIssue[]): void {
   value.rationale.forEach((rationale, index) => {
-    if (prohibitedPatterns[value.language].some((pattern) => pattern.test(rationale.text))) {
+    if (violatesLanguagePolicy(value.language, rationale.text)) {
       issues.push({ code: "PROHIBITED_CLAIM", path: `/rationale/${index}/text` });
     }
   });

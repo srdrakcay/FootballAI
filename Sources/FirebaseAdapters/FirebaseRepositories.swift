@@ -15,11 +15,85 @@ public actor FirebaseCreditWalletRepository: CreditWalletRepository {
 
     public func wallet() async throws -> CreditWallet {
         let uid = try await authentication.ensureAnonymousUser()
-        async let walletDocument = Firestore.firestore().collection("users").document(uid).collection("private").document("wallet").getDocument()
-        async let configuration = configurationService.fetchAndActivate()
-        let (document, config) = try await (walletDocument, configuration)
-        let balance = integer(document.data()?["balance"]) ?? 0
-        return CreditWallet(balance: balance, analysisCreditCost: config.analysisCreditCost)
+        // Activated Remote Config values only: never a network fetch on the hot path.
+        let cost = await configurationService.bootstrap().analysisCreditCost
+        let document = try await Self.walletReference(uid).getDocument()
+        return Self.wallet(document.data(), cost: cost)
+    }
+
+    public nonisolated func observe() -> AsyncStream<CreditWallet> {
+        AsyncStream { continuation in
+            let registration = ListenerBox()
+            let task = Task {
+                guard let uid = try? await authentication.ensureAnonymousUser() else { continuation.finish(); return }
+                let cost = await configurationService.bootstrap().analysisCreditCost
+                registration.value = Self.walletReference(uid).addSnapshotListener(includeMetadataChanges: false) { snapshot, _ in
+                    guard let snapshot, snapshot.exists else { return }
+                    continuation.yield(Self.wallet(snapshot.data(), cost: cost))
+                }
+            }
+            continuation.onTermination = { _ in
+                task.cancel()
+                registration.remove()
+            }
+        }
+    }
+
+    public func ledger(limit: Int) async throws -> [CreditLedgerEntry] {
+        let uid = try await authentication.ensureAnonymousUser()
+        let snapshot = try await Firestore.firestore().collection("users").document(uid).collection("ledger")
+            .order(by: "createdAt", descending: true)
+            .limit(to: max(1, min(limit, 100)))
+            .getDocuments()
+        return snapshot.documents.compactMap { document in
+            let data = document.data()
+            guard let kind = (data["kind"] as? String).flatMap(CreditLedgerKind.init(rawValue:)),
+                  let delta = integer(data["delta"]) else { return nil }
+            return CreditLedgerEntry(
+                id: document.documentID,
+                kind: kind,
+                delta: delta,
+                balanceAfter: integer(data["balanceAfter"]) ?? 0,
+                label: data["label"] as? String,
+                createdAt: date(data["createdAt"]) ?? .now
+            )
+        }
+    }
+
+    private nonisolated static func walletReference(_ uid: String) -> DocumentReference {
+        Firestore.firestore().collection("users").document(uid).collection("private").document("wallet")
+    }
+
+    private nonisolated static func wallet(_ data: [String: Any]?, cost: Int) -> CreditWallet {
+        CreditWallet(
+            balance: integer(data?["balance"]) ?? 0,
+            reserved: integer(data?["reservedCredits"]) ?? 0,
+            analysisCreditCost: cost
+        )
+    }
+}
+
+/// Holds a Firestore listener so it can be removed from a `@Sendable` termination handler.
+final class ListenerBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var registration: (any ListenerRegistration)?
+    private var removed = false
+
+    var value: (any ListenerRegistration)? {
+        get { lock.withLock { registration } }
+        set {
+            lock.withLock {
+                if removed { newValue?.remove() } else { registration = newValue }
+            }
+        }
+    }
+
+    func remove() {
+        lock.withLock {
+            removed = true
+            registration?.remove()
+            registration = nil
+        }
     }
 }
 
@@ -31,29 +105,48 @@ public actor FirebaseFixtureRepository: FixtureRepository {
         self.callable = callable
     }
 
+    /// Emits Firestore's on-device cache immediately (if any), then the server's fresh list.
     public nonisolated func observeUpcoming(filter: FixtureFilter) -> AsyncThrowingStream<[Fixture], any Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
+                let query = Firestore.firestore().collection("fixtures")
+                    .whereField("kickoffAt", isGreaterThanOrEqualTo: Timestamp(date: filter.from))
+                    .whereField("kickoffAt", isLessThanOrEqualTo: Timestamp(date: filter.through))
+                    .order(by: "kickoffAt")
+                var emittedCache = false
+                if let cached = try? await query.getDocuments(source: .cache), !cached.documents.isEmpty {
+                    let fixtures = cached.documents.compactMap { try? Self.fixture($0) }.filter { Self.matches($0, filter) }
+                    if !fixtures.isEmpty {
+                        continuation.yield(fixtures)
+                        emittedCache = true
+                    }
+                }
                 do {
                     _ = try await authentication.ensureAnonymousUser()
-                    let syncPayload = FixtureSyncRequestDTO(
+                    let response: FixtureSyncResponseDTO = try await callable.call("syncFixtures", request: FixtureSyncRequestDTO(
                         dateFrom: Self.apiDate(filter.from),
                         dateTo: Self.apiDate(filter.through.addingTimeInterval(86_400))
-                    )
-                    let _: FixtureSyncResponseDTO = try await callable.call("syncFixtures", request: syncPayload)
-                    let snapshot = try await Firestore.firestore().collection("fixtures")
-                        .whereField("kickoffAt", isGreaterThanOrEqualTo: Timestamp(date: filter.from))
-                        .whereField("kickoffAt", isLessThanOrEqualTo: Timestamp(date: filter.through))
-                        .order(by: "kickoffAt")
-                        .getDocuments()
-                    let fixtures = try snapshot.documents.map(Self.fixture)
-                        .filter { filter.competitionIDs.isEmpty || filter.competitionIDs.contains($0.competition.id) }
-                    continuation.yield(fixtures)
+                    ))
+                    let fixtures: [Fixture]
+                    if let list = response.fixtures {
+                        fixtures = list.compactMap(\.domain)
+                    } else {
+                        fixtures = try await query.getDocuments().documents.compactMap { try? Self.fixture($0) }
+                    }
+                    continuation.yield(fixtures.filter { Self.matches($0, filter) }.sorted { $0.kickoffAt < $1.kickoffAt })
                     continuation.finish()
-                } catch { continuation.finish(throwing: error) }
+                } catch {
+                    // Keep showing cached fixtures when the network fails.
+                    if emittedCache { continuation.finish() } else { continuation.finish(throwing: error) }
+                }
             }
             continuation.onTermination = { _ in task.cancel() }
         }
+    }
+
+    private nonisolated static func matches(_ fixture: Fixture, _ filter: FixtureFilter) -> Bool {
+        fixture.kickoffAt >= filter.from && fixture.kickoffAt <= filter.through
+            && (filter.competitionIDs.isEmpty || filter.competitionIDs.contains(fixture.competition.id))
     }
 
     private nonisolated static func apiDate(_ date: Date) -> String {
@@ -204,7 +297,9 @@ public actor FirebaseUserLibraryRepository: UserLibraryRepository {
             viewedAt: viewedAt,
             generatedAt: generatedAt,
             validUntil: validUntil,
-            homeWinProbability: integer(data["homeWinProbability"])
+            homeWinProbability: integer(data["homeWinProbability"]),
+            drawProbability: integer(data["drawProbability"]),
+            awayWinProbability: integer(data["awayWinProbability"])
         )
     }
 }
@@ -336,16 +431,56 @@ private struct RequestResponseDTO: Decodable, Sendable {
     let requestId: String; let analysisId: String?; let state: String
 }
 private struct FixtureSyncRequestDTO: Encodable, Sendable { let dateFrom: String; let dateTo: String }
-private struct FixtureSyncResponseDTO: Decodable, Sendable { let count: Int; let cached: Bool }
+private struct FixtureSyncResponseDTO: Decodable, Sendable { let count: Int; let cached: Bool; let fixtures: [FixtureDTO]? }
+
+struct FixtureDTO: Decodable, Sendable {
+    struct TeamDTO: Decodable, Sendable {
+        let id: String?
+        let name: String?
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            name = try container.decodeIfPresent(String.self, forKey: .name)
+            if let text = try? container.decodeIfPresent(String.self, forKey: .id) { id = text }
+            else if let number = try? container.decodeIfPresent(Int.self, forKey: .id) { id = String(number) }
+            else { id = nil }
+        }
+        private enum CodingKeys: String, CodingKey { case id, name }
+    }
+    let key: String
+    let version: Int?
+    let competitionId: String
+    let competitionName: String?
+    let homeTeam: TeamDTO?
+    let awayTeam: TeamDTO?
+    let kickoffAt: String
+    let status: String
+    let latestSnapshotId: String?
+
+    var domain: Fixture? {
+        guard let kickoff = ISODate.parse(kickoffAt),
+              let status = FixtureStatus(rawValue: status),
+              let homeName = homeTeam?.name, let awayName = awayTeam?.name else { return nil }
+        return Fixture(
+            key: .init(rawValue: key),
+            version: version ?? 1,
+            competition: .init(id: .init(rawValue: competitionId), name: competitionName ?? competitionId),
+            homeTeam: Team(id: .init(rawValue: homeTeam?.id ?? homeName), name: homeName),
+            awayTeam: Team(id: .init(rawValue: awayTeam?.id ?? awayName), name: awayName),
+            kickoffAt: kickoff,
+            status: status,
+            latestSnapshotID: latestSnapshotId.map(SnapshotID.init(rawValue:))
+        )
+    }
+}
 private struct FixtureInsightsRequestDTO: Encodable, Sendable { let fixtureKey: String }
 
-private func date(_ value: Any?) -> Date? {
+func date(_ value: Any?) -> Date? {
     if let timestamp = value as? Timestamp { return timestamp.dateValue() }
     if let date = value as? Date { return date }
     if let string = value as? String { return ISO8601DateFormatter().date(from: string) }
     return nil
 }
-private func integer(_ value: Any?) -> Int? { (value as? NSNumber)?.intValue ?? value as? Int }
+func integer(_ value: Any?) -> Int? { (value as? NSNumber)?.intValue ?? value as? Int }
 private func requiredInt(_ data: [String: Any], _ key: String, fallback: String? = nil) throws -> Int {
     if let value = integer(data[key]) { return value }
     if let fallback, let value = integer(data[fallback]) { return value }

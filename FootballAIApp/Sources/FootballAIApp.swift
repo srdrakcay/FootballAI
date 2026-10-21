@@ -10,6 +10,10 @@ struct FootballAIApp: App {
         AppCompositionRoot.bootstrapFirebase()
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("-footballai-screenshot-mode") {
+            // Screenshots and previews run on sample data and skip onboarding
+            // (pass -footballai-show-onboarding to capture the onboarding screens).
+            let showOnboarding = ProcessInfo.processInfo.arguments.contains("-footballai-show-onboarding")
+            UserDefaults.standard.set(!showOnboarding, forKey: "footballai.onboarding.completed.v2")
             compositionRoot = AppCompositionRoot.mock()
         } else {
             compositionRoot = AppCompositionRoot.live()

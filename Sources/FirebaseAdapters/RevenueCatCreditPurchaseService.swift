@@ -25,13 +25,24 @@ public actor RevenueCatCreditPurchaseService: CreditPurchaseService {
     public func packages() async throws -> [CreditPackage] {
         guard Purchases.isConfigured else { throw RevenueCatConfigurationError.notConfigured }
         let offerings = try await Purchases.shared.offerings()
-        return (offerings.current?.availablePackages ?? []).map {
-            CreditPackage(
-                id: $0.identifier,
-                title: $0.storeProduct.localizedTitle,
-                localizedPrice: $0.storeProduct.localizedPriceString
+        return (offerings.current?.availablePackages ?? []).map { package in
+            let product = package.storeProduct
+            let credits = CreditPackage.credits(fromIdentifier: product.productIdentifier)
+                ?? CreditPackage.credits(fromIdentifier: package.identifier)
+            var perCredit: String?
+            if let credits, credits > 0, let formatter = product.priceFormatter {
+                perCredit = formatter.string(from: NSDecimalNumber(decimal: product.price / Decimal(credits)))
+            }
+            return CreditPackage(
+                id: package.identifier,
+                title: product.localizedTitle,
+                localizedPrice: product.localizedPriceString,
+                credits: credits,
+                price: product.price,
+                localizedPricePerCredit: perCredit
             )
         }
+        .sorted { ($0.credits ?? 0) < ($1.credits ?? 0) }
     }
 
     public func purchase(packageID: String) async throws -> CreditPurchaseResult {

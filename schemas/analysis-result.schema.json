@@ -10,7 +10,7 @@
     "snapshotId": { "type": "string", "minLength": 1, "maxLength": 128 }, "snapshotVersion": { "type": "integer", "minimum": 1 },
     "generatedAt": { "type": "string", "format": "date-time" }, "validUntil": { "type": "string", "format": "date-time" },
     "promptVersion": { "type": "string", "minLength": 1, "maxLength": 64 }, "modelVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
-    "language": { "enum": ["tr", "en", "es", "fr"] },
+    "language": { "enum": ["tr", "en", "de", "es", "fr"] },
     "markets": {
       "type": "object", "additionalProperties": false, "required": ["matchResult", "goals25", "bothTeamsScore", "likelyScores", "likelyScoresTotalPct", "otherScoresPct"],
       "properties": {

@@ -9,17 +9,23 @@ import { authorize, parsePayload } from "./security/requestGuard.js";
 import { FootballDataClient } from "./fixtures/footballDataClient.js";
 import { footballDataApiToken, geminiApiKey, requiredSecret, revenueCatWebhookAuthorization, rotatingSecret } from "./security/secrets.js";
 import { analysisCreditCost, analysisRuntimeConfiguration } from "./config/runtimeConfig.js";
-import { applyCreditAdjustment, parseRevenueCatCreditEvent } from "./revenuecat/creditEvent.js";
+import { parseRevenueCatCreditEvent } from "./revenuecat/creditEvent.js";
 import { modelAliases } from "./config/providerRegistry.js";
 import { AllowlistedModelAliasResolver } from "./analysis/modelGateway.js";
 import { GeminiGateway, GeminiProviderError } from "./analysis/geminiGateway.js";
 import { buildAnalysisSnapshot, fixtureInsights, type AnalysisSnapshot } from "./analysis/snapshotBuilder.js";
+import { ensurePersonalLayer, loadAIProfile, publicAnalysis, type StructuredModel } from "./analysis/personalService.js";
+import { AIProfileValidationError, parseAIProfile } from "./profile/aiProfile.js";
+import { isSupportedLocale, resolveLocale, type SupportedLocale } from "./shared/locales.js";
+import {
+  applyStoreAdjustment, commitReservation, InsufficientCreditsError, ledgerEntry, newWallet,
+  publicWallet, readWallet, release, reserve, spendDirect, type WalletState,
+} from "./credits/wallet.js";
 import { AnalysisResultValidator } from "./analysis/validator.js";
 
 initializeApp();
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
-const supportedLocales = new Set(["tr", "en", "es", "fr"]);
 const fixtureDatePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 interface FootballDataMatch {
@@ -36,14 +42,14 @@ interface FootballDataMatchList { matches?: FootballDataMatch[] }
 
 export const bootstrapUser = onCall({ enforceAppCheck: true, timeoutSeconds: 10, invoker: "public" }, async (request) => {
   const context = authorize(request);
-  const locale = typeof request.data?.locale === "string" && supportedLocales.has(request.data.locale) ? request.data.locale : "en";
+  const locale = resolveLocale(request.data?.locale);
   const db = getFirestore();
   const userReference = db.collection("users").doc(context.uid);
   const walletReference = userReference.collection("private").doc("wallet");
   const quotaReference = userReference.collection("private").doc("quota");
 
-  const balance = await db.runTransaction(async (transaction) => {
-    const [user, wallet, quota] = await Promise.all([
+  const wallet = await db.runTransaction(async (transaction) => {
+    const [user, walletSnapshot, quota] = await Promise.all([
       transaction.get(userReference), transaction.get(walletReference), transaction.get(quotaReference),
     ]);
     if (!user.exists) {
@@ -59,23 +65,53 @@ export const bootstrapUser = onCall({ enforceAppCheck: true, timeoutSeconds: 10,
       transaction.set(userReference, { locale, lastSeenAt: FieldValue.serverTimestamp() }, { merge: true });
     }
 
-    if (!wallet.exists) {
-      const migratedBalance = quota.exists ? Math.max(0, Number(quota.data()?.remaining ?? 0)) : 1;
-      transaction.create(walletReference, {
-        schemaVersion: 1,
-        currency: "credits",
-        balance: migratedBalance,
-        lifetimeGranted: migratedBalance,
-        lifetimePurchased: 0,
-        lifetimeSpent: 0,
-        updatedAt: FieldValue.serverTimestamp(),
+    if (walletSnapshot.exists) return readWallet(walletSnapshot.data());
+    const created = newWallet(quota.exists ? Number(quota.data()?.remaining ?? 0) : undefined);
+    transaction.create(walletReference, { schemaVersion: 1, currency: "credits", ...created, updatedAt: FieldValue.serverTimestamp() });
+    if (created.balance > 0) {
+      transaction.create(userReference.collection("ledger").doc("welcome"), {
+        ...ledgerEntry("welcome_grant", { ...created, balance: 0 }, created),
+        createdAt: FieldValue.serverTimestamp(),
       });
-      return migratedBalance;
     }
-    return Math.max(0, Number(wallet.data()?.balance ?? 0));
+    return created;
   });
 
-  return { uid: context.uid, balance, analysisCreditCost: await analysisCreditCost() };
+  const [cost, profileSnapshot] = await Promise.all([
+    analysisCreditCost(),
+    userReference.collection("private").doc("aiProfile").get(),
+  ]);
+  return {
+    uid: context.uid,
+    wallet: publicWallet(wallet, cost),
+    hasAIProfile: profileSnapshot.exists,
+    aiProfile: profileSnapshot.exists ? await loadAIProfile(context.uid) : null,
+    // Kept for app versions that read the flat fields.
+    balance: wallet.balance,
+    analysisCreditCost: cost,
+  };
+});
+
+export const updateAIProfile = onCall({ enforceAppCheck: true, timeoutSeconds: 10, invoker: "public" }, async (request) => {
+  const context = authorize(request);
+  let profile;
+  try {
+    profile = parseAIProfile(request.data?.profile);
+  } catch (error) {
+    throw new HttpsError("invalid-argument", error instanceof AIProfileValidationError ? error.message : "INVALID_PROFILE");
+  }
+  const userReference = getFirestore().collection("users").doc(context.uid);
+  const batch = getFirestore().batch();
+  batch.set(userReference.collection("private").doc("aiProfile"), {
+    schemaVersion: 1,
+    ...profile,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  if (isSupportedLocale(request.data?.locale)) {
+    batch.set(userReference, { locale: request.data.locale, lastSeenAt: FieldValue.serverTimestamp() }, { merge: true });
+  }
+  await batch.commit();
+  return { profile };
 });
 
 export const syncFixtures = onCall({
@@ -91,12 +127,23 @@ export const syncFixtures = onCall({
   const windowSnapshot = await windowReference.get();
   const fetchedAt = windowSnapshot.data()?.fetchedAt as Timestamp | undefined;
   if (fetchedAt && Date.now() - fetchedAt.toMillis() < 15 * 60 * 1_000) {
-    return { count: Number(windowSnapshot.data()?.count ?? 0), cached: true };
+    const fixtures = await fixturesInWindow(dateFrom, dateTo);
+    return { count: fixtures.length, cached: true, fixtures };
   }
 
-  const client = new FootballDataClient({ token: await rotatingSecret("FOOTBALL_DATA_API_TOKEN") });
-  const response = await client.getMatches<FootballDataMatchList>({ dateFrom, dateTo });
-  const matches = (response.data.matches ?? []).filter(validFootballDataMatch);
+  let matches: FootballDataMatch[];
+  let remainingThisMinute: number | null = null;
+  try {
+    const client = new FootballDataClient({ token: await rotatingSecret("FOOTBALL_DATA_API_TOKEN") });
+    const response = await client.getMatches<FootballDataMatchList>({ dateFrom, dateTo });
+    matches = (response.data.matches ?? []).filter(validFootballDataMatch);
+    remainingThisMinute = response.rateLimit.remainingThisMinute;
+  } catch (error) {
+    // Provider outage or rate limit: serve what we already have instead of failing the screen.
+    console.warn("fixture_sync_provider_failed", { error: error instanceof Error ? error.message : "unknown" });
+    const fixtures = await fixturesInWindow(dateFrom, dateTo);
+    return { count: fixtures.length, cached: true, stale: true, fixtures };
+  }
 
   for (let offset = 0; offset < matches.length; offset += 400) {
     const batch = db.batch();
@@ -111,9 +158,10 @@ export const syncFixtures = onCall({
     dateTo,
     count: matches.length,
     fetchedAt: FieldValue.serverTimestamp(),
-    providerRemainingThisMinute: response.rateLimit.remainingThisMinute,
+    providerRemainingThisMinute: remainingThisMinute,
   });
-  return { count: matches.length, cached: false };
+  const fixtures = matches.map((match) => publicFixture(`football-data:${match.id}`, normalizedFixture(match)));
+  return { count: fixtures.length, cached: false, fixtures };
 });
 
 export const getFixtureInsights = onCall({
@@ -135,6 +183,33 @@ export const getFixtureInsights = onCall({
   return fixtureInsights(snapshot);
 });
 
+/** Opens an analysis the user already unlocked. Never charges. */
+export const getAnalysis = onCall({
+  enforceAppCheck: true,
+  timeoutSeconds: 30,
+  memory: "256MiB",
+  invoker: "public",
+  secrets: [geminiApiKey],
+}, async (request) => {
+  const context = authorize(request);
+  const fixtureKey = typeof request.data?.fixtureKey === "string" ? request.data.fixtureKey.trim() : "";
+  if (!/^[A-Za-z0-9._:-]{1,160}$/.test(fixtureKey)) throw new HttpsError("invalid-argument", "INVALID_FIXTURE_KEY");
+  const locale = resolveLocale(request.data?.locale);
+  const db = getFirestore();
+  const fixtureHash = createHash("sha256").update(fixtureKey).digest("hex");
+  const userReference = db.collection("users").doc(context.uid);
+  const [history, wallet, cost] = await Promise.all([
+    userReference.collection("history").doc(fixtureHash).get(),
+    userReference.collection("private").doc("wallet").get(),
+    analysisCreditCost(),
+  ]);
+  const walletView = publicWallet(readWallet(wallet.data()), cost);
+  const analysisId = history.data()?.analysisId;
+  if (!history.exists || typeof analysisId !== "string") return { state: "locked", wallet: walletView };
+  return unlockedPayload(context.uid, fixtureKey, fixtureHash, analysisId, locale, context.correlationId, `history_${fixtureHash.slice(0, 24)}`, walletView);
+});
+
+/** Unlocks (and if needed generates) the analysis for a fixture. Charges once per user and fixture. */
 export const requestAnalysis = onCall({
   enforceAppCheck: true,
   timeoutSeconds: 120,
@@ -144,8 +219,12 @@ export const requestAnalysis = onCall({
 }, async (request) => {
   const context = authorize(request);
   const payload = parsePayload(request.data);
+  const locale = resolveLocale(payload.locale);
+  const fixtureHash = createHash("sha256").update(payload.fixtureKey).digest("hex");
   const reused = await reuseReadyAnalysis(context.uid, payload.fixtureKey);
-  if (reused) return reused;
+  if (reused) {
+    return unlockedPayload(context.uid, payload.fixtureKey, fixtureHash, reused.analysisId, locale, context.correlationId, reused.requestId);
+  }
 
   const runtime = await analysisRuntimeConfiguration();
   if (!runtime.featureAnalysisGenerationEnabled) throw new HttpsError("failed-precondition", "CONFIG_UNAVAILABLE");
@@ -157,13 +236,12 @@ export const requestAnalysis = onCall({
   const fixtureSnapshot = await fixtureReference.get();
   if (!fixtureSnapshot.exists) throw new HttpsError("not-found", "FIXTURE_NOT_FOUND");
   const fixture = fixtureSnapshot.data() ?? {};
-  const fixtureHash = createHash("sha256").update(payload.fixtureKey).digest("hex");
   const requestId = `req_${createHash("sha256").update(`${context.uid}\u001f${payload.clientRequestId}`).digest("hex").slice(0, 40)}`;
   const reservationId = `res_${createHash("sha256").update(`${context.uid}\u001f${fixtureHash}`).digest("hex")}`;
   const creditCost = await analysisCreditCost();
   const reservation = await reserveAnalysisCredits(context.uid, payload.fixtureKey, fixtureHash, requestId, reservationId, creditCost);
   if (reservation.historyAnalysisId) {
-    return { requestId: `history_${fixtureHash.slice(0, 24)}`, analysisId: reservation.historyAnalysisId, state: "ready" };
+    return unlockedPayload(context.uid, payload.fixtureKey, fixtureHash, reservation.historyAnalysisId, locale, context.correlationId, `history_${fixtureHash.slice(0, 24)}`);
   }
 
   const requestReference = db.collection("analysisRequests").doc(requestId);
@@ -176,6 +254,7 @@ export const requestAnalysis = onCall({
     updatedAt: FieldValue.serverTimestamp(),
   });
 
+  let analysisId: string;
   try {
     const footballClient = new FootballDataClient({ token: await rotatingSecret("FOOTBALL_DATA_API_TOKEN") });
     const snapshot = await cachedOrFreshAnalysisSnapshot(payload.fixtureKey, fixture, footballClient);
@@ -186,7 +265,7 @@ export const requestAnalysis = onCall({
 
     const generatedAt = new Date();
     const validUntil = new Date(Math.min(kickoffAt.getTime() - 60_000, generatedAt.getTime() + analysisTTLSeconds(kickoffAt, generatedAt) * 1_000));
-    const analysisId = `ana_${createHash("sha256").update(`${snapshot.contentHash}\u001f${runtime.modelAlias}\u001f${runtime.promptVersion}`).digest("hex")}`;
+    analysisId = `ana_${createHash("sha256").update(`${snapshot.contentHash}\u001f${runtime.modelAlias}\u001f${runtime.promptVersion}`).digest("hex")}`;
     const outputIdentity = {
       schemaVersion: runtime.schemaVersion,
       analysisId,
@@ -199,7 +278,8 @@ export const requestAnalysis = onCall({
       validUntil: validUntil.toISOString(),
       promptVersion: runtime.promptVersion,
       modelVersion: runtime.modelAlias,
-      language: payload.locale,
+      // The shared layer is language-neutral; every reader's own language lives in the personal layer.
+      language: "en",
     };
 
     await requestReference.set({ state: "validating", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
@@ -235,7 +315,7 @@ export const requestAnalysis = onCall({
 
     const analysis = validation.value as unknown as Record<string, unknown>;
     await persistReadyAnalysis(payload.fixtureKey, fixtureHash, analysisId, analysis, generated);
-    await finalizeAnalysisCredits(context.uid, fixtureHash, fixture, analysisId, analysis, reservationId, creditCost);
+    await finalizeAnalysisCredits(context.uid, fixtureHash, { ...fixture, fixtureKey: payload.fixtureKey }, analysisId, analysis, reservationId, creditCost);
     await requestReference.set({
       state: "ready",
       analysisId,
@@ -244,7 +324,6 @@ export const requestAnalysis = onCall({
       outputTokens: generated.outputTokens ?? null,
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
-    return { requestId, analysisId, state: "ready" };
   } catch (error) {
     await releaseAnalysisReservation(context.uid, reservationId, creditCost);
     await requestReference.set({
@@ -260,7 +339,56 @@ export const requestAnalysis = onCall({
     });
     throw new HttpsError("unavailable", "ANALYSIS_GENERATION_FAILED");
   }
+  return unlockedPayload(context.uid, payload.fixtureKey, fixtureHash, analysisId, locale, context.correlationId, requestId);
 });
+
+async function unlockedPayload(
+  uid: string,
+  fixtureKey: string,
+  fixtureHash: string,
+  analysisId: string,
+  locale: SupportedLocale,
+  correlationId: string,
+  requestId: string,
+  knownWallet?: ReturnType<typeof publicWallet>,
+): Promise<Record<string, unknown>> {
+  const db = getFirestore();
+  const [analysisSnapshot, fixtureSnapshot, walletSnapshot, cost] = await Promise.all([
+    db.collection("analyses").doc(analysisId).get(),
+    db.collection("fixtures").doc(fixtureKey).get(),
+    knownWallet ? Promise.resolve(null) : db.collection("users").doc(uid).collection("private").doc("wallet").get(),
+    knownWallet ? Promise.resolve(knownWallet.analysisCreditCost) : analysisCreditCost(),
+  ]);
+  if (!analysisSnapshot.exists) throw new HttpsError("not-found", "ANALYSIS_NOT_FOUND");
+  const analysis = analysisSnapshot.data() ?? {};
+  const personal = await ensurePersonalLayer({
+    uid,
+    fixtureKey,
+    fixtureHash,
+    locale,
+    analysis,
+    analysisId,
+    fixture: fixtureSnapshot.data() ?? {},
+    correlationId,
+    model: personalModel,
+  });
+  return {
+    requestId,
+    analysisId,
+    state: "ready",
+    analysis: publicAnalysis(analysisId, analysis),
+    personal,
+    wallet: knownWallet ?? publicWallet(readWallet(walletSnapshot?.data()), cost),
+  };
+}
+
+async function personalModel(): Promise<StructuredModel | null> {
+  const runtime = await analysisRuntimeConfiguration().catch(() => null);
+  if (!runtime) return null;
+  const resolved = new AllowlistedModelAliasResolver(modelAliases).resolve(runtime.modelAlias);
+  if (resolved.provider !== "google") return null;
+  return new GeminiGateway({ apiKey: await rotatingSecret("GEMINI_API_KEY"), model: resolved.model, responseSchema: {} });
+}
 
 export const revenueCatWebhook = onRequest({
   timeoutSeconds: 15,
@@ -304,29 +432,27 @@ export const revenueCatWebhook = onRequest({
   const db = getFirestore();
   const eventReference = db.collection("revenueCatEvents").doc(event.eventId);
   const walletReference = db.collection("users").doc(event.uid).collection("private").doc("wallet");
+  const ledgerReference = db.collection("users").doc(event.uid).collection("ledger").doc(`rc_${createHash("sha256").update(event.eventId).digest("hex").slice(0, 40)}`);
   const processed = await db.runTransaction(async (transaction) => {
-    const [existingEvent, wallet] = await Promise.all([
+    const [existingEvent, walletSnapshot] = await Promise.all([
       transaction.get(eventReference),
       transaction.get(walletReference),
     ]);
     if (existingEvent.exists) return false;
 
-    const current = wallet.data() ?? {};
-    const next = applyCreditAdjustment({
-      balance: Number(current.balance ?? 0),
-      refundDebt: Number(current.refundDebt ?? 0),
-      lifetimePurchased: Number(current.lifetimePurchased ?? 0),
-      lifetimeRefunded: Number(current.lifetimeRefunded ?? 0),
-    }, event.creditDelta);
-
+    const before = readWallet(walletSnapshot.data());
+    const after = applyStoreAdjustment(before, event.creditDelta);
     transaction.set(walletReference, {
       schemaVersion: 1,
       currency: "credits",
-      ...next,
-      lifetimeGranted: Math.max(0, Number(current.lifetimeGranted ?? 0)),
-      lifetimeSpent: Math.max(0, Number(current.lifetimeSpent ?? 0)),
+      ...after,
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
+    transaction.create(ledgerReference, {
+      ...ledgerEntry(event.creditDelta > 0 ? "purchase" : "refund", before, after, { productId: event.productId }),
+      storeDelta: event.creditDelta,
+      createdAt: FieldValue.serverTimestamp(),
+    });
     transaction.create(eventReference, {
       schemaVersion: 1,
       uid: event.uid,
@@ -465,7 +591,7 @@ async function reserveAnalysisCredits(
   const historyReference = userReference.collection("history").doc(fixtureHash);
   const reservationReference = db.collection("quotaReservations").doc(reservationId);
   return db.runTransaction(async (transaction) => {
-    const [wallet, history, existingReservation] = await Promise.all([
+    const [walletSnapshot, history, existingReservation] = await Promise.all([
       transaction.get(walletReference),
       transaction.get(historyReference),
       transaction.get(reservationReference),
@@ -474,32 +600,25 @@ async function reserveAnalysisCredits(
       const analysisId = history.data()?.analysisId;
       return typeof analysisId === "string" ? { historyAnalysisId: analysisId } : {};
     }
-    if (!wallet.exists) throw new HttpsError("failed-precondition", "WALLET_UNAVAILABLE");
+    if (!walletSnapshot.exists) throw new HttpsError("failed-precondition", "WALLET_UNAVAILABLE");
 
-    const balance = Math.max(0, Number(wallet.data()?.balance ?? 0));
-    let reservedCredits = Math.max(0, Number(wallet.data()?.reservedCredits ?? 0));
+    let wallet = readWallet(walletSnapshot.data());
     const prior = existingReservation.data();
     if (existingReservation.exists && prior?.state === "reserved") {
       const expiresAt = prior.expiresAt as Timestamp | undefined;
-      if (expiresAt && expiresAt.toMillis() > Date.now()) {
-        throw new HttpsError("aborted", "ANALYSIS_ALREADY_IN_PROGRESS");
-      }
-      reservedCredits = Math.max(0, reservedCredits - Math.max(0, Number(prior.creditCost ?? 0)));
+      if (expiresAt && expiresAt.toMillis() > Date.now()) throw new HttpsError("aborted", "ANALYSIS_ALREADY_IN_PROGRESS");
+      // A crashed generation left a stale hold; give it back before reserving again.
+      wallet = release(wallet, Number(prior.creditCost ?? creditCost));
     }
 
-    const available = Math.max(0, balance - reservedCredits);
-    if (available < creditCost) {
-      throw new HttpsError("resource-exhausted", "INSUFFICIENT_CREDITS", {
-        reason: "INSUFFICIENT_CREDITS",
-        balance: available,
-        requiredCredits: creditCost,
-      });
+    try {
+      wallet = reserve(wallet, creditCost);
+    } catch (error) {
+      if (error instanceof InsufficientCreditsError) throw insufficientCredits(error);
+      throw error;
     }
 
-    transaction.update(walletReference, {
-      reservedCredits: reservedCredits + creditCost,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
+    transaction.update(walletReference, { reservedCredits: wallet.reservedCredits, updatedAt: FieldValue.serverTimestamp() });
     transaction.set(reservationReference, {
       schemaVersion: 1,
       uid,
@@ -515,28 +634,31 @@ async function reserveAnalysisCredits(
   });
 }
 
+function insufficientCredits(error: InsufficientCreditsError): HttpsError {
+  return new HttpsError("resource-exhausted", "INSUFFICIENT_CREDITS", {
+    reason: "INSUFFICIENT_CREDITS",
+    balance: error.available,
+    requiredCredits: error.required,
+  });
+}
+
 async function releaseAnalysisReservation(uid: string, reservationId: string, fallbackCreditCost: number): Promise<void> {
   const db = getFirestore();
   const reservationReference = db.collection("quotaReservations").doc(reservationId);
   const walletReference = db.collection("users").doc(uid).collection("private").doc("wallet");
   await db.runTransaction(async (transaction) => {
-    const [reservation, wallet] = await Promise.all([
+    const [reservation, walletSnapshot] = await Promise.all([
       transaction.get(reservationReference),
       transaction.get(walletReference),
     ]);
     if (!reservation.exists || reservation.data()?.state !== "reserved") return;
-    const creditCost = Math.max(0, Number(reservation.data()?.creditCost ?? fallbackCreditCost));
-    const reservedCredits = Math.max(0, Number(wallet.data()?.reservedCredits ?? 0));
-    if (wallet.exists) {
-      transaction.update(walletReference, {
-        reservedCredits: Math.max(0, reservedCredits - creditCost),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
+    if (walletSnapshot.exists) {
+      const wallet = release(readWallet(walletSnapshot.data()), Number(reservation.data()?.creditCost ?? fallbackCreditCost));
+      transaction.update(walletReference, { reservedCredits: wallet.reservedCredits, updatedAt: FieldValue.serverTimestamp() });
     }
-    transaction.set(reservationReference, {
-      state: "released",
-      releasedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
+    transaction.set(reservationReference, { state: "released", releasedAt: FieldValue.serverTimestamp() }, { merge: true });
+  }).catch((error: unknown) => {
+    console.error("reservation_release_failed", { error: error instanceof Error ? error.message : "unknown" });
   });
 }
 
@@ -554,41 +676,64 @@ async function finalizeAnalysisCredits(
   const walletReference = userReference.collection("private").doc("wallet");
   const historyReference = userReference.collection("history").doc(fixtureHash);
   const reservationReference = db.collection("quotaReservations").doc(reservationId);
+  const ledgerReference = userReference.collection("ledger").doc(`unlock_${fixtureHash.slice(0, 40)}`);
   await db.runTransaction(async (transaction) => {
-    const [wallet, history, reservation] = await Promise.all([
+    const [walletSnapshot, history, reservation] = await Promise.all([
       transaction.get(walletReference),
       transaction.get(historyReference),
       transaction.get(reservationReference),
     ]);
+    const reserved = reservation.exists && reservation.data()?.state === "reserved";
     if (history.exists) {
-      if (reservation.exists && reservation.data()?.state === "reserved") {
-        const reservedCredits = Math.max(0, Number(wallet.data()?.reservedCredits ?? 0));
-        transaction.update(walletReference, {
-          reservedCredits: Math.max(0, reservedCredits - creditCost),
-          updatedAt: FieldValue.serverTimestamp(),
-        });
+      if (reserved) {
+        const wallet = release(readWallet(walletSnapshot.data()), creditCost);
+        transaction.update(walletReference, { reservedCredits: wallet.reservedCredits, updatedAt: FieldValue.serverTimestamp() });
         transaction.set(reservationReference, { state: "released", releasedAt: FieldValue.serverTimestamp() }, { merge: true });
       }
       return;
     }
-    if (!wallet.exists || !reservation.exists || reservation.data()?.state !== "reserved") {
-      throw new HttpsError("failed-precondition", "RESERVATION_UNAVAILABLE");
+    if (!walletSnapshot.exists || !reserved) throw new HttpsError("failed-precondition", "RESERVATION_UNAVAILABLE");
+    const before = readWallet(walletSnapshot.data());
+    let after: WalletState;
+    try {
+      after = commitReservation(before, creditCost);
+    } catch (error) {
+      if (error instanceof InsufficientCreditsError) throw insufficientCredits(error);
+      throw error;
     }
-    const balance = Math.max(0, Number(wallet.data()?.balance ?? 0));
-    if (balance < creditCost) throw new HttpsError("resource-exhausted", "INSUFFICIENT_CREDITS");
-    const reservedCredits = Math.max(0, Number(wallet.data()?.reservedCredits ?? 0));
-    const lifetimeSpent = Math.max(0, Number(wallet.data()?.lifetimeSpent ?? 0));
-    transaction.update(walletReference, {
-      balance: balance - creditCost,
-      reservedCredits: Math.max(0, reservedCredits - creditCost),
-      lifetimeSpent: lifetimeSpent + creditCost,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-    transaction.create(historyReference, analysisHistoryData(fixtureHash, fixture, analysisId, analysis, creditCost));
-    transaction.set(reservationReference, {
-      state: "committed",
-      committedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
+    writeUnlock(transaction, walletReference, historyReference, ledgerReference, before, after, fixtureHash, fixture, analysisId, analysis, creditCost);
+    transaction.set(reservationReference, { state: "committed", committedAt: FieldValue.serverTimestamp() }, { merge: true });
+  });
+}
+
+function writeUnlock(
+  transaction: FirebaseFirestore.Transaction,
+  walletReference: FirebaseFirestore.DocumentReference,
+  historyReference: FirebaseFirestore.DocumentReference,
+  ledgerReference: FirebaseFirestore.DocumentReference,
+  before: WalletState,
+  after: WalletState,
+  fixtureHash: string,
+  fixture: Record<string, unknown>,
+  analysisId: string,
+  analysis: Record<string, unknown>,
+  creditCost: number,
+): void {
+  transaction.update(walletReference, {
+    balance: after.balance,
+    reservedCredits: after.reservedCredits,
+    lifetimeSpent: after.lifetimeSpent,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  const history = analysisHistoryData(fixtureHash, fixture, analysisId, analysis, creditCost);
+  transaction.create(historyReference, history);
+  transaction.create(ledgerReference, {
+    ...ledgerEntry("analysis_unlock", before, after, {
+      fixtureKey: String(history.fixtureKey),
+      analysisId,
+      label: `${String(history.homeTeamName)} – ${String(history.awayTeamName)}`,
+    }),
+    createdAt: FieldValue.serverTimestamp(),
   });
 }
 
@@ -642,18 +787,25 @@ function analysisHistoryData(
 ): Record<string, unknown> {
   const markets = (analysis.markets ?? analysis.canonicalMarkets) as Record<string, unknown> | undefined;
   const matchResult = markets?.matchResult as Record<string, unknown> | undefined;
+  const home = fixture.homeTeam as Record<string, unknown> | undefined;
+  const away = fixture.awayTeam as Record<string, unknown> | undefined;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     fixtureKey: fixture.fixtureKey ?? analysis.fixtureKey ?? fixtureHash,
     analysisId,
+    competitionId: fixture.competitionId ?? null,
     competitionName: fixture.competitionName ?? fixture.competitionId ?? "Football",
-    homeTeamName: (fixture.homeTeam as Record<string, unknown> | undefined)?.name ?? "Home",
-    awayTeamName: (fixture.awayTeam as Record<string, unknown> | undefined)?.name ?? "Away",
+    homeTeamId: home?.id ?? null,
+    homeTeamName: home?.name ?? "Home",
+    awayTeamId: away?.id ?? null,
+    awayTeamName: away?.name ?? "Away",
     kickoffAt: fixture.kickoffAt,
     viewedAt: FieldValue.serverTimestamp(),
     generatedAt: timestampValue(analysis.generatedAt),
     validUntil: timestampValue(analysis.validUntil),
     homeWinProbability: matchResult?.homePct ?? null,
+    drawProbability: matchResult?.drawPct ?? null,
+    awayWinProbability: matchResult?.awayPct ?? null,
     creditCost,
   };
 }
@@ -717,28 +869,44 @@ async function commitHistoryAndCredits(uid: string, fixtureKey: string, fixtureH
   const userReference = db.collection("users").doc(uid);
   const historyReference = userReference.collection("history").doc(fixtureHash);
   const walletReference = userReference.collection("private").doc("wallet");
+  const ledgerReference = userReference.collection("ledger").doc(`unlock_${fixtureHash.slice(0, 40)}`);
   await db.runTransaction(async (transaction) => {
-    const [history, wallet] = await Promise.all([transaction.get(historyReference), transaction.get(walletReference)]);
+    const [history, walletSnapshot] = await Promise.all([transaction.get(historyReference), transaction.get(walletReference)]);
     if (history.exists) return;
-    if (!wallet.exists) throw new HttpsError("failed-precondition", "WALLET_UNAVAILABLE");
-    const balance = Math.max(0, Number(wallet.data()?.balance ?? 0));
-    const reservedCredits = Math.max(0, Number(wallet.data()?.reservedCredits ?? 0));
-    const available = Math.max(0, balance - reservedCredits);
-    if (available < creditCost) {
-      throw new HttpsError("resource-exhausted", "INSUFFICIENT_CREDITS", {
-        reason: "INSUFFICIENT_CREDITS",
-        balance: available,
-        requiredCredits: creditCost,
-      });
+    if (!walletSnapshot.exists) throw new HttpsError("failed-precondition", "WALLET_UNAVAILABLE");
+    const before = readWallet(walletSnapshot.data());
+    let after: WalletState;
+    try {
+      after = spendDirect(before, creditCost);
+    } catch (error) {
+      if (error instanceof InsufficientCreditsError) throw insufficientCredits(error);
+      throw error;
     }
-    const lifetimeSpent = Math.max(0, Number(wallet.data()?.lifetimeSpent ?? 0));
-    const canonicalMarkets = analysis.canonicalMarkets as Record<string, unknown> | undefined;
-    const matchResult = canonicalMarkets?.matchResult as Record<string, unknown> | undefined;
-    transaction.update(walletReference, {
-      balance: balance - creditCost,
-      lifetimeSpent: lifetimeSpent + creditCost,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-    transaction.create(historyReference, analysisHistoryData(fixtureHash, { ...fixture, fixtureKey }, analysisId, analysis, creditCost));
+    writeUnlock(transaction, walletReference, historyReference, ledgerReference, before, after, fixtureHash, { ...fixture, fixtureKey }, analysisId, analysis, creditCost);
   });
+}
+
+async function fixturesInWindow(dateFrom: string, dateTo: string): Promise<Array<Record<string, unknown>>> {
+  const snapshot = await getFirestore().collection("fixtures")
+    .where("kickoffAt", ">=", Timestamp.fromDate(new Date(`${dateFrom}T00:00:00Z`)))
+    .where("kickoffAt", "<", Timestamp.fromDate(new Date(`${dateTo}T00:00:00Z`)))
+    .orderBy("kickoffAt")
+    .limit(500)
+    .get();
+  return snapshot.docs.map((document) => publicFixture(document.id, document.data()));
+}
+
+function publicFixture(key: string, data: Record<string, unknown>): Record<string, unknown> {
+  const kickoff = data.kickoffAt instanceof Timestamp ? data.kickoffAt.toDate() : new Date(String(data.kickoffAt));
+  return {
+    key,
+    version: Number(data.fixtureVersion ?? 1),
+    competitionId: String(data.competitionId ?? ""),
+    competitionName: String(data.competitionName ?? data.competitionId ?? ""),
+    homeTeam: data.homeTeam ?? null,
+    awayTeam: data.awayTeam ?? null,
+    kickoffAt: kickoff.toISOString(),
+    status: String(data.status ?? "scheduled"),
+    latestSnapshotId: typeof data.latestSnapshotId === "string" ? data.latestSnapshotId : null,
+  };
 }
