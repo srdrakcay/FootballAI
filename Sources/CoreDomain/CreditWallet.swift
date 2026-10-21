@@ -16,7 +16,7 @@ public struct CreditWallet: Equatable, Sendable, Codable {
     public var canAffordAnalysis: Bool { available >= analysisCreditCost }
     public var analysesAffordable: Int { available / analysisCreditCost }
 
-    public static let defaultValue = CreditWallet(balance: 1, analysisCreditCost: 1)
+    public static let defaultValue = CreditWallet(balance: 0, analysisCreditCost: 1)
 
     private enum CodingKeys: String, CodingKey { case balance, reserved, analysisCreditCost }
 

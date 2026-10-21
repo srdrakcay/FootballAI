@@ -19,8 +19,16 @@ struct MatchDetailScreen: View {
                 tabs
                 switch tab {
                 case .analysis:
-                    AnalysisPanel(fixture: fixture, ready: $readyAnalysis)
-                    if let form = insights?.recentForm { FormSummaryCard(fixture: fixture, form: form, compact: true) }
+                    if fixture.supportsAnalysis {
+                        AnalysisPanel(fixture: fixture, ready: $readyAnalysis)
+                        if let form = insights?.recentForm { FormSummaryCard(fixture: fixture, form: form, compact: true) }
+                    } else {
+                        EmptyStateView(
+                            symbol: "list.bullet.rectangle",
+                            title: Text("analysis.listOnly.title", bundle: .module),
+                            message: Text("analysis.listOnly.message", bundle: .module)
+                        )
+                    }
                 case .form:
                     insightContent { insights in
                         if let form = insights.recentForm { FormSummaryCard(fixture: fixture, form: form, compact: false) } else { unavailable }
@@ -37,7 +45,11 @@ struct MatchDetailScreen: View {
             }
             .padding(.horizontal, Pitch.screenPadding)
             .padding(.bottom, 32)
+            // Pin the content to the screen width: any child that reports a wider ideal size
+            // (long chip rows, unbroken text) would otherwise let the page pan sideways.
+            .containerRelativeFrame(.horizontal)
         }
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
         .scrollIndicators(.hidden)
         .pitchScreen()
         .navigationTitle(Text(Competitions.knownName(fixture.competition)))
@@ -56,7 +68,7 @@ struct MatchDetailScreen: View {
                 .sensoryFeedback(.impact(weight: .light), trigger: session.isFavorite(fixture))
             }
         }
-        .task { await loadInsights() }
+        .task { if fixture.supportsAnalysis { await loadInsights() } }
     }
 
     private var tabs: some View {
@@ -83,7 +95,9 @@ struct MatchDetailScreen: View {
 
     @ViewBuilder
     private func insightContent<Content: View>(@ViewBuilder _ content: (FixtureInsights) -> Content) -> some View {
-        if let insights {
+        if !fixture.supportsAnalysis {
+            unavailable
+        } else if let insights {
             content(insights)
         } else if insightsFailed {
             EmptyStateView(
@@ -264,7 +278,7 @@ struct AnalysisPanel: View {
 
     private var checking: some View {
         VStack(alignment: .leading, spacing: 14) {
-            SkeletonBlock(width: 160, height: 18)
+            SkeletonBlock(height: 18, width: 160)
             SkeletonBlock(height: 34)
             HStack(spacing: 8) { SkeletonBlock(height: 52); SkeletonBlock(height: 52) }
         }

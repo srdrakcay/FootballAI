@@ -73,7 +73,14 @@ final class SessionStore {
             for await value in stream {
                 guard let self, !Task.isCancelled else { return }
                 let previous = self.wallet
-                self.wallet = value
+                // The listener only knows the balance. The cost the server reported at bootstrap is
+                // authoritative; the app's own Remote Config copy can be stale (1 h fetch interval)
+                // or still at its built-in default.
+                self.wallet = CreditWallet(
+                    balance: value.balance,
+                    reserved: value.reserved,
+                    analysisCreditCost: previous?.analysisCreditCost ?? value.analysisCreditCost
+                )
                 if previous != nil, previous?.balance != value.balance {
                     await self.refreshLedger()
                 }

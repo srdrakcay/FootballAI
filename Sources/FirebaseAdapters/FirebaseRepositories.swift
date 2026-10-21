@@ -183,12 +183,13 @@ public actor FirebaseFixtureRepository: FixtureRepository {
         return Fixture(
             key: .init(rawValue: document.documentID),
             version: integer(data["fixtureVersion"]) ?? 1,
-            competition: .init(id: .init(rawValue: competitionID), name: (data["competitionName"] as? String) ?? competitionID),
+            competition: .init(id: .init(rawValue: competitionID), name: (data["competitionName"] as? String) ?? competitionID, areaName: data["competitionAreaName"] as? String),
             homeTeam: home,
             awayTeam: away,
             kickoffAt: kickoffAt,
             status: status,
-            latestSnapshotID: (data["latestSnapshotId"] as? String).map(SnapshotID.init(rawValue:))
+            latestSnapshotID: (data["latestSnapshotId"] as? String).map(SnapshotID.init(rawValue:)),
+            analysisSupported: (data["analysisAvailable"] as? Bool) == false ? false : nil
         )
     }
 
@@ -450,11 +451,13 @@ struct FixtureDTO: Decodable, Sendable {
     let version: Int?
     let competitionId: String
     let competitionName: String?
+    let competitionAreaName: String?
     let homeTeam: TeamDTO?
     let awayTeam: TeamDTO?
     let kickoffAt: String
     let status: String
     let latestSnapshotId: String?
+    let analysisAvailable: Bool?
 
     var domain: Fixture? {
         guard let kickoff = ISODate.parse(kickoffAt),
@@ -463,12 +466,13 @@ struct FixtureDTO: Decodable, Sendable {
         return Fixture(
             key: .init(rawValue: key),
             version: version ?? 1,
-            competition: .init(id: .init(rawValue: competitionId), name: competitionName ?? competitionId),
+            competition: .init(id: .init(rawValue: competitionId), name: competitionName ?? competitionId, areaName: competitionAreaName),
             homeTeam: Team(id: .init(rawValue: homeTeam?.id ?? homeName), name: homeName),
             awayTeam: Team(id: .init(rawValue: awayTeam?.id ?? awayName), name: awayName),
             kickoffAt: kickoff,
             status: status,
-            latestSnapshotID: latestSnapshotId.map(SnapshotID.init(rawValue:))
+            latestSnapshotID: latestSnapshotId.map(SnapshotID.init(rawValue:)),
+            analysisSupported: analysisAvailable == false ? false : nil
         )
     }
 }

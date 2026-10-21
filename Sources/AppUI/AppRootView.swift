@@ -42,7 +42,22 @@ public struct AppRootView: View {
 enum AppTab: Hashable { case matches, analyses, profile }
 
 struct MainTabView: View {
-    @State var selection: AppTab = .matches
+    @State var selection: AppTab = MainTabView.initialTab
+
+    /// DEBUG only: `-footballai-screenshot-tab analyses|profile` opens that tab (store screenshots).
+    static var initialTab: AppTab {
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if let index = arguments.firstIndex(of: "-footballai-screenshot-tab"), arguments.indices.contains(index + 1) {
+            switch arguments[index + 1] {
+            case "analyses": return .analyses
+            case "profile": return .profile
+            default: break
+            }
+        }
+#endif
+        return .matches
+    }
 
     var body: some View {
         TabView(selection: $selection) {

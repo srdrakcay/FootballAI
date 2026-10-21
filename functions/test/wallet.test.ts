@@ -5,10 +5,17 @@ import {
   ledgerEntry, newWallet, publicWallet, readWallet, release, reserve, spendDirect,
 } from "../src/credits/wallet.js";
 
-test("new wallets receive exactly one welcome credit", () => {
+test("new wallets start with zero credits by default", () => {
   const wallet = newWallet();
-  assert.equal(wallet.balance, 1);
-  assert.equal(wallet.lifetimeGranted, 1);
+  assert.equal(wallet.balance, 0);
+  assert.equal(wallet.lifetimeGranted, 0);
+});
+
+test("welcome credits from Remote Config are granted to new wallets", () => {
+  const wallet = newWallet(undefined, 2);
+  assert.equal(wallet.balance, 2);
+  assert.equal(wallet.lifetimeGranted, 2);
+  assert.equal(newWallet(undefined, -1).balance, 0);
 });
 
 test("migrated quota balance is kept and never negative", () => {

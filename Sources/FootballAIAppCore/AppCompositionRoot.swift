@@ -199,7 +199,7 @@ public enum SampleData {
             CreditLedgerEntry(id: "l3", kind: .analysisUnlock, delta: -1, balanceAfter: 4, label: "Royal Madrid – Barcelona City", createdAt: now.addingTimeInterval(-2 * 86_400)),
             CreditLedgerEntry(id: "l2", kind: .purchase, delta: 5, balanceAfter: 5, label: nil, createdAt: now.addingTimeInterval(-3 * 86_400)),
             CreditLedgerEntry(id: "l1", kind: .analysisUnlock, delta: -1, balanceAfter: 0, label: "Coast Rovers – Midlands FC", createdAt: now.addingTimeInterval(-6 * 86_400)),
-            CreditLedgerEntry(id: "l0", kind: .welcomeGrant, delta: 1, balanceAfter: 1, label: nil, createdAt: now.addingTimeInterval(-9 * 86_400)),
+            CreditLedgerEntry(id: "l0", kind: .purchase, delta: 1, balanceAfter: 1, label: nil, createdAt: now.addingTimeInterval(-9 * 86_400)),
         ]
     }
 
@@ -232,28 +232,35 @@ public enum SampleData {
         let championsLeague = Competition(id: .init(rawValue: "UCL"), name: "UEFA Champions League")
         let premierLeague = Competition(id: .init(rawValue: "PL"), name: "Premier League")
         let laLiga = Competition(id: .init(rawValue: "PD"), name: "La Liga")
-        return [
+        let eredivisie = Competition(id: .init(rawValue: "DED"), name: "Eredivisie", areaName: "Netherlands")
+        let brasileirao = Competition(id: .init(rawValue: "BSA"), name: "Campeonato Brasileiro Série A", areaName: "Brazil")
+        let superLig = Competition(id: .init(rawValue: "TSL"), name: "Süper Lig", areaName: "Turkey")
+        let primeiraLiga = Competition(id: .init(rawValue: "PPL"), name: "Primeira Liga", areaName: "Portugal")
+        let startOfDay = Calendar.current.startOfDay(for: now)
+        func at(day: Int, hour: Int, minute: Int = 0) -> Date {
+            startOfDay.addingTimeInterval(TimeInterval(day * 86_400 + hour * 3_600 + minute * 60))
+        }
+        func fixture(_ number: Int, _ competition: Competition, _ home: (String, String), _ away: (String, String), _ kickoff: Date, _ status: FixtureStatus, analysisSupported: Bool? = nil) -> Fixture {
             Fixture(
-                key: .init(rawValue: "mock:2026:1"), version: 1, competition: championsLeague,
-                homeTeam: Team(id: .init(rawValue: "home"), name: "North City"),
-                awayTeam: Team(id: .init(rawValue: "away"), name: "South United"),
-                kickoffAt: now.addingTimeInterval(4 * 3_600), status: .timed,
-                latestSnapshotID: .init(rawValue: "snap_mock_1")
-            ),
-            Fixture(
-                key: .init(rawValue: "mock:2026:2"), version: 1, competition: premierLeague,
-                homeTeam: Team(id: .init(rawValue: "arsenal"), name: "London Red"),
-                awayTeam: Team(id: .init(rawValue: "chelsea"), name: "London Blue"),
-                kickoffAt: now.addingTimeInterval(25 * 3_600), status: .scheduled,
-                latestSnapshotID: .init(rawValue: "snap_mock_2")
-            ),
-            Fixture(
-                key: .init(rawValue: "mock:2026:3"), version: 1, competition: laLiga,
-                homeTeam: Team(id: .init(rawValue: "madrid"), name: "Royal Madrid"),
-                awayTeam: Team(id: .init(rawValue: "barcelona"), name: "Barcelona City"),
-                kickoffAt: now.addingTimeInterval(48 * 3_600), status: .timed,
-                latestSnapshotID: .init(rawValue: "snap_mock_3")
+                key: .init(rawValue: "mock:2026:\(number)"), version: 1, competition: competition,
+                homeTeam: Team(id: .init(rawValue: home.0), name: home.1),
+                awayTeam: Team(id: .init(rawValue: away.0), name: away.1),
+                kickoffAt: kickoff, status: status,
+                latestSnapshotID: .init(rawValue: "snap_mock_\(number)"),
+                analysisSupported: analysisSupported
             )
+        }
+        return [
+            fixture(1, championsLeague, ("home", "North City"), ("away", "South United"), at(day: 0, hour: 21), .timed),
+            fixture(2, premierLeague, ("arsenal", "London Red"), ("chelsea", "London Blue"), at(day: 1, hour: 20, minute: 30), .scheduled),
+            fixture(3, laLiga, ("madrid", "Royal Madrid"), ("barcelona", "Barcelona City"), at(day: 2, hour: 21), .timed),
+            fixture(4, premierLeague, ("coast", "Coast Rovers"), ("midlands", "Midlands FC"), at(day: 0, hour: 18, minute: 30), .scheduled),
+            fixture(5, championsLeague, ("riverside", "Riverside"), ("harbor", "Harbor Town"), at(day: 0, hour: 19, minute: 45), .timed),
+            fixture(6, laLiga, ("valley", "Sporting Valley"), ("atlas", "Atlas FC"), at(day: 0, hour: 22), .scheduled),
+            fixture(7, eredivisie, ("canal", "Canal City"), ("tulip", "Tulip United"), at(day: 0, hour: 20, minute: 45), .timed),
+            fixture(8, primeiraLiga, ("porto", "Porto Dragons"), ("lisbon", "Lisbon Eagles"), at(day: 0, hour: 21, minute: 15), .scheduled),
+            fixture(9, brasileirao, ("rio", "Rio Samba"), ("sao", "São Paulo Stars"), at(day: 0, hour: 23, minute: 30), .scheduled),
+            fixture(10, superLig, ("af:bosphorus", "Bosphorus FC"), ("af:anatolia", "Anatolia United"), at(day: 0, hour: 20), .scheduled, analysisSupported: false),
         ]
     }
 

@@ -106,6 +106,7 @@ function systemInstruction(invocation: ModelInvocation): string {
     "Return only JSON matching the supplied response schema.",
     "All probability groups must total exactly 100 using integers.",
     "Every rationale must cite one or more available sections using evidenceRefs.",
+    "Every evidenceRefs item must be exactly the string \"sections.<name>\" naming an available section of ANALYSIS_INPUT_JSON, for example \"sections.recentForm\". Never a sentence, a sub-path, or any other format.",
     "Never promise an outcome, recommend betting, or use certainty language.",
     "Reflect missing information in limitations and lower confidence.",
     "Write rationale text in plain English; it is a neutral base that is localized and personalized later.",

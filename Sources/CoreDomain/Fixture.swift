@@ -20,7 +20,9 @@ public struct Team: Codable, Hashable, Sendable, Identifiable {
 public struct Competition: Codable, Hashable, Sendable, Identifiable {
     public let id: CompetitionID
     public let name: String
-    public init(id: CompetitionID, name: String) { self.id = id; self.name = name }
+    /// Provider area (country or continent), used to group competitions the app has no code for.
+    public let areaName: String?
+    public init(id: CompetitionID, name: String, areaName: String? = nil) { self.id = id; self.name = name; self.areaName = areaName }
 }
 
 public struct Fixture: Codable, Hashable, Sendable, Identifiable {
@@ -33,8 +35,12 @@ public struct Fixture: Codable, Hashable, Sendable, Identifiable {
     public let kickoffAt: Date
     public let status: FixtureStatus
     public let latestSnapshotID: SnapshotID?
+    /// `false` for browse-only fixtures (leagues listed without the data an AI analysis needs). `nil` = supported.
+    public let analysisSupported: Bool?
+    public var supportsAnalysis: Bool { analysisSupported ?? true }
 
-    public init(key: FixtureKey, version: Int, competition: Competition, homeTeam: Team, awayTeam: Team, kickoffAt: Date, status: FixtureStatus, latestSnapshotID: SnapshotID?) {
+    public init(key: FixtureKey, version: Int, competition: Competition, homeTeam: Team, awayTeam: Team, kickoffAt: Date, status: FixtureStatus, latestSnapshotID: SnapshotID?, analysisSupported: Bool? = nil) {
+        self.analysisSupported = analysisSupported
         self.key = key; self.version = version; self.competition = competition
         self.homeTeam = homeTeam; self.awayTeam = awayTeam; self.kickoffAt = kickoffAt
         self.status = status; self.latestSnapshotID = latestSnapshotID

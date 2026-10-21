@@ -11,6 +11,8 @@ Remote Config stores only non-secret, validated operational configuration. Clien
 | `feature_notifications_enabled` | Bool | false | Future only; no V1 settings UI |
 | `supported_leagues_v1` | JSON string array | core six | Allowlisted IDs only |
 | `free_monthly_unique_views` | Int | 1 | Clamp 0...20; backend authoritative |
+| `analysis_credit_cost` | Int | 1 | Clamp 1...100; credits charged per analysis; backend authoritative |
+| `welcome_credits` | Int | 0 | Clamp 0...100; credits granted once when a new wallet is created; missing/invalid = 0 |
 | `free_history_days` | Int | 30 | Clamp 1...90 |
 | `premium_history_days` | Int | 365 | Clamp 30...730 |
 | `analysis_ttl_policy_v1` | JSON | documented tiers | Schema validated; never past kickoff |

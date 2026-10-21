@@ -2,6 +2,7 @@ import CoreDomain
 import FirebaseAuth
 import FirebaseFunctions
 import Foundation
+import OSLog
 
 public enum FirebaseEnvironment {
     public static let projectID = "footballai-40789"
@@ -118,8 +119,19 @@ public actor FirebaseCallableTransport: CallableTransport {
             let responseData = try JSONSerialization.data(withJSONObject: result.data)
             return try JSONDecoder().decode(Response.self, from: responseData)
         } catch {
+            Self.log(callable: name, error: error)
             throw Self.domainError(from: error)
         }
+    }
+
+    private static let logger = Logger(subsystem: "com.footballai.predictions", category: "callable")
+
+    /// Console.app / Xcode console: filter by category "callable". The server code (HttpsError message) is the
+    /// reason; traceId-based server logs are in Cloud Logging under the same function name.
+    private static func log(callable name: String, error: any Error) {
+        let value = error as NSError
+        let details = (value.userInfo[FunctionsErrorDetailsKey] as? [String: Any]).map { String(describing: $0) } ?? "-"
+        logger.error("\(name, privacy: .public) failed domain=\(value.domain, privacy: .public) code=\(value.code, privacy: .public) message=\(value.localizedDescription, privacy: .public) details=\(details, privacy: .public)")
     }
 
     private static func domainError(from error: any Error) -> any Error {
@@ -127,6 +139,22 @@ public actor FirebaseCallableTransport: CallableTransport {
         guard value.domain == FunctionsErrorDomain else { return error }
         let details = value.userInfo[FunctionsErrorDetailsKey] as? [String: Any]
         let reason = details?["reason"] as? String
+        let message = value.localizedDescription
+
+        // Server-reported analysis outcomes must not be shown as "you are offline".
+        if value.code == FunctionsErrorCode.unavailable.rawValue, message == "ANALYSIS_GENERATION_FAILED" {
+            return DomainError.generationFailedRetryable(retryAfter: nil)
+        }
+        if value.code == FunctionsErrorCode.internal.rawValue, message == "ANALYSIS_VALIDATION_FAILED" {
+            return DomainError.generationFailedPermanent(referenceID: message)
+        }
+        if value.code == FunctionsErrorCode.resourceExhausted.rawValue, message == "MODEL_RATE_LIMITED" {
+            return DomainError.rateLimited(retryAfter: nil)
+        }
+        if value.code == FunctionsErrorCode.failedPrecondition.rawValue {
+            if message == "FIXTURE_INELIGIBLE" || message == "ANALYSIS_UNAVAILABLE_FOR_COMPETITION" { return DomainError.fixtureIneligible(reason: message) }
+            if message == "DATA_INSUFFICIENT" { return DomainError.dataInsufficient(missingCodes: []) }
+        }
 
         if value.code == FunctionsErrorCode.resourceExhausted.rawValue, reason == "INSUFFICIENT_CREDITS" {
             return DomainError.insufficientCredits(

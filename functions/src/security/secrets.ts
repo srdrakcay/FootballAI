@@ -5,6 +5,7 @@ import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 export const footballDataApiToken = defineSecret("FOOTBALL_DATA_API_TOKEN");
 export const revenueCatWebhookAuthorization = defineSecret("REVENUECAT_WEBHOOK_AUTH");
 export const geminiApiKey = defineSecret("GEMINI_API_KEY");
+export const apiFootballKey = defineSecret("API_FOOTBALL_KEY");
 
 const secretManager = new SecretManagerServiceClient();
 const secretCache = new Map<string, { value: string; expiresAt: number }>();

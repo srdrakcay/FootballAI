@@ -89,7 +89,7 @@ struct AIProfileOnboardingView: View {
             VStack(alignment: .leading, spacing: 14) {
                 benefit("chart.bar.fill", Pitch.homeText, Text("onboarding.welcome.point1", bundle: .module))
                 benefit("person.fill", Pitch.accent, Text("onboarding.welcome.point2", bundle: .module))
-                benefit("gift.fill", Pitch.awayText, Text("onboarding.welcome.point3", bundle: .module))
+                benefit("bolt.fill", Pitch.awayText, Text("onboarding.welcome.point3", bundle: .module))
             }
             Spacer()
         }

@@ -9,6 +9,7 @@
   "free_history_days": 30,
   "premium_history_days": 365,
   "analysis_credit_cost": 1,
+  "welcome_credits": 0,
   "revenuecat_public_sdk_key_ios": "",
   "analysis_ttl_policy_v1": { "over_48h_seconds": 86400, "between_6h_48h_seconds": 21600, "under_6h_seconds": 3600 },
   "analysis_schema_version": "2.0",

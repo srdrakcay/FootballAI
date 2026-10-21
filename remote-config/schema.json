@@ -8,6 +8,7 @@
     "supported_leagues_v1": { "type": "array", "uniqueItems": true, "items": { "enum": ["PL", "PD", "SA", "BL1", "FL1", "UCL"] } },
     "free_monthly_unique_views": { "type": "integer", "minimum": 0, "maximum": 20 }, "free_history_days": { "type": "integer", "minimum": 1, "maximum": 90 }, "premium_history_days": { "type": "integer", "minimum": 30, "maximum": 730 },
     "analysis_credit_cost": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "welcome_credits": { "type": "integer", "minimum": 0, "maximum": 100 },
     "revenuecat_public_sdk_key_ios": { "type": "string", "pattern": "^(|test_[A-Za-z0-9]+|appl_[A-Za-z0-9]+)$" },
     "analysis_ttl_policy_v1": { "type": "object", "additionalProperties": false, "required": ["over_48h_seconds", "between_6h_48h_seconds", "under_6h_seconds"], "properties": { "over_48h_seconds": { "type": "integer", "minimum": 3600, "maximum": 86400 }, "between_6h_48h_seconds": { "type": "integer", "minimum": 1800, "maximum": 21600 }, "under_6h_seconds": { "type": "integer", "minimum": 300, "maximum": 3600 } } },
     "analysis_schema_version": { "enum": ["2.0"] }, "analysis_prompt_version": { "enum": ["football-v2.1.0"] }, "analysis_model_alias": { "enum": ["gemini-flash-default"] },

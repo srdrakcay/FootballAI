@@ -3,7 +3,7 @@ import CoreDomain
 import SwiftUI
 
 enum MatchFilter: Hashable {
-    case all, favorites, analyzed, competition(String)
+    case all, favorites, analyzed, category(MatchCategory), competition(String)
 }
 
 struct MatchesScreen: View {
@@ -36,7 +36,10 @@ struct MatchesScreen: View {
         .sheet(isPresented: $showsCalendar) { calendarSheet }
         .sheet(isPresented: $showsPaywall) { PaywallView(context: nil) }
         .onChange(of: matches.selectedDay) { _, _ in
-            if case .competition = filter { filter = .all }
+            switch filter {
+            case .competition, .category: filter = .all
+            default: break
+            }
         }
     }
 
@@ -95,22 +98,52 @@ struct MatchesScreen: View {
     }
 
     private var filterBar: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                chip(.all, Text("filter.all \(dayFixtures.count)", bundle: .module))
-                chip(.favorites, Text("filter.favorites", bundle: .module))
-                chip(.analyzed, Text("filter.analyzed", bundle: .module))
-                ForEach(dayCompetitions, id: \.id) { competition in
-                    chip(.competition(competition.id.rawValue), Text(Competitions.knownName(competition)))
+        VStack(alignment: .leading, spacing: 8) {
+            ScrollView(.horizontal) {
+                HStack(spacing: 8) {
+                    chip(.all, Text("filter.all \(dayFixtures.count)", bundle: .module))
+                    chip(.favorites, Text("filter.favorites", bundle: .module))
+                    chip(.analyzed, Text("filter.analyzed", bundle: .module))
+                    ForEach(dayCategories) { category in
+                        chip(.category(category), Text(category.title, bundle: .module))
+                    }
                 }
             }
+            .scrollIndicators(.hidden)
+            if let category = activeCategory {
+                ScrollView(.horizontal) {
+                    HStack(spacing: 8) {
+                        chip(.category(category), Text("filter.allLeagues", bundle: .module), strong: false)
+                        ForEach(dayCompetitions.filter { MatchCategory.of($0) == category }, id: \.id) { competition in
+                            chip(.competition(competition.id.rawValue), Text(Competitions.knownName(competition)), strong: false)
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
-        .scrollIndicators(.hidden)
     }
 
-    private func chip(_ value: MatchFilter, _ title: Text) -> some View {
+    /// Categories that have at least one match on the selected day, in a stable order.
+    private var dayCategories: [MatchCategory] {
+        let present = Set(dayFixtures.map { MatchCategory.of($0.competition) })
+        return MatchCategory.allCases.filter { present.contains($0) }
+    }
+
+    /// The category whose leagues should be offered: the chosen one, or the one of the chosen league.
+    private var activeCategory: MatchCategory? {
+        switch filter {
+        case .category(let category): return category
+        case .competition(let id):
+            return dayFixtures.first { $0.competition.id.rawValue == id }.map { MatchCategory.of($0.competition) }
+        default: return nil
+        }
+    }
+
+    private func chip(_ value: MatchFilter, _ title: Text, strong: Bool = true) -> some View {
         Button { withAnimation(.snappy) { filter = value } } label: { title }
-            .buttonStyle(ChipButtonStyle(selected: filter == value, strong: true))
+            .buttonStyle(ChipButtonStyle(selected: filter == value, strong: strong))
             .accessibilityAddTraits(filter == value ? .isSelected : [])
     }
 
@@ -132,6 +165,7 @@ struct MatchesScreen: View {
         case .favorites:
             dayFixtures.filter { session.isFavorite($0) || isFavoriteTeam($0) }
         case .analyzed: dayFixtures.filter { session.historyItem(for: $0.key) != nil }
+        case .category(let category): dayFixtures.filter { MatchCategory.of($0.competition) == category }
         case .competition(let id): dayFixtures.filter { $0.competition.id.rawValue == id }
         }
     }
@@ -282,7 +316,7 @@ struct FixtureRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            kickoff.frame(width: 48, alignment: .leading)
+            kickoff.frame(minWidth: 48, alignment: .leading)
             VStack(alignment: .leading, spacing: 5) {
                 Text(fixture.homeTeam.name).lineLimit(1)
                 Text(fixture.awayTeam.name).lineLimit(1)
@@ -308,6 +342,7 @@ struct FixtureRow: View {
         default:
             Text(fixture.kickoffAt, format: .dateTime.hour().minute())
                 .font(.display(18, weight: .semibold)).foregroundStyle(Pitch.textSecondary)
+                .lineLimit(1).fixedSize(horizontal: true, vertical: false)
         }
     }
 
@@ -321,6 +356,8 @@ struct FixtureRow: View {
         } else if history != nil {
             Label { Text("matches.row.analyzed", bundle: .module) } icon: { Image(systemName: "checkmark.circle.fill") }
                 .font(.caption.weight(.semibold)).foregroundStyle(Pitch.accent)
+        } else if !fixture.supportsAnalysis {
+            Text("matches.row.listOnly", bundle: .module).font(.caption).foregroundStyle(Pitch.textMuted)
         } else if fixture.status.acceptsNewAnalysis, fixture.kickoffAt > .now.addingTimeInterval(300) {
             HStack(spacing: 4) {
                 Image(systemName: "bolt.fill").font(.caption2).foregroundStyle(Pitch.accent)

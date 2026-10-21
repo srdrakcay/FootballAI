@@ -3,12 +3,12 @@ import { readFileSync } from "node:fs";
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue, getFirestore, Timestamp } from "firebase-admin/firestore";
-import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
+import { onCall, onRequest, HttpsError, type CallableRequest } from "firebase-functions/v2/https";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { authorize, parsePayload } from "./security/requestGuard.js";
 import { FootballDataClient } from "./fixtures/footballDataClient.js";
-import { footballDataApiToken, geminiApiKey, requiredSecret, revenueCatWebhookAuthorization, rotatingSecret } from "./security/secrets.js";
-import { analysisCreditCost, analysisRuntimeConfiguration } from "./config/runtimeConfig.js";
+import { apiFootballKey, footballDataApiToken, geminiApiKey, requiredSecret, revenueCatWebhookAuthorization, rotatingSecret } from "./security/secrets.js";
+import { analysisCreditCost, analysisRuntimeConfiguration, apiFootballSettings, welcomeCredits } from "./config/runtimeConfig.js";
 import { parseRevenueCatCreditEvent } from "./revenuecat/creditEvent.js";
 import { modelAliases } from "./config/providerRegistry.js";
 import { AllowlistedModelAliasResolver } from "./analysis/modelGateway.js";
@@ -22,6 +22,11 @@ import {
   publicWallet, readWallet, release, reserve, spendDirect, type WalletState,
 } from "./credits/wallet.js";
 import { AnalysisResultValidator } from "./analysis/validator.js";
+import { normalizeEvidenceRefs } from "./analysis/evidenceRefs.js";
+import {
+  ApiFootballError, fetchApiFootballDay, isUsableApiFootballFixture, normalizeApiFootballFixture, servedDates,
+} from "./fixtures/apiFootball.js";
+import { startAnalysisTrace, type AnalysisTrace } from "./observability/analysisTrace.js";
 
 initializeApp();
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
@@ -34,6 +39,7 @@ interface FootballDataMatch {
   status: string;
   lastUpdated?: string;
   competition: { id: number; code?: string | null; name: string };
+  area?: { name?: string | null; code?: string | null };
   homeTeam: { id?: number | null; name?: string | null; shortName?: string | null };
   awayTeam: { id?: number | null; name?: string | null; shortName?: string | null };
 }
@@ -48,6 +54,7 @@ export const bootstrapUser = onCall({ enforceAppCheck: true, timeoutSeconds: 10,
   const walletReference = userReference.collection("private").doc("wallet");
   const quotaReference = userReference.collection("private").doc("quota");
 
+  const welcome = await welcomeCredits();
   const wallet = await db.runTransaction(async (transaction) => {
     const [user, walletSnapshot, quota] = await Promise.all([
       transaction.get(userReference), transaction.get(walletReference), transaction.get(quotaReference),
@@ -66,7 +73,7 @@ export const bootstrapUser = onCall({ enforceAppCheck: true, timeoutSeconds: 10,
     }
 
     if (walletSnapshot.exists) return readWallet(walletSnapshot.data());
-    const created = newWallet(quota.exists ? Number(quota.data()?.remaining ?? 0) : undefined);
+    const created = newWallet(quota.exists ? Number(quota.data()?.remaining ?? 0) : undefined, welcome);
     transaction.create(walletReference, { schemaVersion: 1, currency: "credits", ...created, updatedAt: FieldValue.serverTimestamp() });
     if (created.balance > 0) {
       transaction.create(userReference.collection("ledger").doc("welcome"), {
@@ -116,13 +123,17 @@ export const updateAIProfile = onCall({ enforceAppCheck: true, timeoutSeconds: 1
 
 export const syncFixtures = onCall({
   enforceAppCheck: true,
-  timeoutSeconds: 20,
+  timeoutSeconds: 30,
   invoker: "public",
-  secrets: [footballDataApiToken],
+  secrets: [footballDataApiToken, apiFootballKey],
 }, async (request) => {
   authorize(request);
   const { dateFrom, dateTo } = parseFixtureWindow(request.data);
   const db = getFirestore();
+  // Browse-only leagues from the second provider; never allowed to fail or delay the main list.
+  await refreshApiFootball(dateFrom, dateTo).catch((error) => {
+    console.warn("api_football_sync_failed", { error: error instanceof Error ? error.message : "unknown", detail: error instanceof ApiFootballError ? error.detail : undefined });
+  });
   const windowReference = db.collection("fixtureSyncWindows").doc(`${dateFrom}_${dateTo}`);
   const windowSnapshot = await windowReference.get();
   const fetchedAt = windowSnapshot.data()?.fetchedAt as Timestamp | undefined;
@@ -160,7 +171,8 @@ export const syncFixtures = onCall({
     fetchedAt: FieldValue.serverTimestamp(),
     providerRemainingThisMinute: remainingThisMinute,
   });
-  const fixtures = matches.map((match) => publicFixture(`football-data:${match.id}`, normalizedFixture(match)));
+  const browseOnly = (await fixturesInWindow(dateFrom, dateTo)).filter((fixture) => String(fixture.key).startsWith("api-football:"));
+  const fixtures = [...matches.map((match) => publicFixture(`football-data:${match.id}`, normalizedFixture(match))), ...browseOnly];
   return { count: fixtures.length, cached: false, fixtures };
 });
 
@@ -177,6 +189,7 @@ export const getFixtureInsights = onCall({
 
   const fixtureSnapshot = await getFirestore().collection("fixtures").doc(fixtureKey).get();
   if (!fixtureSnapshot.exists) throw new HttpsError("not-found", "FIXTURE_NOT_FOUND");
+  if (fixtureSnapshot.data()?.analysisAvailable === false) throw new HttpsError("failed-precondition", "ANALYSIS_UNAVAILABLE_FOR_COMPETITION");
 
   const footballClient = new FootballDataClient({ token: await rotatingSecret("FOOTBALL_DATA_API_TOKEN") });
   const snapshot = await cachedOrFreshAnalysisSnapshot(fixtureKey, fixtureSnapshot.data() ?? {}, footballClient);
@@ -184,13 +197,27 @@ export const getFixtureInsights = onCall({
 });
 
 /** Opens an analysis the user already unlocked. Never charges. */
+/** Runs a callable body under an analysis trace so every outcome (including thrown HttpsErrors) is logged once. */
+async function withTrace<T>(op: string, request: CallableRequest, run: (trace: AnalysisTrace) => Promise<T>): Promise<T> {
+  const trace = startAnalysisTrace(op, request.auth?.uid, request.data?.fixtureKey);
+  trace.stage("start", { locale: typeof request.data?.locale === "string" ? request.data.locale : null });
+  try {
+    const result = await run(trace);
+    trace.done();
+    return result;
+  } catch (error) {
+    trace.fail(error);
+    throw error;
+  }
+}
+
 export const getAnalysis = onCall({
   enforceAppCheck: true,
   timeoutSeconds: 30,
   memory: "256MiB",
   invoker: "public",
   secrets: [geminiApiKey],
-}, async (request) => {
+}, async (request) => withTrace("getAnalysis", request, async (trace) => {
   const context = authorize(request);
   const fixtureKey = typeof request.data?.fixtureKey === "string" ? request.data.fixtureKey.trim() : "";
   if (!/^[A-Za-z0-9._:-]{1,160}$/.test(fixtureKey)) throw new HttpsError("invalid-argument", "INVALID_FIXTURE_KEY");
@@ -205,9 +232,10 @@ export const getAnalysis = onCall({
   ]);
   const walletView = publicWallet(readWallet(wallet.data()), cost);
   const analysisId = history.data()?.analysisId;
+  trace.stage("history_checked", { unlocked: history.exists, balance: walletView.balance, creditCost: cost });
   if (!history.exists || typeof analysisId !== "string") return { state: "locked", wallet: walletView };
   return unlockedPayload(context.uid, fixtureKey, fixtureHash, analysisId, locale, context.correlationId, `history_${fixtureHash.slice(0, 24)}`, walletView);
-});
+}));
 
 /** Unlocks (and if needed generates) the analysis for a fixture. Charges once per user and fixture. */
 export const requestAnalysis = onCall({
@@ -216,17 +244,19 @@ export const requestAnalysis = onCall({
   memory: "512MiB",
   invoker: "public",
   secrets: [geminiApiKey, footballDataApiToken],
-}, async (request) => {
+}, async (request) => withTrace("requestAnalysis", request, async (trace) => {
   const context = authorize(request);
   const payload = parsePayload(request.data);
   const locale = resolveLocale(payload.locale);
   const fixtureHash = createHash("sha256").update(payload.fixtureKey).digest("hex");
   const reused = await reuseReadyAnalysis(context.uid, payload.fixtureKey);
+  trace.stage("reuse_checked", { reused: Boolean(reused) });
   if (reused) {
     return unlockedPayload(context.uid, payload.fixtureKey, fixtureHash, reused.analysisId, locale, context.correlationId, reused.requestId);
   }
 
   const runtime = await analysisRuntimeConfiguration();
+  trace.stage("config_loaded", { generationEnabled: runtime.featureAnalysisGenerationEnabled, model: runtime.modelAlias, promptVersion: runtime.promptVersion });
   if (!runtime.featureAnalysisGenerationEnabled) throw new HttpsError("failed-precondition", "CONFIG_UNAVAILABLE");
   const resolvedModel = new AllowlistedModelAliasResolver(modelAliases).resolve(runtime.modelAlias);
   if (resolvedModel.provider !== "google") throw new HttpsError("failed-precondition", "CONFIG_UNAVAILABLE");
@@ -235,11 +265,15 @@ export const requestAnalysis = onCall({
   const fixtureReference = db.collection("fixtures").doc(payload.fixtureKey);
   const fixtureSnapshot = await fixtureReference.get();
   if (!fixtureSnapshot.exists) throw new HttpsError("not-found", "FIXTURE_NOT_FOUND");
+  // Browse-only fixtures have no form/standings data: refuse before any credit is reserved.
+  if (fixtureSnapshot.data()?.analysisAvailable === false) throw new HttpsError("failed-precondition", "ANALYSIS_UNAVAILABLE_FOR_COMPETITION");
+  trace.stage("fixture_loaded");
   const fixture = fixtureSnapshot.data() ?? {};
   const requestId = `req_${createHash("sha256").update(`${context.uid}\u001f${payload.clientRequestId}`).digest("hex").slice(0, 40)}`;
   const reservationId = `res_${createHash("sha256").update(`${context.uid}\u001f${fixtureHash}`).digest("hex")}`;
   const creditCost = await analysisCreditCost();
   const reservation = await reserveAnalysisCredits(context.uid, payload.fixtureKey, fixtureHash, requestId, reservationId, creditCost);
+  trace.stage("credits_reserved", { creditCost, alreadyUnlocked: Boolean(reservation.historyAnalysisId) });
   if (reservation.historyAnalysisId) {
     return unlockedPayload(context.uid, payload.fixtureKey, fixtureHash, reservation.historyAnalysisId, locale, context.correlationId, `history_${fixtureHash.slice(0, 24)}`);
   }
@@ -261,6 +295,7 @@ export const requestAnalysis = onCall({
     const kickoffAt = new Date(snapshot.fixture.kickoffAt);
     if (kickoffAt.getTime() <= Date.now() + 5 * 60_000) throw new HttpsError("failed-precondition", "FIXTURE_INELIGIBLE");
     const availableSections = Object.values(snapshot.sections).filter((section) => section.status === "available").length;
+    trace.stage("snapshot_ready", { availableSections, kickoffAt: snapshot.fixture.kickoffAt });
     if (availableSections < 1) throw new HttpsError("failed-precondition", "DATA_INSUFFICIENT");
 
     const generatedAt = new Date();
@@ -283,6 +318,7 @@ export const requestAnalysis = onCall({
     };
 
     await requestReference.set({ state: "validating", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    trace.stage("model_call", { model: resolvedModel.model });
     const gateway = new GeminiGateway({
       apiKey: await rotatingSecret("GEMINI_API_KEY"),
       model: resolvedModel.model,
@@ -296,7 +332,8 @@ export const requestAnalysis = onCall({
       timeoutMs: 55_000,
       correlationId: context.correlationId,
     });
-    const validation = new AnalysisResultValidator().validate(generated.rawJson, snapshot, {
+    trace.stage("model_done", { inputTokens: generated.inputTokens ?? null, outputTokens: generated.outputTokens ?? null });
+    const validation = new AnalysisResultValidator().validate(normalizeEvidenceRefs(generated.rawJson), snapshot, {
       schemaVersion: runtime.schemaVersion,
       fixtureKey: payload.fixtureKey,
       fixtureVersion: snapshot.fixture.fixtureVersion,
@@ -310,9 +347,16 @@ export const requestAnalysis = onCall({
         correlationId: context.correlationId,
         issueCodes: [...new Set(validation.issues.map((issue) => issue.code))],
       });
+      // Which field broke which rule, plus the head of the model output, so the cause is visible in Cloud Logging.
+      trace.stage("validation_failed", {
+        issues: validation.issues.slice(0, 10).map((issue) => `${issue.code} ${issue.path} ${issue.detail ?? ""}`.trim()),
+        rawPreview: JSON.stringify(generated.rawJson).slice(0, 400),
+        evidenceRefs: (generated.rawJson as { rationale?: Array<{ evidenceRefs?: unknown }> } | null)?.rationale?.map((item) => item.evidenceRefs),
+      });
       throw new HttpsError("internal", "ANALYSIS_VALIDATION_FAILED");
     }
 
+    trace.stage("validated");
     const analysis = validation.value as unknown as Record<string, unknown>;
     await persistReadyAnalysis(payload.fixtureKey, fixtureHash, analysisId, analysis, generated);
     await finalizeAnalysisCredits(context.uid, fixtureHash, { ...fixture, fixtureKey: payload.fixtureKey }, analysisId, analysis, reservationId, creditCost);
@@ -325,7 +369,9 @@ export const requestAnalysis = onCall({
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
   } catch (error) {
+    trace.fail(error);
     await releaseAnalysisReservation(context.uid, reservationId, creditCost);
+    trace.stage("credits_released", { creditCost });
     await requestReference.set({
       state: error instanceof GeminiProviderError && error.retryable ? "failed_retryable" : "failed_permanent",
       errorCode: publicAnalysisErrorCode(error),
@@ -340,7 +386,7 @@ export const requestAnalysis = onCall({
     throw new HttpsError("unavailable", "ANALYSIS_GENERATION_FAILED");
   }
   return unlockedPayload(context.uid, payload.fixtureKey, fixtureHash, analysisId, locale, context.correlationId, requestId);
-});
+}));
 
 async function unlockedPayload(
   uid: string,
@@ -529,6 +575,8 @@ function normalizedFixture(match: FootballDataMatch): Record<string, unknown> {
     fixtureVersion: 1,
     competitionId: match.competition.code ?? String(match.competition.id),
     competitionName: match.competition.name,
+    competitionAreaName: match.area?.name ?? null,
+    competitionAreaCode: match.area?.code ?? null,
     homeTeam: { id: String(match.homeTeam.id ?? `home-${match.id}`), name: homeName },
     awayTeam: { id: String(match.awayTeam.id ?? `away-${match.id}`), name: awayName },
     kickoffAt: Timestamp.fromDate(new Date(match.utcDate)),
@@ -886,6 +934,38 @@ async function commitHistoryAndCredits(uid: string, fixtureKey: string, fixtureH
   });
 }
 
+/** Pulls the days the provider's free plan serves (at most 3), 60-minute cache per date, one call per date. */
+async function refreshApiFootball(dateFrom: string, dateTo: string): Promise<void> {
+  const settings = await apiFootballSettings();
+  if (!settings.enabled) return;
+  const dates = servedDates(dateFrom, dateTo);
+  if (dates.length === 0) return;
+  const db = getFirestore();
+  const allowed = new Set(settings.leagueIds);
+  const key = await rotatingSecret("API_FOOTBALL_KEY");
+  for (const date of dates) {
+    const marker = db.collection("fixtureSyncWindows").doc(`af_${date}`);
+    const fetchedAt = (await marker.get()).data()?.fetchedAt as Timestamp | undefined;
+    if (fetchedAt && Date.now() - fetchedAt.toMillis() < 60 * 60 * 1_000) continue;
+    const result = await fetchApiFootballDay(key, date);
+    const usable = result.fixtures.filter((item) => isUsableApiFootballFixture(item, allowed));
+    for (let offset = 0; offset < usable.length; offset += 400) {
+      const batch = db.batch();
+      for (const item of usable.slice(offset, offset + 400)) {
+        const body = normalizeApiFootballFixture(item);
+        batch.set(db.collection("fixtures").doc(`api-football:${item.fixture.id}`), {
+          ...body,
+          kickoffAt: Timestamp.fromDate(body.kickoffAt),
+          syncedAt: FieldValue.serverTimestamp(),
+        }, { merge: true });
+      }
+      await batch.commit();
+    }
+    await marker.set({ date, count: usable.length, scanned: result.fixtures.length, remainingToday: result.remainingToday, fetchedAt: FieldValue.serverTimestamp() });
+    console.info("api_football_day_synced", { date, kept: usable.length, scanned: result.fixtures.length, remainingToday: result.remainingToday });
+  }
+}
+
 async function fixturesInWindow(dateFrom: string, dateTo: string): Promise<Array<Record<string, unknown>>> {
   const snapshot = await getFirestore().collection("fixtures")
     .where("kickoffAt", ">=", Timestamp.fromDate(new Date(`${dateFrom}T00:00:00Z`)))
@@ -903,6 +983,8 @@ function publicFixture(key: string, data: Record<string, unknown>): Record<strin
     version: Number(data.fixtureVersion ?? 1),
     competitionId: String(data.competitionId ?? ""),
     competitionName: String(data.competitionName ?? data.competitionId ?? ""),
+    competitionAreaName: typeof data.competitionAreaName === "string" ? data.competitionAreaName : null,
+    analysisAvailable: data.analysisAvailable !== false,
     homeTeam: data.homeTeam ?? null,
     awayTeam: data.awayTeam ?? null,
     kickoffAt: kickoff.toISOString(),

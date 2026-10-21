@@ -39,7 +39,7 @@ export class InsufficientCreditsError extends Error {
   }
 }
 
-export const welcomeCredits = 1;
+export const defaultWelcomeCredits = 0;
 
 export function readWallet(data: Readonly<Record<string, unknown>> | undefined): WalletState {
   return {
@@ -66,8 +66,8 @@ export function publicWallet(wallet: WalletState, analysisCreditCost: number): P
   };
 }
 
-export function newWallet(migratedBalance?: number): WalletState {
-  const granted = migratedBalance === undefined ? welcomeCredits : count(migratedBalance);
+export function newWallet(migratedBalance?: number, welcomeCredits: number = defaultWelcomeCredits): WalletState {
+  const granted = migratedBalance === undefined ? count(welcomeCredits) : count(migratedBalance);
   return {
     balance: granted,
     reservedCredits: 0,
